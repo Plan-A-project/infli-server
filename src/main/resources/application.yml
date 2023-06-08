@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/dev/h2/h2-2.1.214/project/infli
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create # 없으면 만들고 있으면 그대로 사용
+    show-sql: true # mysql debug mode, 실제 쿼리가 로그로 보임
+    properties:
+      hibernate: # custom options
+        format_sql: true # sql 로그를 포매팅해서 보여줌
+
+
+jwt:
+  properties:
+    secret: 123
+    access-token-expiration-seconds: 1800 # 30 min
+    refresh-token-expiration-seconds: 1209600 # 14 days
+  header:
+    token-prefix: Bearer
+    access-token-header-name: Access-Token
+    refresh-token-header-name: Refresh-Token
