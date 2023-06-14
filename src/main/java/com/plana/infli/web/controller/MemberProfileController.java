@@ -2,6 +2,8 @@ package com.plana.infli.web.controller;
 
 import com.plana.infli.service.MemberProfileService;
 import com.plana.infli.web.dto.request.profile.NicknameModifyRequest;
+import com.plana.infli.web.dto.request.profile.PasswordConfirmRequest;
+import com.plana.infli.web.dto.request.profile.PasswordModifyRequest;
 import com.plana.infli.web.dto.response.profile.MemberProfileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,4 +36,19 @@ public class MemberProfileController {
         return memberProfileService.modifyNickname(nicknameModifyRequest);
     }
 
+    /**
+     * 비빌번호 변경/탈퇴하기 시 비밀번호 확인
+     * */
+    @PostMapping("/password/confirm")
+    public boolean passwordConfirm(@RequestBody PasswordConfirmRequest passwordConfirmRequest){
+        return memberProfileService.checkPassword(passwordConfirmRequest);
+    }
+
+    /**
+     * 비밀번호 변경
+     * */
+    @PostMapping("/password/modify")
+    public boolean passwordModify(@RequestBody PasswordModifyRequest passwordModifyRequest){
+        return memberProfileService.modifyPassword(passwordModifyRequest);
+    }
 }
