@@ -1,6 +1,7 @@
 package com.plana.infli.web.controller;
 
 import com.plana.infli.service.MemberProfileService;
+import com.plana.infli.web.dto.request.profile.MemberWithdrawalRequest;
 import com.plana.infli.web.dto.request.profile.NicknameModifyRequest;
 import com.plana.infli.web.dto.request.profile.PasswordConfirmRequest;
 import com.plana.infli.web.dto.request.profile.PasswordModifyRequest;
@@ -50,5 +51,13 @@ public class MemberProfileController {
     @PostMapping("/password/modify")
     public boolean passwordModify(@RequestBody PasswordModifyRequest passwordModifyRequest){
         return memberProfileService.modifyPassword(passwordModifyRequest);
+    }
+
+    /**
+     * 탈퇴하기
+     */
+    @PostMapping("/withdrawal")
+    public boolean memberWithdrawal(@RequestBody MemberWithdrawalRequest memberWithdrawalRequest){
+        return memberProfileService.deleteMember(memberWithdrawalRequest);
     }
 }

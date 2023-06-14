@@ -2,11 +2,11 @@ package com.plana.infli.service;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.repository.member.MemberRepository;
+import com.plana.infli.web.dto.request.profile.MemberWithdrawalRequest;
 import com.plana.infli.web.dto.request.profile.NicknameModifyRequest;
 import com.plana.infli.web.dto.request.profile.PasswordConfirmRequest;
 import com.plana.infli.web.dto.request.profile.PasswordModifyRequest;
 import com.plana.infli.web.dto.response.profile.MemberProfileResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -23,7 +23,6 @@ public class MemberProfileService {
     public MemberProfileResponse getMemberProfile(String email) {
         Member member = memberRepository.findByEmail(email)
             .orElseThrow(() -> new UsernameNotFoundException(email + " is not found"));
-
 
         return new MemberProfileResponse(member.getNickname(), member.getRole(), member.getEmail());
     }
@@ -57,6 +56,15 @@ public class MemberProfileService {
             .orElseThrow(() -> new UsernameNotFoundException(passwordModifyRequest.getEmail() + " is not found"));
 
         member.changePassword(encodeAfterPassword);
+        return true;
+    }
+
+    @Transactional(readOnly = false)
+    public boolean deleteMember(MemberWithdrawalRequest memberWithdrawalRequest){
+        Member member = memberRepository.findByEmail(memberWithdrawalRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException(
+                memberWithdrawalRequest.getEmail() + " is not found"));
+
+        member.deleteMember();
         return true;
     }
 
