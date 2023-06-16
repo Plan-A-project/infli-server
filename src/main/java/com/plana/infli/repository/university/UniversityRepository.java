@@ -6,4 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UniversityRepository extends JpaRepository<University, Long>, UniversityRepositoryCustom {
 
 
+    boolean existsByUniversityName(String universityName);
+
+    University findUniversityById(Long id);
+
 }
