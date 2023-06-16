@@ -4,4 +4,9 @@ spring:
   profiles:
     active: local
   config:
-    import: optional:configserver:http://localhost:8888
+    import: optional:configserver:http://dukcode.iptime.org:8888
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh
