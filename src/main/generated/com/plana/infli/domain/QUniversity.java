@@ -31,7 +31,7 @@ public class QUniversity extends EntityPathBase<University> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> lastModifiedDate = _super.lastModifiedDate;
 
-    public final StringPath name = createString("name");
+    public final StringPath universityName = createString("universityName");
 
     public QUniversity(String variable) {
         super(University.class, forVariable(variable));

@@ -1,22 +1,25 @@
 package com.plana.infli.domain;
 
+import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+import com.plana.infli.web.dto.request.board.CreateBoardRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE board SET is_enabled = false WHERE board_id=?")
-@Where(clause = "is_enabled=true")
 public class Board extends BaseEntity {
 
     @Id
@@ -25,8 +28,22 @@ public class Board extends BaseEntity {
     private Long id;
 
     @Column(unique = true)
-    private String name;
+    private String boardName;
 
-    private boolean isEnabled = true;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "university_id")
+    private University university;
+
+    private Boolean isEnabled = true;
+
+    private Boolean isAnonymous;
+
+    @Builder
+    public Board(String boardName, University university, Boolean isAnonymous) {
+
+        this.boardName = boardName;
+        this.university = university;
+        this.isAnonymous = isAnonymous;
+    }
 
 }

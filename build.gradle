@@ -61,3 +61,10 @@ tasks.named('test') {
 clean {
     delete file('src/main/generated')
 }
+
+//Querydsl Q Class 생성 위치
+def generated = 'src/main/generated'
+
+tasks.withType(JavaCompile) {
+	options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
