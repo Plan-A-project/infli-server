@@ -27,14 +27,22 @@ public class MemberUtil {
             throw new AuthenticationFailedException();
         }
 
-        String nickname = authentication.getName();
-
-        Member member = memberRepository.findActiveMemberByNickname(nickname);
+        Member member = memberRepository.findActiveMemberByNickname(authentication.getName());
 
         if (member == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
         return member;
+    }
+
+    public static String getAuthenticatedName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "";
+    }
+
+
+    public static Boolean isMyInfo(String nickname) {
+        return nickname.equals(getAuthenticatedName());
     }
 }

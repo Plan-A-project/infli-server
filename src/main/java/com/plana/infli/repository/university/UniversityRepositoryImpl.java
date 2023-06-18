@@ -30,7 +30,7 @@ public class UniversityRepositoryImpl implements UniversityRepositoryCustom {
 
 
     @Override
-    public Boolean checkIfMemberAndPostIsInSameUniversity(Member findMember, Post findPost) {
+    public Boolean isMemberAndPostInSameUniversity(Member findMember, Post findPost) {
         Long memberUniversityId = jpaQueryFactory.select(member.university.id).
                 from(member)
                 .where(member.eq(findMember))

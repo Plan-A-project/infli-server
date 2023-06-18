@@ -34,9 +34,9 @@ public class Board extends BaseEntity {
     @JoinColumn(name = "university_id")
     private University university;
 
-    private Boolean isEnabled = true;
+    private boolean isEnabled = true;
 
-    private Boolean isAnonymous;
+    private boolean isAnonymous;
 
     @Builder
     public Board(String boardName, University university, Boolean isAnonymous) {
