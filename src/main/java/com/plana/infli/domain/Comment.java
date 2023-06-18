@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
@@ -42,12 +43,19 @@ public class Comment extends BaseEntity {
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "parent_id")
-    private Comment parent;
+    private Comment parentComment;
 
     @OneToMany(mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
 
     private Boolean isEnabled = true;
 
-
+    @Builder
+    public Comment(Post post, String content, Member member, Comment parentComment, Boolean isEnabled) {
+        this.post = post;
+        this.content = content;
+        this.member = member;
+        this.parentComment = parentComment;
+        this.isEnabled = isEnabled;
+    }
 }
