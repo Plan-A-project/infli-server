@@ -24,7 +24,7 @@ public class University extends BaseEntity{
     @Column(unique = true)
     private String universityName;
 
-    private Boolean isEnabled = true;
+    private boolean isEnabled = true;
 
     @Builder
     public University(String universityName) {

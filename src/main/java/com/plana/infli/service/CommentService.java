@@ -1,5 +1,6 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.domain.editor.CommentEditor.editComment;
 import static com.plana.infli.web.dto.request.comment.CreateCommentRequest.createComment;
 
 import com.plana.infli.domain.Comment;
@@ -8,6 +9,7 @@ import com.plana.infli.domain.Post;
 import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.web.dto.request.comment.CreateCommentRequest;
+import com.plana.infli.web.dto.request.comment.EditCommentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,5 +40,11 @@ public class CommentService {
                 commentRepository.findCommentById(parentCommentId) : null;
 
        return createComment(post, member, parentComment, request.getContent());
+    }
+
+    @Transactional
+    public void edit(EditCommentRequest request) {
+        Comment comment = commentRepository.findCommentById(request.getCommentId());
+        editComment(comment, request);
     }
 }

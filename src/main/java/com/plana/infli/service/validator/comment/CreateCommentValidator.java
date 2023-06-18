@@ -72,7 +72,7 @@ public class CreateCommentValidator implements Validator {
 
     private void validateParentComment(Post post, Comment parentComment) {
 
-        if (parentComment == null || parentComment.getIsEnabled() == false) {
+        if (parentComment == null || parentComment.isEnabled() == false) {
             throw new NotFoundException(COMMENT_NOT_FOUND);
         }
 

@@ -54,15 +54,18 @@ public class Member extends BaseEntity {
 
 	private boolean acceptPostRule = false;
 
-	public Member(String email, String password, String name, String nickname) {
-		this(email, password, name, nickname, Role.UNCERTIFIED);
+	public Member(String email, String password, String name, String nickname,
+			University university) {
+		this(email, password, name, nickname, Role.UNCERTIFIED, university);
 	}
 
-	public Member(String email, String password, String name, String nickname, Role role) {
+	public Member(String email, String password, String name, String nickname, Role role,
+			University university) {
 		this.email = email;
 		this.password = password;
 		this.name = name;
 		this.nickname = nickname;
 		this.role = role;
+		this.university = university;
 	}
 }

@@ -5,6 +5,7 @@ import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.plana.infli.domain.editor.CommentEditor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,14 +49,25 @@ public class Comment extends BaseEntity {
     @OneToMany(mappedBy = "parent")
     private List<Comment> children = new ArrayList<>();
 
-    private Boolean isEnabled = true;
+    private boolean isEnabled = true;
+
+    private boolean isEdited = false;
 
     @Builder
-    public Comment(Post post, String content, Member member, Comment parentComment, Boolean isEnabled) {
+    public Comment(Post post, String content, Member member, Comment parentComment) {
         this.post = post;
         this.content = content;
         this.member = member;
         this.parentComment = parentComment;
-        this.isEnabled = isEnabled;
     }
+
+    public void edit(CommentEditor commentEditor) {
+        this.content = commentEditor.getContent();
+    }
+
+    public CommentEditor.CommentEditorBuilder toEditor() {
+        return CommentEditor.builder()
+                .content(content);
+    }
+
 }
