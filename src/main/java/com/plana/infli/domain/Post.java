@@ -32,5 +32,4 @@ public class Post extends BaseEntity {
     //TODO 회원 컬럼
 
     private int viewCount;
-
 }
