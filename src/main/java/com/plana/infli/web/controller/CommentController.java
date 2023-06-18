@@ -4,11 +4,13 @@ import com.plana.infli.service.CommentService;
 import com.plana.infli.service.validator.comment.CreateCommentValidator;
 import com.plana.infli.service.validator.comment.EditCommentValidator;
 import com.plana.infli.web.dto.request.comment.CreateCommentRequest;
+import com.plana.infli.web.dto.request.comment.DeleteCommentRequest;
 import com.plana.infli.web.dto.request.comment.EditCommentRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,4 +55,9 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/api/comments")
+    public ResponseEntity<Void> delete(@Validated @RequestBody DeleteCommentRequest request) {
+        commentService.delete(request);
+        return ResponseEntity.ok().build();
+    }
 }

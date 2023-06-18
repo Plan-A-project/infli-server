@@ -9,7 +9,9 @@ import com.plana.infli.domain.Post;
 import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.web.dto.request.comment.CreateCommentRequest;
+import com.plana.infli.web.dto.request.comment.DeleteCommentRequest;
 import com.plana.infli.web.dto.request.comment.EditCommentRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,5 +48,11 @@ public class CommentService {
     public void edit(EditCommentRequest request) {
         Comment comment = commentRepository.findCommentById(request.getCommentId());
         editComment(comment, request);
+    }
+
+    @Transactional
+    public void delete(DeleteCommentRequest request) {
+        List<Long> ids = request.getIds();
+        commentRepository.bulkDeleteByIds(ids);
     }
 }

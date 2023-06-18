@@ -36,13 +36,13 @@ public class MemberUtil {
         return member;
     }
 
-    public static String getAuthenticatedName() {
+    public static Boolean isAdmin() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null ? authentication.getName() : "";
-    }
 
+        if (authentication == null) {
+            return false;
+        }
 
-    public static Boolean isMyInfo(String nickname) {
-        return nickname.equals(getAuthenticatedName());
+        return authentication.getAuthorities().toString().equals("[ROLE_ADMIN]");
     }
 }
