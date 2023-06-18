@@ -63,6 +63,7 @@ public class Comment extends BaseEntity {
 
     public void edit(CommentEditor commentEditor) {
         this.content = commentEditor.getContent();
+        this.isEdited = true;
     }
 
     public CommentEditor.CommentEditorBuilder toEditor() {
