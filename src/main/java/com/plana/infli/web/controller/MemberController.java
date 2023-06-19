@@ -32,4 +32,10 @@ public class MemberController {
 		memberService.checkEmailDuplicated(email);
 		return ResponseEntity.ok().build();
 	}
+
+	@GetMapping("member/validate/nickname")
+	public ResponseEntity<Void> validateNickname(@RequestParam String nickname) {
+		memberService.checkNicknameDuplicated(nickname);
+		return ResponseEntity.ok().build();
+	}
 }
