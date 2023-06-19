@@ -1,7 +1,11 @@
 package com.plana.infli.domain;
 
+import static jakarta.persistence.FetchType.*;
 import static lombok.AccessLevel.*;
 
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -39,6 +43,10 @@ public class Member extends BaseEntity {
 
 	@Column(nullable = false)
 	private Role role;
+
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "university_id")
+	private University university;
 
 	private String profileImageUrl;
 

@@ -1,5 +1,7 @@
 package com.plana.infli.domain;
 
+import static jakarta.persistence.FetchType.*;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +14,7 @@ public class PostLike extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
     private Post post;
 
     //TODO 회원 컬럼
