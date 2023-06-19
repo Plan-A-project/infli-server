@@ -3,17 +3,19 @@ package com.plana.infli.domain;
 import static jakarta.persistence.FetchType.*;
 import static lombok.AccessLevel.*;
 
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -42,6 +44,7 @@ public class Member extends BaseEntity {
 	private String nickname;
 
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private Role role;
 
 	@ManyToOne(fetch = LAZY)
@@ -54,15 +57,18 @@ public class Member extends BaseEntity {
 
 	private boolean acceptPostRule = false;
 
-	public Member(String email, String password, String name, String nickname) {
-		this(email, password, name, nickname, Role.UNCERTIFIED);
+	public Member(String email, String password, String name, String nickname, University university,
+		PasswordEncoder passwordEncoder) {
+		this(email, password, name, nickname, Role.UNCERTIFIED, university, passwordEncoder);
 	}
 
-	public Member(String email, String password, String name, String nickname, Role role) {
+	public Member(String email, String password, String name, String nickname, Role role,
+		University university, PasswordEncoder passwordEncoder) {
 		this.email = email;
-		this.password = password;
+		this.password = passwordEncoder.encode(password);
 		this.name = name;
 		this.nickname = nickname;
 		this.role = role;
+		this.university = university;
 	}
 }

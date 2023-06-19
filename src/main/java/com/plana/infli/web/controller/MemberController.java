@@ -1,0 +1,25 @@
+package com.plana.infli.web.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.plana.infli.service.MemberService;
+import com.plana.infli.web.dto.request.member.MemberCreateRequest;
+import com.plana.infli.web.dto.response.member.MemberCreateResponse;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@RestController
+public class MemberController {
+
+	private final MemberService memberService;
+
+	@PostMapping("/member/signup")
+	public ResponseEntity<MemberCreateResponse> signup(@RequestBody @Validated MemberCreateRequest request) {
+		return ResponseEntity.ok(memberService.signup(request));
+	}
+}
