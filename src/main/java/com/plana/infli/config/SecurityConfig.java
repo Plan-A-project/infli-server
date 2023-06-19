@@ -1,5 +1,6 @@
 package com.plana.infli.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,13 +14,21 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import com.plana.infli.repository.redis.RedisDao;
 import com.plana.infli.security.JsonLoginFailureHandler;
 import com.plana.infli.security.JsonLoginProcessingFilter;
 import com.plana.infli.security.jwt.JwtLoginSuccessHandler;
+import com.plana.infli.security.jwt.JwtManager;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+	@Autowired
+	private JwtManager jwtManager;
+
+	@Autowired
+	private RedisDao redisDao;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -61,7 +70,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtLoginSuccessHandler jwtLoginSuccessHandler() {
-		return new JwtLoginSuccessHandler();
+		return new JwtLoginSuccessHandler(jwtManager, redisDao);
 	}
 
 	@Bean
