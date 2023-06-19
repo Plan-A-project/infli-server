@@ -6,13 +6,13 @@ import lombok.Getter;
 @Getter
 public class ErrorResponse {
 
-    private final String code;
+	private final Integer code;
 
-    private final String message;
+	private final String message;
 
-    @Builder
-    public ErrorResponse(String code, String message) {
-        this.code = code;
-        this.message = message;
-    }
+	@Builder
+	public ErrorResponse(Integer code, String message) {
+		this.code = code;
+		this.message = message;
+	}
 }

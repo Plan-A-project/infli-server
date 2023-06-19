@@ -10,32 +10,31 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.plana.infli.web.dto.response.error.ErrorResponse;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class ValidationExceptionAdvice {
 
-	public static final int STATUS_CODE = 400;
-
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<ErrorResponse> methodArgumentNotValidExceptionHandler(MethodArgumentNotValidException e) {
 		ErrorResponse body = ErrorResponse.builder()
-			.code(String.valueOf(STATUS_CODE))
+			.code(HttpServletResponse.SC_BAD_REQUEST)
 			.message(e.getBindingResult().getFieldErrors().stream()
 				.map(DefaultMessageSourceResolvable::getDefaultMessage)
 				.collect(Collectors.joining(" ")))
 			.build();
 
-		return ResponseEntity.status(STATUS_CODE).body(body);
+		return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(body);
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<ErrorResponse> constraintViolationExceptionHandler(ConstraintViolationException e) {
 		ErrorResponse body = ErrorResponse.builder()
-			.code(String.valueOf(STATUS_CODE))
+			.code(HttpServletResponse.SC_BAD_REQUEST)
 			.message(e.getMessage())
 			.build();
 
-		return ResponseEntity.status(STATUS_CODE).body(body);
+		return ResponseEntity.status(HttpServletResponse.SC_BAD_REQUEST).body(body);
 	}
 }
