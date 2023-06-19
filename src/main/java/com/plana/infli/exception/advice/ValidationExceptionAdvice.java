@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.plana.infli.web.dto.response.error.ErrorResponse;
 
+import jakarta.validation.ConstraintViolationException;
+
 @RestControllerAdvice
-public class MethodArgumentNotValidAdvice {
+public class ValidationExceptionAdvice {
 
 	public static final int STATUS_CODE = 400;
 
@@ -22,6 +24,16 @@ public class MethodArgumentNotValidAdvice {
 			.message(e.getBindingResult().getFieldErrors().stream()
 				.map(DefaultMessageSourceResolvable::getDefaultMessage)
 				.collect(Collectors.joining(" ")))
+			.build();
+
+		return ResponseEntity.status(STATUS_CODE).body(body);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ErrorResponse> constraintViolationExceptionHandler(ConstraintViolationException e) {
+		ErrorResponse body = ErrorResponse.builder()
+			.code(String.valueOf(STATUS_CODE))
+			.message(e.getMessage())
 			.build();
 
 		return ResponseEntity.status(STATUS_CODE).body(body);
