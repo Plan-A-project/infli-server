@@ -27,7 +27,7 @@ import com.plana.infli.security.jwt.JwtProperties;
 import com.plana.infli.security.jwt.JwtTokenExpiredEntrypoint;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 public class SecurityConfig {
 
 	@Autowired
@@ -55,13 +55,13 @@ public class SecurityConfig {
 			.exceptionHandling(
 				exceptionHandling -> exceptionHandling.authenticationEntryPoint(customAuthenticationEntryPoint))
 			.addFilterAt(jsonLoginProcessingFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
-			.addFilterAfter(jwtAuthenticationFilter(), SecurityContextHolderFilter.class)
-			.addFilterBefore(jwtExceptionHandlerFilter(), JwtAuthenticationFilter.class);
+			.addFilterAfter(jwtExceptionHandlerFilter(), SecurityContextHolderFilter.class)
+			.addFilterAfter(jwtAuthenticationFilter(), JwtExceptionHandlerFilter.class);
 
 		http
 			.authorizeHttpRequests((auth) -> auth
+				.requestMatchers("/error").permitAll()
 				.requestMatchers("/auth/**").permitAll()
-				.requestMatchers("/auth/mail/**").authenticated()
 				.anyRequest().authenticated()
 			);
 
