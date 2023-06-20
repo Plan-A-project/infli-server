@@ -65,4 +65,15 @@ public class Member extends BaseEntity {
 		this.nickname = nickname;
 		this.role = role;
 	}
+
+	public void changeNickname(String nickname){
+		this.nickname = nickname;
+	}
+	public void changePassword(String password){
+		this.password = password;
+	}
+	public void deleteMember(){
+		this.isEnabled = false;
+	}
+
 }
