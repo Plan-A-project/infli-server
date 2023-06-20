@@ -64,4 +64,11 @@ public class JwtManager {
 
 		return UsernamePasswordAuthenticationToken.authenticated(email, null, roles);
 	}
+
+	public String resolveRefreshToken(String refreshToken) {
+		DecodedJWT decodedJwt;
+		decodedJwt = jwtVerifier.verify(refreshToken);
+
+		return decodedJwt.getClaim("email").asString();
+	}
 }
