@@ -12,17 +12,31 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.plana.infli.repository.redis.RedisDao;
+import com.plana.infli.security.CustomAuthenticationEntryPoint;
 import com.plana.infli.security.JsonLoginFailureHandler;
 import com.plana.infli.security.JsonLoginProcessingFilter;
+import com.plana.infli.security.jwt.JwtAuthenticationFilter;
+import com.plana.infli.security.jwt.JwtExceptionHandlerFilter;
 import com.plana.infli.security.jwt.JwtLoginSuccessHandler;
 import com.plana.infli.security.jwt.JwtManager;
+import com.plana.infli.security.jwt.JwtProperties;
+import com.plana.infli.security.jwt.JwtTokenExpiredEntrypoint;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+	@Autowired
+	private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	@Autowired
+	private JwtTokenExpiredEntrypoint jwtTokenExpiredEntrypoint;
+
+	@Autowired
+	private JwtProperties jwtProperties;
 
 	@Autowired
 	private JwtManager jwtManager;
@@ -38,11 +52,15 @@ public class SecurityConfig {
 		http.csrf(AbstractHttpConfigurer::disable)
 			.httpBasic(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
-			.addFilterAt(jsonLoginProcessingFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class);
+			.exceptionHandling(
+				exceptionHandling -> exceptionHandling.authenticationEntryPoint(customAuthenticationEntryPoint))
+			.addFilterAt(jsonLoginProcessingFilter(authenticationManager), UsernamePasswordAuthenticationFilter.class)
+			.addFilterAfter(jwtAuthenticationFilter(), SecurityContextHolderFilter.class)
+			.addFilterBefore(jwtExceptionHandlerFilter(), JwtAuthenticationFilter.class);
 
 		http
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/**").permitAll()
+				.requestMatchers("/auth/**").permitAll()
 				.anyRequest().authenticated()
 			);
 
@@ -56,11 +74,21 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	public JwtAuthenticationFilter jwtAuthenticationFilter() {
+		return new JwtAuthenticationFilter(jwtManager, jwtProperties);
+	}
+
+	@Bean
 	public JsonLoginProcessingFilter jsonLoginProcessingFilter(AuthenticationManager authenticationManager) {
-		return new JsonLoginProcessingFilter(new AntPathRequestMatcher("/member/login", "POST"),
+		return new JsonLoginProcessingFilter(new AntPathRequestMatcher("/auth/login", "POST"),
 			authenticationManager,
 			jwtLoginSuccessHandler(),
 			jwtLoginFailureHandler());
+	}
+
+	@Bean
+	public JwtExceptionHandlerFilter jwtExceptionHandlerFilter() {
+		return new JwtExceptionHandlerFilter(jwtTokenExpiredEntrypoint);
 	}
 
 	@Bean
@@ -70,7 +98,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtLoginSuccessHandler jwtLoginSuccessHandler() {
-		return new JwtLoginSuccessHandler(jwtManager, redisDao);
+		return new JwtLoginSuccessHandler(jwtProperties, jwtManager, redisDao);
 	}
 
 	@Bean

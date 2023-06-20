@@ -22,18 +22,18 @@ public class MemberController {
 
 	private final MemberService memberService;
 
-	@PostMapping("/member/signup")
+	@PostMapping("/auth/signup")
 	public ResponseEntity<MemberCreateResponse> signup(@RequestBody @Validated MemberCreateRequest request) {
 		return ResponseEntity.ok(memberService.signup(request));
 	}
 
-	@GetMapping("/member/validate/email")
+	@GetMapping("/auth/validate/email")
 	public ResponseEntity<Void> validateEmail(@RequestParam @Email String email) {
 		memberService.checkEmailDuplicated(email);
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("member/validate/nickname")
+	@GetMapping("/auth/validate/nickname")
 	public ResponseEntity<Void> validateNickname(@RequestParam String nickname) {
 		memberService.checkNicknameDuplicated(nickname);
 		return ResponseEntity.ok().build();
