@@ -31,6 +31,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 		String accessToken = jwtManager.createAccessToken(userDetails);
 		String refreshToken = jwtManager.createRefreshToken(userDetails);
 
+		redisDao.deleteValues(userDetails.getUsername());
 		redisDao.setValues(userDetails.getUsername(), refreshToken, Duration.ofSeconds(
 			jwtProperties.getRefreshTokenExpirationSeconds()));
 

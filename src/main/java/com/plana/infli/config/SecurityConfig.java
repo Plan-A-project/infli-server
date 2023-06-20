@@ -61,6 +61,7 @@ public class SecurityConfig {
 		http
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers("/auth/**").permitAll()
+				.requestMatchers("/auth/mail/**").authenticated()
 				.anyRequest().authenticated()
 			);
 
