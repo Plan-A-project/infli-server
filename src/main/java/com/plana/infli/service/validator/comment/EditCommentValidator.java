@@ -59,6 +59,6 @@ public class EditCommentValidator implements Validator {
         if (comment.getMember().equals(member) == false) {
             throw new AuthorizationFailedException();
         }
-
     }
+
 }

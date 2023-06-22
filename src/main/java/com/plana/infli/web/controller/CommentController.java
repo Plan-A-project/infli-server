@@ -2,15 +2,19 @@ package com.plana.infli.web.controller;
 
 import com.plana.infli.service.CommentService;
 import com.plana.infli.service.validator.comment.CreateCommentValidator;
+import com.plana.infli.service.validator.comment.DeleteCommentValidator;
 import com.plana.infli.service.validator.comment.EditCommentValidator;
 import com.plana.infli.web.dto.request.comment.CreateCommentRequest;
 import com.plana.infli.web.dto.request.comment.DeleteCommentRequest;
 import com.plana.infli.web.dto.request.comment.EditCommentRequest;
+import com.plana.infli.web.dto.request.comment.SearchCommentsInPostRequest;
+import com.plana.infli.web.dto.response.comment.postcomment.PostCommentsResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +31,7 @@ public class CommentController {
 
     private final EditCommentValidator editCommentValidator;
 
+    private final DeleteCommentValidator deleteCommentValidator;
 
     @InitBinder("createCommentRequest")
     public void createCommentBinder(WebDataBinder webDataBinder) {
@@ -38,11 +43,14 @@ public class CommentController {
         webDataBinder.addValidators(editCommentValidator);
     }
 
-    @PostMapping("/api/comments")
+    @InitBinder("deleteCommentRequest")
+    public void deleteCommentBinder(WebDataBinder webDataBinder) {
+        webDataBinder.addValidators(deleteCommentValidator);
+    }
 
-    public ResponseEntity<Void> saveNewComment(
-            @Validated @RequestBody CreateCommentRequest request) {
-        commentService.saveNewComment(request);
+    @PostMapping("/api/comments")
+    public ResponseEntity<Void> write(@Validated @RequestBody CreateCommentRequest request) {
+        commentService.createComment(request);
 
         return ResponseEntity.ok().build();
     }
@@ -60,4 +68,14 @@ public class CommentController {
         commentService.delete(request);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/api/comments")
+    public ResponseEntity<PostCommentsResponse> searchCommentsInPost(@Validated
+    SearchCommentsInPostRequest request) {
+
+        PostCommentsResponse response = commentService.searchCommentsInPost(request);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
