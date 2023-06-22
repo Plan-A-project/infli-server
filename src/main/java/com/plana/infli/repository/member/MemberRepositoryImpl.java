@@ -13,10 +13,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Member findActiveMemberByNickname(String nickname) {
+    public Member findActiveMemberByEmail(String email) {
         return jpaQueryFactory.selectFrom(member)
                 .where(member.isEnabled.isTrue())
-                .where(member.nickname.eq(nickname))
+                .where(member.email.eq(email))
                 .fetchOne();
     }
 

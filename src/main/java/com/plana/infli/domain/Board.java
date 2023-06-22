@@ -38,12 +38,14 @@ public class Board extends BaseEntity {
 
     private boolean isAnonymous;
 
-    @Builder
     public Board(String boardName, University university, Boolean isAnonymous) {
-
         this.boardName = boardName;
         this.university = university;
         this.isAnonymous = isAnonymous;
+    }
+
+    public static Board create(String boardName, University university, Boolean isAnonymous) {
+        return new Board(boardName, university, isAnonymous);
     }
 
 }

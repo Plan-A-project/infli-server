@@ -27,13 +27,22 @@ public class MemberUtil {
             throw new AuthenticationFailedException();
         }
 
-        Member member = memberRepository.findActiveMemberByNickname(authentication.getName());
+        Member member = memberRepository.findActiveMemberByEmail(authentication.getName());
 
         if (member == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
         return member;
+    }
+
+    public static String getAuthenticatedEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "";
+    }
+
+    public static Boolean isMyInfo(String email) {
+        return email.equals(getAuthenticatedEmail());
     }
 
     public static Boolean isAdmin() {

@@ -28,14 +28,4 @@ public class CreateBoardRequest {
         this.boardName = boardName;
         this.isAnonymous = isAnonymous;
     }
-
-    public static Board createNewBoard(University university, String boardName,
-            Boolean isAnonymous) {
-
-        return Board.builder()
-                .university(university)
-                .boardName(boardName)
-                .isAnonymous(isAnonymous)
-                .build();
-    }
 }

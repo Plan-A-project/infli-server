@@ -26,19 +26,9 @@ public class CreateCommentRequest {
     private String content;
 
     @Builder
-    public CreateCommentRequest(Long postId, @Nullable Long parentCommentId, String content) {
+    private CreateCommentRequest(Long postId, @Nullable Long parentCommentId, String content) {
         this.postId = postId;
         this.parentCommentId = parentCommentId;
         this.content = content;
-    }
-
-    public static Comment createComment(Post post, Member member, Comment parentComment,
-            String content) {
-
-        return Comment.builder()
-                .post(post)
-                .member(member)
-                .parentComment(parentComment)
-                .content(content).build();
     }
 }
