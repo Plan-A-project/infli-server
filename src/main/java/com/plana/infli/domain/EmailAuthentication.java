@@ -1,6 +1,7 @@
 package com.plana.infli.domain;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +11,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class EmailAuthentication extends BaseEntity {
 
@@ -19,7 +25,6 @@ public class EmailAuthentication extends BaseEntity {
 	@Column(name = "email_authentication_id")
 	private Long id;
 
-	@Column(nullable = false)
 	private String email;
 
 	@Column(nullable = false)
@@ -33,4 +38,14 @@ public class EmailAuthentication extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id")
 	private Member member;
+
+	public static EmailAuthentication createEmailAuthentication(Member member) {
+		EmailAuthentication emailAuthentication = new EmailAuthentication();
+		emailAuthentication.secret = UUID.randomUUID().toString();
+		emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
+		emailAuthentication.member = member;
+
+		return emailAuthentication;
+	}
 }
+

@@ -62,6 +62,7 @@ public class SecurityConfig {
 			.authorizeHttpRequests((auth) -> auth
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/auth/**").permitAll()
+				.requestMatchers("/member/email/auth/**").permitAll()
 				.anyRequest().authenticated()
 			);
 
@@ -81,7 +82,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JsonLoginProcessingFilter jsonLoginProcessingFilter(AuthenticationManager authenticationManager) {
-		return new JsonLoginProcessingFilter(new AntPathRequestMatcher("member/auth/login", "POST"),
+		return new JsonLoginProcessingFilter(new AntPathRequestMatcher("/auth/login", "POST"),
 			authenticationManager,
 			jwtLoginSuccessHandler(),
 			jwtLoginFailureHandler());

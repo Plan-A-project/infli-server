@@ -55,7 +55,7 @@ public class Member extends BaseEntity {
 
 	private boolean isEnabled = true;
 
-	private boolean acceptPostRule = false;
+	private boolean isAuthenticated = false;
 
 	public Member(String email, String password, String name, String nickname, University university,
 		PasswordEncoder passwordEncoder) {
@@ -70,5 +70,9 @@ public class Member extends BaseEntity {
 		this.nickname = nickname;
 		this.role = role;
 		this.university = university;
+	}
+
+	public void authenticate() {
+		isAuthenticated = true;
 	}
 }
