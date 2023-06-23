@@ -2,7 +2,6 @@ package com.plana.infli.service;
 
 import static com.plana.infli.domain.MemberBoard.createNewMemberBoard;
 import static com.plana.infli.domain.editor.MemberBoardEditor.*;
-import static com.plana.infli.web.dto.request.board.CreateBoardRequest.createNewBoard;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
@@ -44,9 +43,7 @@ public class BoardService {
     public void create(CreateBoardRequest request) {
 
         University university = universityService.findById(request.getUniversityId());
-
-        Board board = createNewBoard(university, request.getBoardName(), request.getIsAnonymous());
-
+        Board board = Board.create(request.getBoardName(), university, request.getIsAnonymous());
         boardRepository.save(board);
     }
 

@@ -27,14 +27,31 @@ public class MemberUtil {
             throw new AuthenticationFailedException();
         }
 
-        String nickname = authentication.getName();
-
-        Member member = memberRepository.findActiveMemberByNickname(nickname);
+        Member member = memberRepository.findActiveMemberByEmail(authentication.getName());
 
         if (member == null) {
             throw new NotFoundException(MEMBER_NOT_FOUND);
         }
 
         return member;
+    }
+
+    public static String getAuthenticatedEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null ? authentication.getName() : "";
+    }
+
+    public static Boolean isMyInfo(String email) {
+        return email.equals(getAuthenticatedEmail());
+    }
+
+    public static Boolean isAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null) {
+            return false;
+        }
+
+        return authentication.getAuthorities().toString().equals("[ROLE_ADMIN]");
     }
 }

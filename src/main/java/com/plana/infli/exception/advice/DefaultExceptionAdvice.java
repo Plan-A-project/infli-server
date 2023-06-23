@@ -24,4 +24,6 @@ public class DefaultExceptionAdvice {
         return ResponseEntity.status(statusCode)
                 .body(body);
     }
+
+    
 }
