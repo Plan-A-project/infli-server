@@ -81,7 +81,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JsonLoginProcessingFilter jsonLoginProcessingFilter(AuthenticationManager authenticationManager) {
-		return new JsonLoginProcessingFilter(new AntPathRequestMatcher("/auth/login", "POST"),
+		return new JsonLoginProcessingFilter(new AntPathRequestMatcher("member/auth/login", "POST"),
 			authenticationManager,
 			jwtLoginSuccessHandler(),
 			jwtLoginFailureHandler());

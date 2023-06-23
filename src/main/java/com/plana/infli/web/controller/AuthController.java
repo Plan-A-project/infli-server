@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.plana.infli.security.jwt.JwtProperties;
 import com.plana.infli.service.AuthService;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.MemberCreateRequest;
@@ -20,31 +19,30 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Validated
-@RestController
-public class MemberController {
+@RestController("/auth")
+public class AuthController {
 
 	private final MemberService memberService;
 	private final AuthService authService;
-	private final JwtProperties jwtProperties;
 
-	@PostMapping("/auth/signup")
+	@PostMapping("/signup")
 	public ResponseEntity<MemberCreateResponse> signup(@RequestBody @Validated MemberCreateRequest request) {
 		return ResponseEntity.ok(memberService.signup(request));
 	}
 
-	@GetMapping("/auth/validate/email")
+	@GetMapping("/validate/email")
 	public ResponseEntity<Void> validateEmail(@RequestParam @Email String email) {
 		memberService.checkEmailDuplicated(email);
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/auth/validate/nickname")
+	@GetMapping("/validate/nickname")
 	public ResponseEntity<Void> validateNickname(@RequestParam String nickname) {
 		memberService.checkNicknameDuplicated(nickname);
 		return ResponseEntity.ok().build();
 	}
 
-	@PostMapping("/auth/reissue")
+	@PostMapping("/reissue")
 	public ResponseEntity<Void> reissueRefreshToken(@RequestHeader("Refresh-Token") String refreshToken) {
 		return ResponseEntity.ok().headers(authService.reissue(refreshToken)).build();
 	}
