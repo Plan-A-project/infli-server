@@ -10,6 +10,7 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.email_authentication.EmailAuthenticationRepository;
 import com.plana.infli.repository.member.MemberRepository;
+import com.plana.infli.web.dto.request.member.StudentAuthenticationRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,12 +48,48 @@ public class MailService {
 
 	@Transactional
 	public void authenticateMemberEmail(String secret) {
-		EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableMemberEmailAuthentication(
+		EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
 				secret)
 			.orElseThrow(() -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
 
 		Member member = emailAuthentication.getMember();
 
 		member.authenticate();
+	}
+
+	@Transactional
+	public void sendStudentAuthenticationEmail(String email, StudentAuthenticationRequest request) {
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
+
+		String studentEmail = request.getStudentEmail();
+
+		EmailAuthentication emailAuthentication = EmailAuthentication.createStudentAuthentication(member, studentEmail);
+
+		String subject = "INFLI 학생 회원 인증 메일";
+		String secret = emailAuthentication.getSecret();
+		String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
+			"http://localhost:8080/member/student/auth/" + secret + "\n" +
+			"30분안에 인증하셔야 합니다.";
+
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo(member.getEmail());
+		message.setSubject(subject);
+		message.setText(text);
+
+		mailSender.send(message);
+
+		emailAuthenticationRepository.save(emailAuthentication);
+	}
+
+	@Transactional
+	public void authenticateStudent(String secret) {
+		EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
+				secret)
+			.orElseThrow(() -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
+
+		Member member = emailAuthentication.getMember();
+
+		member.authenticateStudent();
 	}
 }

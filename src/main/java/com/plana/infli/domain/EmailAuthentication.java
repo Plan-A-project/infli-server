@@ -47,5 +47,15 @@ public class EmailAuthentication extends BaseEntity {
 
 		return emailAuthentication;
 	}
+
+	public static EmailAuthentication createStudentAuthentication(Member member, String studentEmail) {
+		EmailAuthentication emailAuthentication = new EmailAuthentication();
+		emailAuthentication.secret = UUID.randomUUID().toString();
+		emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
+		emailAuthentication.member = member;
+		emailAuthentication.email = studentEmail;
+
+		return emailAuthentication;
+	}
 }
 

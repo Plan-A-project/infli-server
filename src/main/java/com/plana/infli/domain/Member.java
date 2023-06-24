@@ -75,4 +75,8 @@ public class Member extends BaseEntity {
 	public void authenticate() {
 		isAuthenticated = true;
 	}
+
+	public void authenticateStudent() {
+		role = Role.STUDENT;
+	}
 }

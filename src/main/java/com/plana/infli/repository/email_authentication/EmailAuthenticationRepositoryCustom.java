@@ -6,5 +6,5 @@ import com.plana.infli.domain.EmailAuthentication;
 
 public interface EmailAuthenticationRepositoryCustom {
 
-	Optional<EmailAuthentication> findAvailableMemberEmailAuthentication(String secret);
+	Optional<EmailAuthentication> findAvailableEmailAuthentication(String secret);
 }

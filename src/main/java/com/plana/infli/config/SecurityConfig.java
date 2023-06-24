@@ -63,6 +63,9 @@ public class SecurityConfig {
 				.requestMatchers("/error").permitAll()
 				.requestMatchers("/auth/**").permitAll()
 				.requestMatchers("/member/email/auth/**").permitAll()
+				.requestMatchers("/member/student/auth/**").permitAll()
+				.requestMatchers("/member/email/auth/send").authenticated()
+				.requestMatchers("/member/student/auth/send").authenticated()
 				.anyRequest().authenticated()
 			);
 

@@ -16,7 +16,7 @@ public class EmailAuthenticationRepositoryImpl implements EmailAuthenticationRep
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Optional<EmailAuthentication> findAvailableMemberEmailAuthentication(String secret) {
+	public Optional<EmailAuthentication> findAvailableEmailAuthentication(String secret) {
 		return Optional.ofNullable(jpaQueryFactory.selectFrom(emailAuthentication)
 			.where(emailAuthentication.secret.eq(secret)
 				.and(emailAuthentication.expirationTime.after(LocalDateTime.now())))
