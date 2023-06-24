@@ -27,7 +27,7 @@ import com.plana.infli.security.jwt.JwtProperties;
 import com.plana.infli.security.jwt.JwtTokenExpiredEntrypoint;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 public class SecurityConfig {
 
 	@Autowired

@@ -19,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -68,6 +69,7 @@ public class Comment extends BaseEntity {
 		bindParentAndChildComment(parent);
 	}
 
+	@Builder
 	public static Comment create(Post post, String content, Member member, Comment parentComment) {
 		return new Comment(post, content, member, parentComment);
 	}
