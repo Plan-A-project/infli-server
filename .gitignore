@@ -4,6 +4,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+aws.yml
 
 ### STS ###
 .apt_generated
@@ -35,7 +36,5 @@ out/
 
 ### VS Code ###
 .vscode/
-.gitsecret/keys/random_seed
-!*.secret
 /src/main/generated/
 /src/main/resources/application-local.yml
