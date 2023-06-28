@@ -1,6 +1,5 @@
 package com.plana.infli.domain;
 
-import static jakarta.persistence.FetchType.LAZY;
 import static lombok.AccessLevel.*;
 
 import com.plana.infli.web.dto.request.post.GatherPostCreateRq;
@@ -44,11 +43,11 @@ public class Post extends BaseEntity {
 
     private LocalDate endDate;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
     private Board board;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
