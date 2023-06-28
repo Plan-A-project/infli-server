@@ -4,8 +4,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
-public class PostCreateRequest {
+public class PostCreateRq {
+
+    private String title;
+    private String main;
+
 }
