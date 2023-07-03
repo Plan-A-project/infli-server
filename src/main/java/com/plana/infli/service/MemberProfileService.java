@@ -13,6 +13,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +26,7 @@ public class MemberProfileService {
     private final MemberRepository memberRepository;
     private final MemberUtil memberUtil;
     private final S3Uploader s3Uploader;
+    private final PasswordEncoder passwordEncoder;
 
     public MemberProfileResponse getMemberProfile(String email) {
         Member member = memberRepository.findByEmail(email)
@@ -47,7 +49,7 @@ public class MemberProfileService {
             .orElseThrow(() -> new UsernameNotFoundException(
                 passwordConfirmRequest.getEmail() + " is not found"));
 
-        if (member.getPassword().equals(new BCryptPasswordEncoder().encode(passwordConfirmRequest.getPassword()))) {
+        if(passwordEncoder.matches(passwordConfirmRequest.getPassword(), member.getPassword())){
             return true;
         } else {
             return false;
