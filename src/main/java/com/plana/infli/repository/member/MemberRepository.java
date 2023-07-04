@@ -2,6 +2,7 @@ package com.plana.infli.repository.member;
 
 import com.plana.infli.domain.Member;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

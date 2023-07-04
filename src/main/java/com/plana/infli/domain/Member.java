@@ -1,11 +1,16 @@
 package com.plana.infli.domain;
 
+import static com.plana.infli.domain.Role.*;
+import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 import static lombok.AccessLevel.*;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -16,12 +21,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE member SET is_enabled = false WHERE member_id=?")
-@Where(clause = "is_enabled=true")
+@SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE member_id=?")
 public class Member extends BaseEntity {
 
 	@Id
@@ -42,6 +48,7 @@ public class Member extends BaseEntity {
 	private String nickname;
 
 	@Column(nullable = false)
+	@Enumerated(value = STRING)
 	private Role role;
 
 	@ManyToOne(fetch = LAZY)
@@ -50,16 +57,17 @@ public class Member extends BaseEntity {
 
 	private String profileImageUrl;
 
-	private boolean isEnabled = true;
+	private boolean isDeleted = false;
 
 	private boolean acceptPostRule = false;
 
 	public Member(String email, String password, String name, String nickname,
 			University university) {
-		this(email, password, name, nickname, Role.UNCERTIFIED, university);
+		this(email, password, name, nickname, UNCERTIFIED, university);
 	}
 
-	public Member(String email, String password, String name, String nickname, Role role,
+	@Builder
+	private Member(String email, String password, String name, String nickname, Role role,
 			University university) {
 		this.email = email;
 		this.password = password;
@@ -75,8 +83,12 @@ public class Member extends BaseEntity {
 	public void changePassword(String password){
 		this.password = password;
 	}
+
 	public void deleteMember(){
-		this.isEnabled = false;
+		this.isDeleted = true;
 	}
 
+	public static Boolean isAdmin(Member member) {
+		return member.role.equals(ADMIN);
+	}
 }

@@ -1,13 +1,15 @@
 package com.plana.infli.repository.university;
 
 import com.plana.infli.domain.University;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UniversityRepository extends JpaRepository<University, Long>, UniversityRepositoryCustom {
 
 
-    boolean existsByUniversityName(String universityName);
+    boolean existsByName(String universityName);
 
-    University findUniversityById(Long id);
+    Optional<University> findUniversityById(Long id);
 
+    Optional<University> findByName(String name);
 }
