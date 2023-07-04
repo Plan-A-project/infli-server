@@ -28,21 +28,21 @@ import org.springframework.lang.Nullable;
 @SQLDelete(sql = "UPDATE comment SET is_deleted = true WHERE comment_id=?")
 public class Comment extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "comment_id")
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = IDENTITY)
+	@Column(name = "comment_id")
+	private Long id;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "post_id")
+	private Post post;
 
     @Lob
     private String content;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "member_id")
+	private Member member;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "rood_id")

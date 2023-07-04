@@ -18,7 +18,7 @@ public class ExceptionAdvice {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(MethodArgumentNotValidException e) {
         ErrorResponse response = ErrorResponse.builder()
-                .code("400")
+                .code(400)
                 .message("잘못된 요청입니다")
                 .build();
 
@@ -31,12 +31,12 @@ public class ExceptionAdvice {
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(BindException e) {
         ErrorResponse response = ErrorResponse.builder()
-                .code("400")
+                .code(400)
                 .message("잘못된 요청입니다")
                 .build();
 
         e.getFieldErrors().forEach(fieldError -> response.addValidation(fieldError.getField(), fieldError.getDefaultMessage()));
-        return ResponseEntity.status(parseInt(response.getCode()))
+        return ResponseEntity.status(response.getCode())
                 .body(response);
     }
 }

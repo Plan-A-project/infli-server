@@ -1,13 +1,19 @@
 package com.plana.infli.repository.member;
 
-import com.plana.infli.domain.Member;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.plana.infli.domain.Member;
+
 public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
-    Optional<Member> findByEmail(String email);
+	boolean existsByEmail(String email);
+
+	boolean existsByNickname(String nickname);
+
+	Optional<Member> findByEmail(String email);
 }

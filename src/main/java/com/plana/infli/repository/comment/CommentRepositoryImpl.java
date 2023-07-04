@@ -31,7 +31,7 @@ import org.springframework.data.domain.PageRequest;
 @RequiredArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
-    private final JPAQueryFactory jpaQueryFactory;
+	private final JPAQueryFactory jpaQueryFactory;
 
 
     @Override

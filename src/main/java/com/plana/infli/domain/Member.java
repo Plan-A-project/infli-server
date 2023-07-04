@@ -13,12 +13,17 @@ import jakarta.persistence.ManyToOne;
 import lombok.Builder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -48,7 +53,7 @@ public class Member extends BaseEntity {
 	private String nickname;
 
 	@Column(nullable = false)
-	@Enumerated(value = STRING)
+	@Enumerated(EnumType.STRING)
 	private Role role;
 
 	@ManyToOne(fetch = LAZY)
@@ -59,36 +64,47 @@ public class Member extends BaseEntity {
 
 	private boolean isDeleted = false;
 
-	private boolean acceptPostRule = false;
+	private boolean isAuthenticated = false;
 
 	public Member(String email, String password, String name, String nickname,
-			University university) {
-		this(email, password, name, nickname, UNCERTIFIED, university);
+			University university,
+			PasswordEncoder passwordEncoder) {
+		this(email, password, name, nickname, Role.UNCERTIFIED, university, passwordEncoder);
 	}
 
-	@Builder
-	private Member(String email, String password, String name, String nickname, Role role,
-			University university) {
+	public Member(String email, String password, String name, String nickname, Role role,
+			University university, PasswordEncoder passwordEncoder) {
 		this.email = email;
-		this.password = password;
+		this.password = passwordEncoder.encode(password);
 		this.name = name;
 		this.nickname = nickname;
 		this.role = role;
 		this.university = university;
 	}
 
-	public void changeNickname(String nickname){
+	public void authenticate() {
+		isAuthenticated = true;
+	}
+
+	public void authenticateStudent() {
+		role = Role.STUDENT;
+	}
+
+	public void changeNickname(String nickname) {
 		this.nickname = nickname;
 	}
-	public void changePassword(String password){
+
+	public void changePassword(String password) {
 		this.password = password;
 	}
 
-	public void deleteMember(){
+	public void deleteMember() {
 		this.isDeleted = true;
 	}
 
 	public static Boolean isAdmin(Member member) {
+
 		return member.role.equals(ADMIN);
 	}
 }
+
