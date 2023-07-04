@@ -12,6 +12,7 @@ import com.plana.infli.domain.Post;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
 import java.util.UUID;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public abstract class DummyObject {
 
@@ -42,12 +43,13 @@ public abstract class DummyObject {
     }
 
     protected static Post newPost(Member member, Board board) {
-        return Post.create(member, board, "제목입니다", "내용입니다");
+        return Post.create(member, board);
     }
 
     protected static Member newStudentMember(University university) {
         return Member.builder()
                 .email(UUID.randomUUID().toString())
+                .passwordEncoder(new BCryptPasswordEncoder())
                 .password(UUID.randomUUID().toString())
                 .name(UUID.randomUUID().toString())
                 .nickname(UUID.randomUUID().toString())
@@ -59,6 +61,7 @@ public abstract class DummyObject {
     protected static Member newUncertifiedMember(University university) {
         return Member.builder()
                 .email(UUID.randomUUID().toString())
+                .passwordEncoder(new BCryptPasswordEncoder())
                 .password(UUID.randomUUID().toString())
                 .name(UUID.randomUUID().toString())
                 .nickname(UUID.randomUUID().toString())
@@ -70,6 +73,7 @@ public abstract class DummyObject {
     protected static Member newAdminMember(University university) {
         return Member.builder()
                 .email(UUID.randomUUID().toString())
+                .passwordEncoder(new BCryptPasswordEncoder())
                 .password(UUID.randomUUID().toString())
                 .name(UUID.randomUUID().toString())
                 .nickname(UUID.randomUUID().toString())

@@ -72,6 +72,7 @@ public class Member extends BaseEntity {
 		this(email, password, name, nickname, Role.UNCERTIFIED, university, passwordEncoder);
 	}
 
+	@Builder
 	public Member(String email, String password, String name, String nickname, Role role,
 			University university, PasswordEncoder passwordEncoder) {
 		this.email = email;

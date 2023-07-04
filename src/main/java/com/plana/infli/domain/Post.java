@@ -1,11 +1,13 @@
 package com.plana.infli.domain;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
+import static jakarta.persistence.GenerationType.UUID;
 import static lombok.AccessLevel.*;
 
 import com.plana.infli.web.dto.request.post.GatherPostCreateRq;
 import com.plana.infli.web.dto.request.post.PostCreateRq;
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +21,6 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE post SET is_deleted=true WHERE post_id=?")
-@Where(clause = "is_deleted=false")
 @Entity
 @SQLDelete(sql = "UPDATE post SET is_deleted = true WHERE post_id=?")
 public class Post extends BaseEntity {
@@ -79,6 +80,15 @@ public class Post extends BaseEntity {
 
     public void setMember(Member member) {
         this.member = member;
+    }
+
+    public static Post create(Member member, Board board) {
+        Post post = Post.builder()
+                .build();
+
+        post.setMember(member);
+        post.setBoard(board);
+        return post;
     }
 
     public void publish(PostCreateRq request) {
