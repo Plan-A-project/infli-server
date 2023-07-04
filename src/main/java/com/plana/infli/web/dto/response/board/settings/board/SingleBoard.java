@@ -1,9 +1,11 @@
-package com.plana.infli.web.dto.response.board.all;
+package com.plana.infli.web.dto.response.board.settings.board;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class SingleBoard {
 
     private final Long id;
