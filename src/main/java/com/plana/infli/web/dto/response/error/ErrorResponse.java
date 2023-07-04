@@ -2,7 +2,6 @@ package com.plana.infli.web.dto.response.error;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,7 +12,7 @@ public class ErrorResponse {
 
 	private final String message;
 
-	private final Map<String, String> validation;
+    private final Map<String, String> validation;
 
 	@Builder
 	private ErrorResponse(Integer code, String message, Map<String, String> validation) {
@@ -22,7 +21,7 @@ public class ErrorResponse {
 		this.validation = validation != null ? validation : new HashMap<>();
 	}
 
-	public void addValidation(String field, String defaultMessage) {
-		validation.put(field, defaultMessage);
-	}
+    public void addValidation(String field, String defaultMessage) {
+        validation.put(field, defaultMessage);
+    }
 }

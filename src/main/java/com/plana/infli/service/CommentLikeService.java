@@ -1,0 +1,109 @@
+package com.plana.infli.service;
+
+import static com.plana.infli.domain.CommentLike.*;
+import static com.plana.infli.exception.custom.BadRequestException.DIDNT_PRESSED_LIKE_ON_THIS_COMMENT;
+import static com.plana.infli.exception.custom.ConflictException.ALREADY_PRESSED_LIKE_ON_THIS_COMMENT;
+import static com.plana.infli.exception.custom.NotFoundException.*;
+
+import com.plana.infli.domain.Comment;
+import com.plana.infli.domain.CommentLike;
+import com.plana.infli.domain.Member;
+import com.plana.infli.domain.Post;
+import com.plana.infli.exception.custom.BadRequestException;
+import com.plana.infli.exception.custom.ConflictException;
+import com.plana.infli.exception.custom.NotFoundException;
+import com.plana.infli.repository.comment.CommentRepository;
+import com.plana.infli.repository.commentlike.CommentLikeRepository;
+import com.plana.infli.repository.member.MemberRepository;
+import com.plana.infli.repository.post.PostRepository;
+import com.plana.infli.web.dto.request.commentlike.cancel.controller.CancelCommentLikeRequest;
+import com.plana.infli.web.dto.request.commentlike.cancel.service.CancelCommentLikeServiceRequest;
+import com.plana.infli.web.dto.request.commentlike.create.service.CreateCommentLikeServiceRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class CommentLikeService {
+
+    private final CommentLikeRepository commentLikeRepository;
+
+    private final MemberRepository memberRepository;
+
+    private final PostRepository postRepository;
+
+    private final CommentRepository commentRepository;
+
+    @Transactional
+    public void createCommentLike(CreateCommentLikeServiceRequest request, String email) {
+
+        // 좋아요를 누를 회원이 존재하지 않거나 삭제된 경우 예외가 발생된다
+        Member member = memberRepository.findActiveMemberBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+
+        // 좋아요를 누를 댓글이 작성된 글이 존재하지 않거나 삭제된 경우 예외가 발생된다
+        Post post = postRepository.findActivePostBy(request.getPostId())
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+
+        // 좋아요를 누를 댓글이 존재하지 않거나 삭제된 경우 예외가 발생된다
+        Comment comment = commentRepository.findActiveCommentWithMemberAndPostBy(
+                        request.getCommentId())
+                .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
+
+        // 좋아요 생성 요청에 대한 검증 진행
+        validateCreateCommentLikeRequest(post, comment, member);
+
+        CommentLike savedCommentLike = commentLikeRepository.save(create(comment, member));
+    }
+
+    private void validateCreateCommentLikeRequest(Post post, Comment comment,
+            Member member) {
+
+        // 클라이언트가 전송한 글 ID 번호와, 좋아요를 누를 댓글의 글 번호는 일치해야 한다
+        Long postId = post.getId();
+        if (comment.getPost().getId().equals(postId) == false) {
+            throw new NotFoundException(COMMENT_NOT_FOUND);
+        }
+
+        // 이미 해당 댓글에 회원이 좋아요를 누른경우 예외가 발생한다
+        if (commentLikeRepository.existsByMemberAndComment(member, comment)) {
+            throw new ConflictException(ALREADY_PRESSED_LIKE_ON_THIS_COMMENT);
+        }
+    }
+
+    @Transactional
+    public void cancelCommentLike(CancelCommentLikeServiceRequest request, String email) {
+
+        // 좋아요를 취소를 할 회원이 존재하지 않거나 삭제된 경우 예외가 발생된다
+        Member member = memberRepository.findActiveMemberBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+
+        // 좋아요를 누른 댓글이 작성된 글이 존재하지 않거나 삭제된 경우 예외가 발생된다
+        Post post = postRepository.findActivePostBy(request.getPostId())
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+
+        // 좋아요 취소를 할 댓글이 존재하지 않거나 삭제된 경우 예외가 발생된다
+        Comment comment = commentRepository.findActiveCommentWithMemberAndPostBy(
+                        request.getCommentId())
+                .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
+
+        // 좋아요 취소 요청에 대한 검증 진행
+        CommentLike commentLike = validateCancelCommentLikeRequest(post, comment, member);
+
+        commentLikeRepository.delete(commentLike);
+    }
+
+    private CommentLike validateCancelCommentLikeRequest(Post post, Comment comment, Member member) {
+
+        // 클라이언트가 전송한 글 ID 번호와, 좋아요 취소할 댓글의 글 번호는 일치해야 한다
+        Long postId = post.getId();
+        if (comment.getPost().getId().equals(postId) == false) {
+            throw new NotFoundException(COMMENT_NOT_FOUND);
+        }
+
+        // 좋아요를 누르지 않은 댓글에 좋아요 취소 요청을 할수 없다
+        return commentLikeRepository.findByCommentAndMember(comment, member)
+                .orElseThrow(() -> new BadRequestException(DIDNT_PRESSED_LIKE_ON_THIS_COMMENT));
+    }
+}

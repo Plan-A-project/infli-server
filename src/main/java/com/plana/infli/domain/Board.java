@@ -1,12 +1,15 @@
 package com.plana.infli.domain;
 
+import static com.plana.infli.domain.BoardType.*;
+import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
-import com.plana.infli.web.dto.request.board.CreateBoardRequest;
+import com.plana.infli.exception.custom.AuthorizationFailedException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -19,7 +22,7 @@ import org.hibernate.annotations.SQLDelete;
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE board SET is_enabled = false WHERE board_id=?")
+@SQLDelete(sql = "UPDATE board SET is_deleted = true WHERE board_id=?")
 public class Board extends BaseEntity {
 
     @Id
@@ -27,25 +30,40 @@ public class Board extends BaseEntity {
     @Column(name = "board_id")
     private Long id;
 
-    @Column(unique = true)
+    @Column(nullable = false)
+    @Enumerated(value = STRING)
+    private BoardType boardType;
+
+    @Column(nullable = false)
     private String boardName;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "university_id")
     private University university;
 
-    private boolean isEnabled = true;
+    private int sequence;
 
-    private boolean isAnonymous;
+    private boolean isDeleted = false;
 
-    public Board(String boardName, University university, Boolean isAnonymous) {
-        this.boardName = boardName;
+    @Builder
+    private Board(BoardType boardType, University university) {
+        this.boardType = boardType;
+        this.boardName = boardType.getBoardName();
         this.university = university;
-        this.isAnonymous = isAnonymous;
+        this.sequence = boardType.getDefaultSequence();
     }
 
-    public static Board create(String boardName, University university, Boolean isAnonymous) {
-        return new Board(boardName, university, isAnonymous);
+    public static Board create(BoardType boardType, University university) {
+        return new Board(boardType, university);
     }
 
+    public void hasWritePermissionByWithThis(Role role) {
+        if (boardType.getRoles().contains(role) == false) {
+            throw new AuthorizationFailedException();
+        }
+    }
+
+    public static boolean isAnonymousBoard(Board board) {
+        return board.getBoardType().equals(ANONYMOUS);
+    }
 }

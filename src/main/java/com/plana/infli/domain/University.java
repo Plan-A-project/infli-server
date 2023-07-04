@@ -22,12 +22,18 @@ public class University extends BaseEntity{
     private Long id;
 
     @Column(unique = true)
-    private String universityName;
+    private String name;
 
-    private boolean isEnabled = true;
+    private boolean isDeleted = false;
 
     @Builder
-    public University(String universityName) {
-        this.universityName = universityName;
+    private University(String name) {
+        this.name = name;
+    }
+
+    public static University create(String name) {
+        return University.builder()
+                .name(name)
+                .build();
     }
 }

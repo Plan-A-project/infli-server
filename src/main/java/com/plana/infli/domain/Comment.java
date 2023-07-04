@@ -5,28 +5,27 @@ import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.annotations.SQLDelete;
-
-import com.plana.infli.domain.editor.CommentEditor;
-
+import com.plana.infli.domain.editor.comment.CommentContentEditor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.springframework.lang.Nullable;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE comment SET is_enabled = false WHERE comment_id=?")
+@SQLDelete(sql = "UPDATE comment SET is_deleted = true WHERE comment_id=?")
 public class Comment extends BaseEntity {
 
 	@Id
@@ -38,61 +37,89 @@ public class Comment extends BaseEntity {
 	@JoinColumn(name = "post_id")
 	private Post post;
 
-	private String content;
+    @Lob
+    private String content;
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name = "member_id")
 	private Member member;
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "rood_id")
-	private Comment root;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "rood_id")
+    private Comment root;
 
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "parent_id")
-	private Comment parent;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "parent_id")
+    private Comment parentComment;
 
-	@OneToMany(mappedBy = "parent")
-	private List<Comment> children = new ArrayList<>();
+    @OneToMany(mappedBy = "parentComment")
+    private List<Comment> children = new ArrayList<>();
 
-	@OneToMany(mappedBy = "comment", cascade = ALL, orphanRemoval = true)
-	private List<CommentLike> likes = new ArrayList<>();
+    @OneToMany(mappedBy = "comment", cascade = ALL, orphanRemoval = true)
+    private List<CommentLike> commentLikes = new ArrayList<>();
 
-	private boolean isEnabled = true;
+    private boolean isDeleted = false;
 
-	private boolean isEdited = false;
+    private boolean isEdited = false;
 
-	public Comment(Post post, String content, Member member, Comment parent) {
-		this.post = post;
-		this.content = content;
-		this.member = member;
-		bindParentAndChildComment(parent);
-	}
+    @Nullable
+    // 글에 댓글을 작성한 회원들에 대한 식별자 번호
+    // 회원이 어떤 글에 처음으로 댓글을 작성하는 경우 : 새로운 식별자 번호를 부여 받는다
+    // 어떤 글에 대한 식별자를 부여 받은 회원이 동일한 글에 계속 댓글을 작성하더라도 첫 부여받은 식별자를 계속 부여받음
+    // 글 작성자가 자신의 글에 댓글을 작성하는 경우 : 0번을 부여받는다
+    // 글 작성자가 아닌 회원은 1번부터 부여 받으며,
+    // 새로운 회원이 이 글에 댓글을 작성할 떄마다 1씩 증가된 번호를 부여받는다
+    //TODO 동시성 확인 필요
+    private Integer identifierNumber;
 
-	@Builder
-	public static Comment create(Post post, String content, Member member, Comment parentComment) {
-		return new Comment(post, content, member, parentComment);
-	}
 
-	private void bindParentAndChildComment(Comment parentComment) {
-		if (parentComment == null) {
-			this.root = this;
-		} else {
-			this.root = parentComment;
-			this.parent = parentComment;
-			parentComment.getChildren().add(this);
-		}
-	}
+    @Builder
+    private Comment(Post post, String content, Member member,
+            Comment parentComment, @Nullable Integer identifierNumber) {
+        this.post = post;
+        this.content = content;
+        this.member = member;
+        this.identifierNumber = identifierNumber;
+        bindParentAndChildComment(parentComment);
+    }
 
-	/** 여기서만 댓글 수정 가능 */
-	public void edit(CommentEditor commentEditor) {
-		this.content = commentEditor.getContent();
-		this.isEdited = true;
-	}
+    public static Comment create(Post post, String content, Member member,
+            Comment parentComment, Integer identifierNumber) {
+        return Comment.builder()
+                .post(post)
+                .content(content)
+                .member(member)
+                .parentComment(parentComment)
+                .identifierNumber(identifierNumber)
+                .build();
+    }
 
-	public CommentEditor.CommentEditorBuilder toEditor() {
-		return CommentEditor.builder()
-			.content(content);
-	}
 
+    private void bindParentAndChildComment(Comment parentComment) {
+        if (parentComment == null) {
+            this.root = this;
+        } else {
+            this.root = parentComment;
+            this.parentComment = parentComment;
+            parentComment.getChildren().add(this);
+        }
+    }
+
+    /**
+     * 여기서만 댓글 수정 가능
+     */
+    public Comment edit(CommentContentEditor commentContentEditor) {
+        this.content = commentContentEditor.getContent();
+        this.isEdited = true;
+        return this;
+    }
+
+    public CommentContentEditor.CommentContentEditorBuilder toEditor() {
+        return CommentContentEditor.builder()
+                .content(content);
+    }
+
+    public boolean isParentComment() {
+        return parentComment == null;
+    }
 }

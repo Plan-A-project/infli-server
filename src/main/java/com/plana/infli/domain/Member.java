@@ -1,8 +1,16 @@
 package com.plana.infli.domain;
 
+import static com.plana.infli.domain.Role.*;
+import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 import static lombok.AccessLevel.*;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,12 +26,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@SQLDelete(sql = "UPDATE member SET is_enabled = false WHERE member_id=?")
-@Where(clause = "is_enabled=true")
+@SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE member_id=?")
 public class Member extends BaseEntity {
 
 	@Id
@@ -53,17 +62,19 @@ public class Member extends BaseEntity {
 
 	private String profileImageUrl;
 
-	private boolean isEnabled = true;
+	private boolean isDeleted = false;
 
 	private boolean isAuthenticated = false;
 
-	public Member(String email, String password, String name, String nickname, University university,
-		PasswordEncoder passwordEncoder) {
+	public Member(String email, String password, String name, String nickname,
+			University university,
+			PasswordEncoder passwordEncoder) {
 		this(email, password, name, nickname, Role.UNCERTIFIED, university, passwordEncoder);
 	}
 
+	@Builder
 	public Member(String email, String password, String name, String nickname, Role role,
-		University university, PasswordEncoder passwordEncoder) {
+			University university, PasswordEncoder passwordEncoder) {
 		this.email = email;
 		this.password = passwordEncoder.encode(password);
 		this.name = name;
@@ -89,7 +100,12 @@ public class Member extends BaseEntity {
 	}
 
 	public void deleteMember() {
-		this.isEnabled = false;
+		this.isDeleted = true;
 	}
 
+	public static Boolean isAdmin(Member member) {
+
+		return member.role.equals(ADMIN);
+	}
 }
+

@@ -1,21 +1,17 @@
 package com.plana.infli.repository.comment;
 
 import com.plana.infli.domain.Comment;
+import com.plana.infli.domain.Member;
+import com.plana.infli.domain.Post;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
 
 
-    Comment findCommentById(Long id);
 
     @EntityGraph(attributePaths = {"post"})
-    Comment findWithPostById(Long id);
-
-    @EntityGraph(attributePaths = {"member, post"})
-    Comment findWithMemberAndPostById(Long id);
-
-    @EntityGraph(attributePaths = "{member}")
-    Comment findWithMemberById(Long id);
-
+    Optional<Comment> findWithPostById(Long id);
 }
