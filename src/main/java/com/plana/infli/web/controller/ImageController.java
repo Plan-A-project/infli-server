@@ -17,7 +17,7 @@ public class ImageController {
     private final ImageService imageService;
     private final S3Uploader s3Uploader;
 
-    @PostMapping("/{postId}/image")
+    @PostMapping("/post/{postId}/image")
     public ResponseEntity createImage(@PathVariable Long postId, @RequestParam("file") List<MultipartFile> files) throws IOException {
         return imageService.createImage(postId, files, "post");
     }

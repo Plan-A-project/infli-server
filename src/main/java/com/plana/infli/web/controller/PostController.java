@@ -1,10 +1,9 @@
 package com.plana.infli.web.controller;
 
-import com.plana.infli.domain.PostType;
 import com.plana.infli.service.PostService;
 import com.plana.infli.web.dto.request.post.GatherPostCreateRq;
 import com.plana.infli.web.dto.request.post.PostCreateRq;
-import jakarta.servlet.ServletRequest;
+import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,35 +15,45 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("/first-post")
-    public ResponseEntity isFirstPost(ServletRequest request) {
-        return postService.isFistPost(request);
+    public ResponseEntity isFirstPost(@AuthenticatedPrincipal String email) {
+        return postService.isFistPost(email);
     }
 
-    @PostMapping("/{boardId}/{postType}")
-    public ResponseEntity initPost(@PathVariable Long boardId, @PathVariable String postType, ServletRequest request) {
-        return postService.initPost(boardId, postType, request);
+    @PostMapping("/board/{boardId}/type/{postType}")
+    public ResponseEntity initPost(@PathVariable Long boardId, @PathVariable String postType, @AuthenticatedPrincipal String email) {
+        return postService.initPost(boardId, postType, email);
     }
 
-    @PostMapping("/{boardId}/normal/{postId}")
-    public ResponseEntity createNormalPost(@PathVariable Long boardId, @PathVariable Long postId, ServletRequest request,
+    @PostMapping("/board/{boardId}/normal/{postId}")
+    public ResponseEntity createNormalPost(@PathVariable Long boardId, @PathVariable Long postId, @AuthenticatedPrincipal String email,
                                            @RequestBody PostCreateRq requestDto) {
-        return postService.createNormalPost(boardId, postId, request, requestDto);
+        return postService.createNormalPost(boardId, postId, email, requestDto);
     }
 
-    @PostMapping("/{boardId}/gather/{postId}")
-    public ResponseEntity createGatherPost(@PathVariable Long boardId, @PathVariable Long postId, ServletRequest request,
+    @PostMapping("/board/{boardId}/gather/{postId}")
+    public ResponseEntity createGatherPost(@PathVariable Long boardId, @PathVariable Long postId, @AuthenticatedPrincipal String email,
                                            @RequestBody GatherPostCreateRq requestDto) {
-        return postService.createGatherPost(boardId, postId, request, requestDto);
+        return postService.createGatherPost(boardId, postId, email, requestDto);
     }
 
-    @PostMapping("/{boardId}/notice/{postId}")
-    public ResponseEntity createNoticePost(@PathVariable Long boardId, @PathVariable Long postId, ServletRequest request,
+    @PostMapping("/board/{boardId}/notice/{postId}")
+    public ResponseEntity createNoticePost(@PathVariable Long boardId, @PathVariable Long postId, @AuthenticatedPrincipal String email,
                                            @RequestBody PostCreateRq requestDto) {
-        return postService.createNoticePost(boardId, postId, request, requestDto);
+        return postService.createNoticePost(boardId, postId, email, requestDto);
     }
 
-    @DeleteMapping("/{boardId}/{postId}")
-    public ResponseEntity deletePost(@PathVariable Long boardId, @PathVariable Long postId, ServletRequest request) {
-        return postService.deletePost(boardId, postId, request);
+    @DeleteMapping("/board/{boardId}/post/{postId}")
+    public ResponseEntity deletePost(@PathVariable Long boardId, @PathVariable Long postId, @AuthenticatedPrincipal String email) {
+        return postService.deletePost(boardId, postId, email);
+    }
+
+    @GetMapping("/board/{boardId}/post/{postId}")
+    public ResponseEntity findPost(@PathVariable Long boardId, @PathVariable Long postId) {
+        return postService.findPost(boardId, postId);
+    }
+
+    @GetMapping("/member/profile/my-post")
+    public ResponseEntity findPost(@PathVariable Long boardId, @PathVariable Long postId, @AuthenticatedPrincipal String email) {
+        return postService.findMyPost(boardId, postId, email);
     }
 }
