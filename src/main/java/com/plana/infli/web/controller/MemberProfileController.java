@@ -6,8 +6,10 @@ import com.plana.infli.web.dto.request.profile.NicknameModifyRequest;
 import com.plana.infli.web.dto.request.profile.PasswordConfirmRequest;
 import com.plana.infli.web.dto.request.profile.PasswordModifyRequest;
 import com.plana.infli.web.dto.response.profile.MemberProfileResponse;
+import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,8 +30,8 @@ public class MemberProfileController {
     /**
      * 내 정보 조회
      * */
-    @GetMapping("/{email}")
-    public ResponseEntity<MemberProfileResponse> profile(@PathVariable String email) {
+    @GetMapping
+    public ResponseEntity<MemberProfileResponse> profile(@AuthenticatedPrincipal String email) {
         return ResponseEntity.ok().body(memberProfileService.getMemberProfile(email));
     }
 
@@ -37,7 +39,7 @@ public class MemberProfileController {
      * 닉네임 변경
      */
     @PostMapping("/nickname/modify")
-    public ResponseEntity<Boolean> nicknameModify(@RequestBody NicknameModifyRequest nicknameModifyRequest){
+    public ResponseEntity<Boolean> nicknameModify(@RequestBody @Validated NicknameModifyRequest nicknameModifyRequest){
         return ResponseEntity.ok().body(memberProfileService.modifyNickname(nicknameModifyRequest));
     }
 
@@ -45,7 +47,7 @@ public class MemberProfileController {
      * 비빌번호 변경/탈퇴하기 시 비밀번호 확인
      * */
     @PostMapping("/password/confirm")
-    public ResponseEntity<Boolean> passwordConfirm(@RequestBody PasswordConfirmRequest passwordConfirmRequest){
+    public ResponseEntity<Boolean> passwordConfirm(@RequestBody @Validated PasswordConfirmRequest passwordConfirmRequest){
         return ResponseEntity.ok().body(memberProfileService.checkPassword(passwordConfirmRequest));
     }
 
@@ -53,7 +55,7 @@ public class MemberProfileController {
      * 비밀번호 변경
      * */
     @PostMapping("/password/modify")
-    public ResponseEntity<Boolean> passwordModify(@RequestBody PasswordModifyRequest passwordModifyRequest){
+    public ResponseEntity<Boolean> passwordModify(@RequestBody @Validated PasswordModifyRequest passwordModifyRequest){
         return ResponseEntity.ok().body(memberProfileService.modifyPassword(passwordModifyRequest));
     }
 
