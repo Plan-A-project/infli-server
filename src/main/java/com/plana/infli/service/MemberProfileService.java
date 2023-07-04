@@ -68,20 +68,22 @@ public class MemberProfileService {
     }
 
     @Transactional(readOnly = false)
-    public boolean modifyProfileImage(MultipartFile profileImage, String dirName){
+    public String modifyProfileImage(MultipartFile profileImage, String dirName){
         Member member = memberUtil.getContextMember();
 
         memberRepository.save(member);
 
         String path = dirName + "/member_" + member.getId();
 
+        String imageUrl = "";
+
         try {
-            String imageUrl = s3Uploader.upload(profileImage, path);
+            imageUrl = s3Uploader.upload(profileImage, path);
             member.changeProfileImage(imageUrl);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return true;
+        return imageUrl;
     }
 
     @Transactional(readOnly = false)

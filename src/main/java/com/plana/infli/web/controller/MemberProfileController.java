@@ -7,6 +7,7 @@ import com.plana.infli.web.dto.request.profile.PasswordConfirmRequest;
 import com.plana.infli.web.dto.request.profile.PasswordModifyRequest;
 import com.plana.infli.web.dto.response.profile.MemberProfileResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,47 +29,47 @@ public class MemberProfileController {
      * 내 정보 조회
      * */
     @GetMapping("/{email}")
-    public MemberProfileResponse profile(@PathVariable String email) {
-        return memberProfileService.getMemberProfile(email);
+    public ResponseEntity<MemberProfileResponse> profile(@PathVariable String email) {
+        return ResponseEntity.ok().body(memberProfileService.getMemberProfile(email));
     }
 
     /**
      * 닉네임 변경
      */
     @PostMapping("/nickname/modify")
-    public boolean nicknameModify(@RequestBody NicknameModifyRequest nicknameModifyRequest){
-        return memberProfileService.modifyNickname(nicknameModifyRequest);
+    public ResponseEntity<Boolean> nicknameModify(@RequestBody NicknameModifyRequest nicknameModifyRequest){
+        return ResponseEntity.ok().body(memberProfileService.modifyNickname(nicknameModifyRequest));
     }
 
     /**
      * 비빌번호 변경/탈퇴하기 시 비밀번호 확인
      * */
     @PostMapping("/password/confirm")
-    public boolean passwordConfirm(@RequestBody PasswordConfirmRequest passwordConfirmRequest){
-        return memberProfileService.checkPassword(passwordConfirmRequest);
+    public ResponseEntity<Boolean> passwordConfirm(@RequestBody PasswordConfirmRequest passwordConfirmRequest){
+        return ResponseEntity.ok().body(memberProfileService.checkPassword(passwordConfirmRequest));
     }
 
     /**
      * 비밀번호 변경
      * */
     @PostMapping("/password/modify")
-    public boolean passwordModify(@RequestBody PasswordModifyRequest passwordModifyRequest){
-        return memberProfileService.modifyPassword(passwordModifyRequest);
+    public ResponseEntity<Boolean> passwordModify(@RequestBody PasswordModifyRequest passwordModifyRequest){
+        return ResponseEntity.ok().body(memberProfileService.modifyPassword(passwordModifyRequest));
     }
 
     /**
      * 프로필 사진 변경
      * */
     @PostMapping("/image/modify")
-    public boolean profileImageModify(@RequestParam("file") MultipartFile profileImage){
-        return memberProfileService.modifyProfileImage(profileImage, "member");
+    public ResponseEntity<String> profileImageModify(@RequestParam("file") MultipartFile profileImage){
+        return ResponseEntity.ok().body(memberProfileService.modifyProfileImage(profileImage, "member"));
     }
 
     /**
      * 탈퇴하기
      */
     @PostMapping("/withdrawal")
-    public boolean memberWithdrawal(@RequestBody MemberWithdrawalRequest memberWithdrawalRequest){
-        return memberProfileService.deleteMember(memberWithdrawalRequest);
+    public ResponseEntity<Boolean> memberWithdrawal(@RequestBody MemberWithdrawalRequest memberWithdrawalRequest){
+        return ResponseEntity.ok().body(memberProfileService.deleteMember(memberWithdrawalRequest));
     }
 }
