@@ -1,11 +1,8 @@
-package com.plana.infli.web.dto.request.comment;
+package com.plana.infli.web.dto.request.comment.create.controller;
 
-import com.plana.infli.domain.Comment;
-import com.plana.infli.domain.Member;
-import com.plana.infli.domain.Post;
+import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +19,6 @@ public class CreateCommentRequest {
     private Long parentCommentId;
 
     @NotBlank(message = "내용을 입력해주세요")
-    @Size(max = 500, message = "댓글은 500자 이하로 입력해주세요")
     private String content;
 
     @Builder
@@ -30,5 +26,13 @@ public class CreateCommentRequest {
         this.postId = postId;
         this.parentCommentId = parentCommentId;
         this.content = content;
+    }
+
+    public CreateCommentServiceRequest toServiceRequest() {
+        return CreateCommentServiceRequest.builder()
+                .postId(postId)
+                .parentCommentId(parentCommentId)
+                .content(content)
+                .build();
     }
 }
