@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.DynamicTest.*;
 
 import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.CommentLike;
-import com.plana.infli.dummy.DummyObject;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
@@ -14,6 +13,12 @@ import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
+import com.plana.infli.factory.BoardFactory;
+import com.plana.infli.factory.CommentFactory;
+import com.plana.infli.factory.CommentLikeFactory;
+import com.plana.infli.factory.MemberFactory;
+import com.plana.infli.factory.PostFactory;
+import com.plana.infli.factory.UniversityFactory;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.commentlike.CommentLikeRepository;
@@ -39,12 +44,12 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 
-@Sql("classpath:db/teardown.sql")
 @SpringBootTest
 @ActiveProfiles("test")
-class CommentServiceTest extends DummyObject {
+@Transactional
+class CommentServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
@@ -67,6 +72,23 @@ class CommentServiceTest extends DummyObject {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private UniversityFactory universityFactory;
+
+    @Autowired
+    private MemberFactory memberFactory;
+
+    @Autowired
+    private CommentFactory commentFactory;
+
+    @Autowired
+    private PostFactory postFactory;
+
+    @Autowired
+    private BoardFactory boardFactory;
+
+    @Autowired
+    private CommentLikeFactory commentLikeFactory;
 
     /**
      * 댓글 작성
@@ -75,14 +97,14 @@ class CommentServiceTest extends DummyObject {
     @DisplayName("특정 글에 댓글을 작성하면 DB에 값이 저장된다")
     @Test
     void writeComment() {
-
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postmember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
                 .content("댓글입니다")
@@ -107,10 +129,10 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeCommentWithNotExistingMember() {
         //given
-        University university = universityRepository.save(newUniversity());
-
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postmember", university), board);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -130,10 +152,10 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeCommentWithoutLogIn() {
         //given
-        University university = universityRepository.save(newUniversity());
-
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postmember", university), board);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -148,16 +170,17 @@ class CommentServiceTest extends DummyObject {
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
     }
 
+
     @DisplayName("탈퇴한 회원은 댓글을 작성할 수 없다")
     @Test
     void writeCommentByUnregisteredMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postmember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
         memberRepository.delete(member);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
@@ -173,17 +196,17 @@ class CommentServiceTest extends DummyObject {
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
     }
 
+
     @DisplayName("최대 허용 댓글 길이는 500자 이다")
     @Test
     void maximumContentLengthIs500() {
-
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postmember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -202,12 +225,12 @@ class CommentServiceTest extends DummyObject {
     @Test
     void contentLengthOver500() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postmember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -227,9 +250,9 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeCommentOnNotExistingPostIsNotAllowed() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(999L)
@@ -248,19 +271,20 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeCommentOnDeletedPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postmember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
         postRepository.delete(post);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
+
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
-
 
         //when //then
         assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
@@ -273,12 +297,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void uncertifiedMemberCanNotWriteComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.save(newUncertifiedMember(university));
+        Member member = memberFactory.createUncertifiedMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -296,21 +321,20 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeCommentOnOtherUniversity() {
         //given
-        University anotherUniversity = universityRepository.save(newUniversity());
+        University otherUniversity = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(otherUniversity);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", otherUniversity), board);
 
-        Post anotherUniversityPost = postRepository.save(newPost(memberRepository.save(newStudentMember(anotherUniversity)),
-                boardRepository.save(newAnonymousBoard(anotherUniversity))));
+        University myUniversity = universityFactory.createUniversity("서울대학교");
 
-        University myUniversity = universityRepository.save(newUniversity());
-
-        Member member = memberRepository.save(newStudentMember(myUniversity));
+        Member member = memberFactory.createStudentMember("nickname", myUniversity);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .postId(anotherUniversityPost.getId())
+                .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
-
 
         //when //then
         assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
@@ -322,16 +346,14 @@ class CommentServiceTest extends DummyObject {
     @TestFactory
     Collection<DynamicTest> identifierNumberAllocationDynamicTest() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
-        Member postMember = memberRepository.save(newStudentMember(university));
-
-        Post post = postRepository.save(newPost(postMember,
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member1 = memberRepository.save(newStudentMember(university));
-        Member member2 = memberRepository.save(newStudentMember(university));
-        Member member3 = memberRepository.save(newStudentMember(university));
+        Member member1 = memberFactory.createStudentMember("nickname1", university);
+        Member member2 = memberFactory.createStudentMember("nickname2", university);
+        Member member3 = memberFactory.createStudentMember("nickname3", university);
 
         //when
         return List.of(
@@ -442,16 +464,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeChildComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
-
+        Member member = memberFactory.createStudentMember("nickname", university);
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
                 .content("대댓글입니다")
@@ -477,13 +498,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeChildCommentWithNotExistingMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -501,13 +522,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeChildCommentWithoutLogIn() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -525,15 +546,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void maximumChildCommentContentLengthIs500() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -552,15 +573,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void ChildCommentContentLengthOver500() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -575,47 +596,21 @@ class CommentServiceTest extends DummyObject {
     }
 
 
-    @DisplayName("존재하지 않는 글에 대댓글을 작성할 수 없다")
-    @Test
-    void writeChildCommentOnNotExistingPost() {
-        //given
-        University university = universityRepository.save(newUniversity());
-
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
-
-        CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .postId(999L)
-                .content("댓글입니다")
-                .parentCommentId(parentComment.getId())
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
-                .isInstanceOf(NotFoundException.class)
-                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
-    }
-
     @DisplayName("삭제된 글에 대댓글을 작성할 수 없다")
     @Test
     void writeChildCommentOnDeletedPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         postRepository.delete(post);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -633,12 +628,12 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeChildCommentOnNotExistingParentComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -656,17 +651,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeChildCommentOnDeletedParentComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         commentRepository.delete(parentComment);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -684,26 +679,25 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeChildCommentOnChildComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentComment", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childComment", university), post, parentComment);
 
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)),
-                parentComment, null));
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(childComment.getId())
                 .build();
-
 
         //when //then
         assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
@@ -715,24 +709,24 @@ class CommentServiceTest extends DummyObject {
     @Test
     void writeChildCommentOnOtherUniversity() {
         //given
-        University otherUniversity = universityRepository.save(newUniversity());
+        University otherUniversity = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(otherUniversity);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", otherUniversity), board);
 
-        Post otherUniversityPost = postRepository.save(newPost(memberRepository.save(newStudentMember(otherUniversity)),
-                boardRepository.save(newAnonymousBoard(otherUniversity))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", otherUniversity), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(otherUniversityPost,
-                memberRepository.save(newStudentMember(otherUniversity)), null));
 
-        University myUniversity = universityRepository.save(newUniversity());
+        University myUniversity = universityFactory.createUniversity("서울대학교");
 
-        Member member = memberRepository.save(newStudentMember(myUniversity));
+        Member member = memberFactory.createStudentMember("nickname", myUniversity);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .postId(otherUniversityPost.getId())
+                .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
-
 
         //when //then
         assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
@@ -744,22 +738,21 @@ class CommentServiceTest extends DummyObject {
     @Test
     void uncertifiedMemberCanNotWriteChildComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newUncertifiedMember(university));
+        Member member = memberFactory.createUncertifiedMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
-
 
         //when //then
         assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
@@ -777,14 +770,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentContent() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -807,12 +800,12 @@ class CommentServiceTest extends DummyObject {
     @TestFactory
     Collection<DynamicTest> editCommentDoesNotChangeIdentifierNumber() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         //when
         return List.of(
@@ -854,14 +847,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentMaximumContentLengthIs500() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -881,14 +874,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentContentLengthCannotBeOver500() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -907,13 +900,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentByNotExistingMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -931,13 +924,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentWithoutLogin() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -955,14 +948,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentByUnregisteredMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         memberRepository.delete(member);
 
@@ -982,15 +975,16 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentThatIsNotMine() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member commentMember = memberFactory.createStudentMember("commentMember", university);
 
-        Member commentMember = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post, commentMember, null));
+        Comment comment = commentFactory.createComment(commentMember, post);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1008,12 +1002,12 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editNotExistingComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1031,14 +1025,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editDeletedComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Comment comment = commentFactory.createComment(member, post);
 
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
         commentRepository.delete(comment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
@@ -1046,7 +1041,6 @@ class CommentServiceTest extends DummyObject {
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
-
 
         //when //then
         assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
@@ -1058,13 +1052,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editDeletedCommentWroteByOtherMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member commentMember = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post, commentMember, null));
+        Member commentMember = memberFactory.createStudentMember("commentMember", university);
+        Comment comment = commentFactory.createComment(commentMember, post);
+        commentRepository.delete(comment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1072,10 +1067,7 @@ class CommentServiceTest extends DummyObject {
                 .content("수정된 댓글입니다")
                 .build();
 
-        commentRepository.delete(comment);
-
-        Member member = memberRepository.save(newStudentMember(university));
-
+        Member member = memberFactory.createStudentMember("nickname", university);
         //when //then
         assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
                 .isInstanceOf(NotFoundException.class)
@@ -1086,15 +1078,16 @@ class CommentServiceTest extends DummyObject {
     @Test
     void postIdByRequestAndPostIdByCommentIdMustBeEqual() {
         //given
-        University university = universityRepository.save(newUniversity());
-        Board board = boardRepository.save(newAnonymousBoard(university));
-        Member postMember = memberRepository.save(newStudentMember(university));
-        Post post = postRepository.save(newPost(postMember, board));
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post anotherPost = postFactory.createPost(
+                memberFactory.createStudentMember("postMember1", university), board);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember2", university), board);
+        Member member = memberFactory.createStudentMember("nickname", university);
+        Comment comment = commentFactory.createComment(member, post);
 
-        Post anotherPost = postRepository.save(newPost(postMember, board));
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(anotherPost.getId())
@@ -1112,14 +1105,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void postIdByRequestAndPostIdByCommentIdMustBeEqual2() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(999L)
@@ -1137,14 +1130,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editCommentInDeletedPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         postRepository.delete(post);
 
@@ -1167,17 +1160,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editChildCommentContent() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment childComment = commentRepository.save(newChildComment(post, member, parentComment, null));
+        Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1200,16 +1193,16 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editChildCommentByNotExistingMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childMember", university), post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1227,18 +1220,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editedChildCommentContentMaximumLengthIs500() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment childComment = commentRepository.save(newChildComment(post, member,
-                parentComment, null));
+        Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1258,18 +1250,18 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editedChildCommentContentMaximumLengthIs500_2() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment childComment = commentRepository.save(newChildComment(post, member,
-                parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1287,16 +1279,18 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editChildCommentByUnregisteredMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment childComment = commentRepository.save(newChildComment(post, member, parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                member, post, parentComment);
 
         memberRepository.delete(member);
 
@@ -1316,18 +1310,18 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editChildCommentThatIsNotMine() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post, parentComment);
 
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .postId(post.getId())
@@ -1346,17 +1340,18 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editDeletedChildComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment childComment = commentRepository.save(newChildComment(post,
-                member, parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                member, post, parentComment);
 
         commentRepository.delete(childComment);
 
@@ -1365,7 +1360,6 @@ class CommentServiceTest extends DummyObject {
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
-
 
         //when //then
         assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
@@ -1377,16 +1371,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editDeletedChildCommentWroteByOtherMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parenCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post,
+                parentComment);
 
         commentRepository.delete(childComment);
 
@@ -1396,7 +1391,7 @@ class CommentServiceTest extends DummyObject {
                 .content("수정된 댓글입니다")
                 .build();
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         //when //then
         assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
@@ -1409,18 +1404,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void editChildCommentInDeletedPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                member, parentComment, null));
+        Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         postRepository.delete(post);
 
@@ -1443,15 +1437,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deleteComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(comment.getId()))
@@ -1471,13 +1464,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deleteCommentByNotExistingMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(comment.getId()))
@@ -1493,13 +1486,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deleteCommentWithoutLogin() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(comment.getId()))
@@ -1515,9 +1508,10 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deleteNotExistingComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberRepository.save(newStudentMember(university));
+
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(999L))
@@ -1533,13 +1527,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletingAlreadyDeletedCommentIsNotAllowed() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         commentRepository.delete(comment);
 
@@ -1557,15 +1552,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletingCommentThatIsNotMine() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(comment.getId()))
@@ -1581,15 +1576,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletingCommentByAdmin() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member admin = memberRepository.save(newAdminMember(university));
+        Member admin = memberFactory.createAdminMember("admin", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(comment.getId()))
@@ -1597,7 +1592,6 @@ class CommentServiceTest extends DummyObject {
 
         //when
         commentService.delete(request, admin.getEmail());
-
 
         // then
         assertThat(commentRepository.findAllActiveCommentCount()).isZero();
@@ -1610,16 +1604,18 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deleteChildComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment childComment = commentRepository.save(newChildComment(post, member, parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                member, post, parentComment);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(childComment.getId()))
@@ -1637,17 +1633,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deleteChildCommentByNotExistingMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
-
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post,
+                parentComment);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(childComment.getId()))
@@ -1663,13 +1659,13 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deleteChildCommentWithoutLogin() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(comment.getId()))
@@ -1685,16 +1681,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletingAlreadyDeletedChildComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment childComment = commentRepository.save(newChildComment(post, member, parentComment, null));
+        Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         commentRepository.delete(childComment);
 
@@ -1712,22 +1709,23 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletingChildCommentThatIsNotMine() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post,
+                parentComment);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(childComment.getId()))
                 .build();
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         //when //then
         assertThatThrownBy(() -> commentService.delete(request, member.getEmail()))
@@ -1739,18 +1737,19 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletingChildCommentByAdmin() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post,
+                parentComment);
 
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
-
-        Member admin = memberRepository.save(newAdminMember(university));
+        Member admin = memberFactory.createAdminMember("admin", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
                 .ids(List.of(childComment.getId()))
@@ -1758,7 +1757,6 @@ class CommentServiceTest extends DummyObject {
 
         //when
         commentService.delete(request, admin.getEmail());
-
 
         // then
         Comment findComment = commentRepository.findById(childComment.getId()).get();
@@ -1773,14 +1771,14 @@ class CommentServiceTest extends DummyObject {
     @TestFactory
     Collection<DynamicTest> loadAnonymousCommentsInPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member1 = memberRepository.save(newStudentMember(university));
-        Member member2 = memberRepository.save(newStudentMember(university));
-        Member member3 = memberRepository.save(newStudentMember(university));
+        Member member1 = memberFactory.createStudentMember("nickname1", university);
+        Member member2 = memberFactory.createStudentMember("nickname2", university);
+        Member member3 = memberFactory.createStudentMember("nickname3", university);
 
         return List.of(
                 dynamicTest("member1이 댓글을 작성한다",
@@ -1817,7 +1815,6 @@ class CommentServiceTest extends DummyObject {
                 dynamicTest("해당 글에 작성된 댓글을 조회한다",
                         () -> {
                             //given
-                            Member member = memberRepository.save(newStudentMember(university));
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                                     .id(post.getId())
@@ -1826,7 +1823,7 @@ class CommentServiceTest extends DummyObject {
 
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request, member.getEmail());
+                                    request, member1.getEmail());
 
                             //then
                             assertThat(response).extracting("postId", "isAnonymousBoard",
@@ -1852,12 +1849,12 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewPostThatDoesNotHaveComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newActivityBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -1876,16 +1873,16 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewIdentifiedComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createNonAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newActivityBoard(university))));
+        Member member1 = memberFactory.createStudentMember("nickname1", university);
+        Member member2 = memberFactory.createStudentMember("nickname2", university);
 
-        Member member1 = memberRepository.save(newStudentMember(university));
-        Member member2 = memberRepository.save(newStudentMember(university));
-
-        Comment comment1 = commentRepository.save(newParentComment(post, member1, null));
-        Comment comment2 = commentRepository.save(newParentComment(post, member2, null));
+        Comment comment1 = commentFactory.createComment(member1, post);
+        Comment comment2 = commentFactory.createComment(member2, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -1908,15 +1905,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void defaultSizeIs100() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newActivityBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 101).forEach(i -> {
-            commentRepository.save(newParentComment(post, member, null));
+            commentFactory.createComment(member, post);
         });
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
@@ -1938,13 +1935,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewMyComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post, member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -1964,15 +1962,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewNotMyComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -1992,16 +1990,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewCommentThatIPressedLike() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        CommentLike commentLike = commentLikeRepository.save(newCommentLike(comment, member));
+        CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2021,15 +2020,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewCommentThatIDidNotPressedLike() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2049,14 +2048,13 @@ class CommentServiceTest extends DummyObject {
     @TestFactory
     Collection<DynamicTest> viewEditedComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member commentMember = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post,
-                commentMember, null));
+        Member commentMember = memberFactory.createStudentMember("commentMember", university);
+        Comment comment = commentFactory.createComment(commentMember, post);
 
         return List.of(
                 dynamicTest("댓글이 수정된다",
@@ -2073,7 +2071,8 @@ class CommentServiceTest extends DummyObject {
                 dynamicTest("수정된 댓글은 isEdited 컬럼의 값이 true 다",
                         () -> {
                             //given
-                            Member member = memberRepository.save(newStudentMember(university));
+                            Member member = memberFactory.createStudentMember("nickname",
+                                    university);
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                                     .id(post.getId())
@@ -2095,15 +2094,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewNotEditedComment() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2123,16 +2122,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewCommentWroteByPostWriter() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
-        Member postMember = memberRepository.save(newStudentMember(university));
-        Post post = postRepository.save(newPost(postMember,
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(postMember, post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                postMember, null));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
                 .page(1)
@@ -2151,14 +2149,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewCommentThatIsNotWroteByPostWriter() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post,
-                member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2178,15 +2176,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewCommentByAdmin() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member admin = memberRepository.save(newAdminMember(university));
+        Member admin = memberFactory.createAdminMember("admin", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2205,9 +2203,9 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewCommentsInNotExistingPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(999L)
@@ -2225,13 +2223,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void viewCommentsInDeletedPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
         postRepository.delete(post);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2249,15 +2248,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void showFirstPageWhenPageRequestIs0() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2276,15 +2275,15 @@ class CommentServiceTest extends DummyObject {
     @Test
     void showFirstPageWhenPageRequestIsMinus() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2303,16 +2302,17 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletedCommentIsNotShown() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
         commentRepository.delete(comment);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
@@ -2331,12 +2331,12 @@ class CommentServiceTest extends DummyObject {
     @Test
     void loadAnonymousCommentsAndChildCommentsInPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentResponse parentComment1 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
@@ -2365,7 +2365,6 @@ class CommentServiceTest extends DummyObject {
                         .content("3번 댓글입니다")
                         .parentCommentId(null)
                         .build(), member.getEmail());
-
 
         CreateCommentResponse childComment2 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
@@ -2408,19 +2407,19 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletedChildCommentIsNotShown() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)),
-                parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post,
+                parentComment);
 
         commentRepository.delete(childComment);
 
@@ -2428,7 +2427,6 @@ class CommentServiceTest extends DummyObject {
                 .id(post.getId())
                 .page(1)
                 .build();
-
 
         //when
         PostCommentsResponse response = commentService.loadCommentsInPost(request,
@@ -2442,18 +2440,18 @@ class CommentServiceTest extends DummyObject {
     @TestFactory
     Collection<DynamicTest> DeletedCommentViewScenarioTest() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post, parentComment);
 
         return List.of(
                 dynamicTest("대댓글이 존재하는 댓글이 삭제된 경우 해당 댓글은 삭제된 댓글입니다 라고 조회된다",
@@ -2509,20 +2507,18 @@ class CommentServiceTest extends DummyObject {
     void findBestComment() {
 
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createNonAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-        Comment comment = commentRepository.save(newParentComment(post,
-                member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(member, comment);
         });
-
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
@@ -2537,22 +2533,19 @@ class CommentServiceTest extends DummyObject {
     @DisplayName("익명글의 베스트 댓글은 nickname 과 profileImageUrl 컬럼의 값이 null 이다")
     @Test
     void findBestAnonymousComment() {
-
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Member member = memberFactory.createStudentMember("commentMember", university);
 
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(member, post);
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-
-            commentLikeRepository.save(
-                    newCommentLike(comment, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(member, comment);
         });
-
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
@@ -2566,19 +2559,18 @@ class CommentServiceTest extends DummyObject {
     @DisplayName("특정글에 작성된 모든 댓글이 전부 좋아요 개수가 10개 미만인 경우, 베스트 댓글은 존재하지 않는다")
     @Test
     void bestCommentIsNotCreatedWhenCommentLikeIsLessThen10() {
-
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         IntStream.rangeClosed(1, 9).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nickname" + i, university), comment);
         });
 
         //when
@@ -2593,33 +2585,33 @@ class CommentServiceTest extends DummyObject {
     void commentThatHasOver10LikesAndHasMostLikesBecomesBestComment() {
 
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment1 = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember1", university), post);
 
-        Comment comment1 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment2 = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember2", university), post);
 
-        Comment comment2 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment comment3 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment3 = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember3", university), post);
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment1, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nicknameA" + i, university), comment1);
         });
 
         IntStream.rangeClosed(1, 11).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment2, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nicknameB" + i, university), comment2);
         });
 
         IntStream.rangeClosed(1, 12).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment3, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nicknameC" + i, university), comment3);
         });
 
         //when
@@ -2634,36 +2626,35 @@ class CommentServiceTest extends DummyObject {
     void commentThatHasEarliestCreatedTimeBecomesBestComment() {
 
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newAnonymousBoard(university))));
+        Comment comment1 = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember1", university), post);
 
-        Comment comment1 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment2 = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember2", university), post);
 
-        Comment comment2 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment comment3 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment3 = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember3", university), post);
 
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment1, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nicknameA" + i, university), comment1);
         });
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment2, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nicknameB" + i, university), comment2);
         });
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(comment3, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nicknameC" + i, university), comment3);
         });
-
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
@@ -2677,20 +2668,21 @@ class CommentServiceTest extends DummyObject {
     void childCommentCanBeBestComment() {
 
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
+        Comment parentComment = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember", university), post);
 
-        Comment parentComment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), parentComment, null));
+        Comment childComment = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember", university), post,
+                parentComment);
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            commentLikeRepository.save(
-                    newCommentLike(childComment, memberRepository.save(newStudentMember(university))));
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("nickname" + i, university), childComment);
         });
 
         //when
@@ -2708,16 +2700,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void listCommentsWroteByMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                member, null));
-
+        Member member = memberFactory.createStudentMember("nickname", university);
+        Comment comment = commentFactory.createComment(member, post);
 
         //when
         MyCommentsResponse response = commentService.loadMyComments(1, member.getEmail());
@@ -2736,25 +2726,21 @@ class CommentServiceTest extends DummyObject {
     @Test
     void listChildCommentsWroteByMember() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
+        Post post1 = postFactory.createPost(
+                memberFactory.createStudentMember("postMember1", university),
+                boardFactory.createAnonymousBoard(university));
 
-        Post post1 = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
-        Comment comment1 = commentRepository.save(newParentComment(post1,
-                memberRepository.save(newStudentMember(university)), null));
+        Post post2 = postFactory.createPost(
+                memberFactory.createStudentMember("postMember2", university),
+                boardFactory.createNonAnonymousBoard(university));
 
+        Comment myComment1 = commentFactory.createComment(member, post1);
 
-        Post post2 = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
-        Comment comment2 = commentRepository.save(newParentComment(post2,
-                memberRepository.save(newStudentMember(university)), null));
-
-
-        Comment myComment1 = commentRepository.save(newChildComment(post1, member, comment1, null));
-        Comment myComment2 = commentRepository.save(newChildComment(post2, member, comment1, null));
+        Comment myComment2 = commentFactory.createComment(member, post2);
 
 
         //when
@@ -2775,26 +2761,22 @@ class CommentServiceTest extends DummyObject {
     @Test
     void commentsOrderIsLIFO() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Post post1 = postRepository.save(
-                newPost(memberRepository.save(newStudentMember(university)),
-                        boardRepository.save(newClubBoard(university))));
+        Post post1 = postFactory.createPost(
+                memberFactory.createStudentMember("postMember1", university), board);
 
-        Post post2 = postRepository.save(
-                newPost(memberRepository.save(newStudentMember(university)),
-                        boardRepository.save(newClubBoard(university))));
+        Post post2 = postFactory.createPost(
+                memberFactory.createStudentMember("postMember2", university), board);
 
-        Comment comment1 = commentRepository.save(newParentComment(post1,
-                member, null));
+        Comment comment1 = commentFactory.createComment(member, post1);
 
-        Comment comment2 = commentRepository.save(newParentComment(post2,
-                member, null));
+        Comment comment2 = commentFactory.createComment(member, post2);
 
-        Comment comment3 = commentRepository.save(newChildComment(post2,
-                member, comment2, null));
+        Comment comment3 = commentFactory.createComment(member, post1);
 
         //when
         MyCommentsResponse response = commentService.loadMyComments(1, member.getEmail());
@@ -2805,7 +2787,7 @@ class CommentServiceTest extends DummyObject {
 
         assertThat(response.getComments()).extracting("commentId", "postId", "content")
                 .containsExactly(
-                        tuple(comment3.getId(), post2.getId(), comment3.getContent()),
+                        tuple(comment3.getId(), post1.getId(), comment3.getContent()),
                         tuple(comment2.getId(), post2.getId(), comment2.getContent()),
                         tuple(comment1.getId(), post1.getId(), comment1.getContent())
                 );
@@ -2815,9 +2797,9 @@ class CommentServiceTest extends DummyObject {
     @Test
     void listCommentsWroteByMeWhoDidNotWroteAnyComments() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         //when
         MyCommentsResponse response = commentService.loadMyComments(1, member.getEmail());
@@ -2830,7 +2812,7 @@ class CommentServiceTest extends DummyObject {
     @Test
     void listCommentsWroteByMeWithoutLogin() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
 
         //when //then
         assertThatThrownBy(() -> commentService.loadMyComments(1, null))
@@ -2842,15 +2824,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void deletedCommentsAreNotListedWhenListingCommentsWroteByMe() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                        boardRepository.save(newClubBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         commentRepository.delete(comment);
 
@@ -2865,15 +2846,14 @@ class CommentServiceTest extends DummyObject {
     @Test
     void commentsInDeletedPostAreListedWhenListingCommentsWroteByMe() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         postRepository.delete(post);
 
@@ -2889,16 +2869,16 @@ class CommentServiceTest extends DummyObject {
     @Test
     void defaultPageSizeIs20() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 30).forEach(i -> {
-            Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                    boardRepository.save(newClubBoard(university))));
+            Post post = postFactory.createPost(
+                    memberFactory.createStudentMember("postMember" + i, university), board);
 
-            Comment comment = commentRepository.save(newParentComment(post,
-                    member, null));
+            Comment parentComment = commentFactory.createComment(member, post);
         });
 
         //when
@@ -2922,18 +2902,17 @@ class CommentServiceTest extends DummyObject {
     @DisplayName("내가 작성한 댓글 총 갯수 조회")
     @Test
     void countMyTotalCommentsNumber() {
-
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 30).forEach(i -> {
-            Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                    boardRepository.save(newClubBoard(university))));
+            Post post = postFactory.createPost(
+                    memberFactory.createStudentMember("postMember" + i, university), board);
 
-            Comment comment = commentRepository.save(newParentComment(post,
-                    member, null));
+            Comment comment = commentFactory.createComment(member, post);
         });
 
         //when
@@ -2946,17 +2925,15 @@ class CommentServiceTest extends DummyObject {
     @DisplayName("내가 작성한 댓글 총 갯수 조회시 삭제된 댓글은 포함되지 않는다")
     @Test
     void deletedCommentIsNotIncludedWhenCountingMyCommentsNumber() {
-
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                member, null));
+        Comment comment = commentFactory.createComment(member, post);
 
         commentRepository.delete(comment);
 
@@ -2980,9 +2957,9 @@ class CommentServiceTest extends DummyObject {
     @Test
     void countingMyCommentsNumberWithUnregisteredAccount() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Member member = memberFactory.createStudentMember("nickname", university);
 
         memberRepository.delete(member);
 
@@ -3009,24 +2986,24 @@ class CommentServiceTest extends DummyObject {
     @Test
     void countCommentsNumberInPost() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.save(newStudentMember(university));
+        Comment parentComment1 = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember1", university), post);
 
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
+        Comment parentComment2 = commentFactory.createComment(
+                memberFactory.createStudentMember("parentCommentMember2", university), post);
 
-        Comment comment1 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment childComment1 = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember1", university), post,
+                parentComment1);
 
-        Comment comment2 = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
-
-        Comment childComment1 = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), comment1, null));
-
-        Comment childComment2 = commentRepository.save(newChildComment(post,
-                memberRepository.save(newStudentMember(university)), comment2, null));
+        Comment childComment2 = commentFactory.createChildComment(
+                memberFactory.createStudentMember("childCommentMember2", university), post,
+                parentComment2);
 
         //when
         Long commentsCount = commentService.findActiveCommentsCountInPost(post.getId());
@@ -3035,19 +3012,33 @@ class CommentServiceTest extends DummyObject {
         assertThat(commentsCount).isEqualTo(4);
     }
 
+    @DisplayName("특정 글에 작성된 총 댓글 갯수 조회 - 댓글이 없는 경우")
+    @Test
+    void countCommentsNumberInPostThatDoesNotHaveComment() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        //when
+        Long commentsCount = commentService.findActiveCommentsCountInPost(post.getId());
+
+        //then
+        assertThat(commentsCount).isEqualTo(0);
+    }
+
     @DisplayName("특정 글에 작성된 총 댓글 갯수 조회시 삭제된 댓글은 갯수에 포함되지 않는다")
     @Test
     void deletedCommentIsNotCounted() {
         //given
-        University university = universityRepository.save(newUniversity());
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.save(newStudentMember(university));
-
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
-
-        Comment comment = commentRepository.save(newParentComment(post,
-                memberRepository.save(newStudentMember(university)), null));
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
 
         commentRepository.delete(comment);
 
@@ -3072,10 +3063,10 @@ class CommentServiceTest extends DummyObject {
     @Test
     void countCommentsInDeletedPost() {
         //given
-        University university = universityRepository.save(newUniversity());
-
-        Post post = postRepository.save(newPost(memberRepository.save(newStudentMember(university)),
-                boardRepository.save(newClubBoard(university))));
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
         postRepository.delete(post);
 
