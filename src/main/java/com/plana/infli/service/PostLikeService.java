@@ -1,6 +1,6 @@
 package com.plana.infli.service;
 
-import com.plana.infli.repository.post.PostLikeRepository;
+import com.plana.infli.repository.postlike.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

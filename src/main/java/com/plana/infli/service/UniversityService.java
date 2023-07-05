@@ -21,7 +21,4 @@ public class UniversityService {
         return universityRepository.findByMember(member);
     }
 
-    public University findById(Long id) {
-        return universityRepository.findUniversityById(id);
-    }
 }

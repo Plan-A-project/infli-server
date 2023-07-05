@@ -1,5 +1,7 @@
 package com.plana.infli.domain;
 
+import static jakarta.persistence.EnumType.STRING;
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.*;
 
 import com.plana.infli.web.dto.request.post.GatherPostCreateRq;
@@ -9,7 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,12 +19,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @SQLDelete(sql = "UPDATE post SET is_deleted=true WHERE post_id=?")
-@Where(clause = "is_deleted=false")
 @Entity
 public class Post extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "post_id")
     private Long id;
 
@@ -31,6 +31,7 @@ public class Post extends BaseEntity {
 
     private String main;
 
+    @Enumerated(value = STRING)
     private PostType type;
 
     private boolean isDeleted = Boolean.FALSE;
@@ -77,6 +78,15 @@ public class Post extends BaseEntity {
 
     public void setMember(Member member) {
         this.member = member;
+    }
+
+    public static Post create(Member member, Board board) {
+        Post post = Post.builder()
+                .build();
+
+        post.setMember(member);
+        post.setBoard(board);
+        return post;
     }
 
     public void publish(PostCreateRq request) {

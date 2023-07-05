@@ -10,18 +10,19 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = PROTECTED)
-@Getter
 public class CommentLike extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "like_id")
+    @Column(name = "comment_like_id")
     private Long id;
 
     @ManyToOne(fetch = LAZY)
@@ -32,16 +33,25 @@ public class CommentLike extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Builder
-    public CommentLike(Comment comment, Member member) {
-        this.member = member;
+    private String email;
 
+    @Builder
+    private CommentLike(Comment comment, Member member) {
+        this.member = member;
+        this.email = member.getEmail();
         //양방향 연관관계 설정
         bindCommentAndLike(comment);
     }
 
     private void bindCommentAndLike(Comment comment) {
         this.comment = comment;
-        comment.getLikes().add(this);
+        comment.getCommentLikes().add(this);
+    }
+
+    public static CommentLike create(Comment comment, Member member) {
+        return CommentLike.builder()
+                .comment(comment)
+                .member(member)
+                .build();
     }
 }

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,4 +24,13 @@ public class MemberCreateRequest {
 	@NotNull(message = "대학교 번호는 필수입니다.")
 	private Long universityId;
 
+	@Builder
+	public MemberCreateRequest(String email, String name, String password, String nickname,
+			Long universityId) {
+		this.email = email;
+		this.name = name;
+		this.password = password;
+		this.nickname = nickname;
+		this.universityId = universityId;
+	}
 }

@@ -2,16 +2,18 @@ package com.plana.infli.repository.board;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.University;
-import com.plana.infli.web.dto.response.board.all.SingleBoard;
+import com.plana.infli.web.dto.response.board.settings.board.SingleBoard;
 import java.util.List;
+import java.util.Optional;
 
 public interface BoardRepositoryCustom {
 
 
-    List<SingleBoard> findAllExistingBoards(University university);
+    List<SingleBoard> loadAllBoardBy(University university);
 
-    Board findByUniversityIDAndBoardName(Long universityId, String boardName);
+    Optional<Board> findActiveBoardBy(Long boardId);
 
-    Boolean existsByIdAndUniversity(Long id, University university);
+    List<Board> findAllActiveBoardBy(University university);
 
+    List<Board> findAllWithUniversityByIdIn(List<Long> ids);
 }

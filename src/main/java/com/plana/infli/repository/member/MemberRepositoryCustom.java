@@ -1,8 +1,12 @@
 package com.plana.infli.repository.member;
 
 import com.plana.infli.domain.Member;
+import java.util.Optional;
 
 public interface MemberRepositoryCustom {
 
-    Member findActiveMemberByEmail(String nickname);
+    Optional<Member> findActiveMemberBy(String email);
+
+
+    Optional<Member> findActiveMemberWithUniversityBy(String email);
 }
