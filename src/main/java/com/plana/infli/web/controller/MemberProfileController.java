@@ -7,6 +7,7 @@ import com.plana.infli.web.dto.request.profile.PasswordConfirmRequest;
 import com.plana.infli.web.dto.request.profile.PasswordModifyRequest;
 import com.plana.infli.web.dto.response.profile.MemberProfileResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +31,7 @@ public class MemberProfileController {
     /**
      * 내 정보 조회
      * */
+    @Operation(description = "회원 정보 조회")
     @GetMapping
     public ResponseEntity<MemberProfileResponse> profile(@AuthenticatedPrincipal String email) {
         return ResponseEntity.ok().body(memberProfileService.getMemberProfile(email));
@@ -38,6 +40,7 @@ public class MemberProfileController {
     /**
      * 닉네임 변경
      */
+    @Operation(description = "회원 닉네임 변경")
     @PostMapping("/nickname/modify")
     public ResponseEntity<Boolean> nicknameModify(@RequestBody @Validated NicknameModifyRequest nicknameModifyRequest){
         return ResponseEntity.ok().body(memberProfileService.modifyNickname(nicknameModifyRequest));
@@ -46,6 +49,7 @@ public class MemberProfileController {
     /**
      * 비빌번호 변경/탈퇴하기 시 비밀번호 확인
      * */
+    @Operation(description = "비밀번호 확인 - 비밀번호 변경/탈퇴 시")
     @PostMapping("/password/confirm")
     public ResponseEntity<Boolean> passwordConfirm(@RequestBody @Validated PasswordConfirmRequest passwordConfirmRequest){
         return ResponseEntity.ok().body(memberProfileService.checkPassword(passwordConfirmRequest));
@@ -54,6 +58,7 @@ public class MemberProfileController {
     /**
      * 비밀번호 변경
      * */
+    @Operation(description = "회원 비밀번호 변경")
     @PostMapping("/password/modify")
     public ResponseEntity<Boolean> passwordModify(@RequestBody @Validated PasswordModifyRequest passwordModifyRequest){
         return ResponseEntity.ok().body(memberProfileService.modifyPassword(passwordModifyRequest));
@@ -62,6 +67,7 @@ public class MemberProfileController {
     /**
      * 프로필 사진 변경
      * */
+    @Operation(description = "회원 프로필 사진 변경")
     @PostMapping("/image/modify")
     public ResponseEntity<String> profileImageModify(@RequestParam("file") MultipartFile profileImage){
         return ResponseEntity.ok().body(memberProfileService.modifyProfileImage(profileImage, "member"));
@@ -70,6 +76,7 @@ public class MemberProfileController {
     /**
      * 탈퇴하기
      */
+    @Operation(description = "회원 탈퇴")
     @PostMapping("/withdrawal")
     public ResponseEntity<Boolean> memberWithdrawal(@RequestBody MemberWithdrawalRequest memberWithdrawalRequest){
         return ResponseEntity.ok().body(memberProfileService.deleteMember(memberWithdrawalRequest));
