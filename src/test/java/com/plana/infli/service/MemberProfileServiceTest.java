@@ -1,5 +1,6 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.exception.custom.NotFoundException.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
+import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.profile.MemberWithdrawalRequest;
@@ -33,6 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -41,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("local")
 @Transactional
 class MemberProfileServiceTest {
 
@@ -164,11 +168,12 @@ class MemberProfileServiceTest {
         boolean result = memberProfileService.deleteMember(memberWithdrawalRequest);
 
         assertThat(result).isEqualTo(true);
-        assertFalse(member.isEnabled());
+        assertFalse(member.isDeleted());
     }
 
     public Member createMember(){
-        University university = universityRepository.findUniversityById(1l);
+        University university = universityRepository.findUniversityById(1l).orElseThrow(() -> new NotFoundException(
+            UNIVERSITY_NOT_FOUND));
         Member member = new Member("testEmail@naver.com", "Test1234!", "LEE", "LSH", Role.UNCERTIFIED, university,
             passwordEncoder);
 
