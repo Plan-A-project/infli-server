@@ -13,6 +13,7 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
 import com.plana.infli.exception.custom.NotFoundException;
+import com.plana.infli.factory.UniversityFactory;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.profile.MemberWithdrawalRequest;
@@ -44,7 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 @Transactional
 class MemberProfileServiceTest {
 
@@ -62,6 +63,8 @@ class MemberProfileServiceTest {
     private ObjectMapper objectMapper;
     @Autowired
     private ResourceLoader resourceLoader;
+    @Autowired
+    private UniversityFactory universityFactory;
 
     private String accessToken;
 
@@ -168,12 +171,12 @@ class MemberProfileServiceTest {
         boolean result = memberProfileService.deleteMember(memberWithdrawalRequest);
 
         assertThat(result).isEqualTo(true);
-        assertFalse(member.isDeleted());
+        assertTrue(member.isDeleted());
     }
 
     public Member createMember(){
-        University university = universityRepository.findUniversityById(1l).orElseThrow(() -> new NotFoundException(
-            UNIVERSITY_NOT_FOUND));
+        University university = universityFactory.createUniversity("푸단대학교");
+
         Member member = new Member("testEmail@naver.com", "Test1234!", "LEE", "LSH", Role.UNCERTIFIED, university,
             passwordEncoder);
 
@@ -181,6 +184,7 @@ class MemberProfileServiceTest {
     }
 
     public void signup() throws Exception {
+        universityFactory.createUniversity("푸단대학교");
         Map<String, String> requestMap = new HashMap<>();
         requestMap.put("email", "testEmail@naver.com");
         requestMap.put("name", "LEE");
