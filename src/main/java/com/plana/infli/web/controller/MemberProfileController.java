@@ -69,8 +69,8 @@ public class MemberProfileController {
      * */
     @Operation(description = "회원 프로필 사진 변경")
     @PostMapping("/image/modify")
-    public ResponseEntity<String> profileImageModify(@RequestParam("file") MultipartFile profileImage){
-        return ResponseEntity.ok().body(memberProfileService.modifyProfileImage(profileImage, "member"));
+    public ResponseEntity<String> profileImageModify(@RequestParam("file") MultipartFile profileImage, @AuthenticatedPrincipal String email){
+        return ResponseEntity.ok().body(memberProfileService.modifyProfileImage(email, profileImage, "member"));
     }
 
     /**

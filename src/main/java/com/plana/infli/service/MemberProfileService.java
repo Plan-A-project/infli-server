@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberProfileService {
 
     private final MemberRepository memberRepository;
-    private final MemberUtil memberUtil;
     private final S3Uploader s3Uploader;
     private final PasswordEncoder passwordEncoder;
 
@@ -68,8 +67,8 @@ public class MemberProfileService {
     }
 
     @Transactional(readOnly = false)
-    public String modifyProfileImage(MultipartFile profileImage, String dirName){
-        Member member = memberUtil.getContextMember();
+    public String modifyProfileImage(String email, MultipartFile profileImage, String dirName){
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email + " is not found"));
 
         memberRepository.save(member);
 
