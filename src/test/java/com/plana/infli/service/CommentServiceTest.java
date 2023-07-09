@@ -1818,7 +1818,7 @@ class CommentServiceTest {
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                                     .id(post.getId())
-                                    .page(1)
+                                    .page("1")
                                     .build();
 
                             //when
@@ -1858,7 +1858,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -1886,7 +1886,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -1918,7 +1918,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -1946,7 +1946,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -1974,7 +1974,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2004,7 +2004,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2032,7 +2032,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2076,7 +2076,7 @@ class CommentServiceTest {
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                                     .id(post.getId())
-                                    .page(1)
+                                    .page("1")
                                     .build();
 
                             //when
@@ -2106,7 +2106,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2133,7 +2133,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2160,7 +2160,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2188,7 +2188,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2209,7 +2209,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(999L)
-                .page(1)
+                .page("1")
                 .build();
 
         //when //then
@@ -2234,7 +2234,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when //then
@@ -2260,7 +2260,34 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(0)
+                .page("0")
+                .build();
+
+        //when
+        PostCommentsResponse response = commentService.loadCommentsInPost(request,
+                member.getEmail());
+
+        //then
+        assertThat(response.getCurrentPage()).isEqualTo(1);
+    }
+
+    @DisplayName("페이지 요청값이 숫자가 아닌 경우 1페이지가 조회된다")
+    @Test
+    void showFirstPageWhenPageRequestIsNotNumber() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("commentMember", university), post);
+
+        Member member = memberFactory.createStudentMember("nickname", university);
+
+        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .id(post.getId())
+                .page("aaaa")
                 .build();
 
         //when
@@ -2287,7 +2314,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(-1)
+                .page("-1")
                 .build();
 
         //when
@@ -2316,7 +2343,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2382,7 +2409,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2425,7 +2452,7 @@ class CommentServiceTest {
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .id(post.getId())
-                .page(1)
+                .page("1")
                 .build();
 
         //when
@@ -2461,7 +2488,7 @@ class CommentServiceTest {
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                                     .id(post.getId())
-                                    .page(1)
+                                    .page("1")
                                     .build();
 
                             //when
@@ -2485,7 +2512,7 @@ class CommentServiceTest {
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                                     .id(post.getId())
-                                    .page(1)
+                                    .page("1")
                                     .build();
 
                             //when

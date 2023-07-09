@@ -43,6 +43,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
         return jpaQueryFactory.selectFrom(board)
                 .where(board.isDeleted.isFalse())
                 .where(board.university.eq(university))
+                .orderBy(board.sequence.asc())
                 .fetch();
     }
 
@@ -53,5 +54,14 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
                 .where(board.isDeleted.isFalse())
                 .innerJoin(board.university, university).fetchJoin()
                 .fetch();
+    }
+
+    @Override
+    public Optional<Board> findActiveBoardWithUniversityBy(Long boardId) {
+        return ofNullable(jpaQueryFactory.selectFrom(board)
+                .where(board.isDeleted.isFalse())
+                .where(board.id.eq(boardId))
+                .leftJoin(board.university, university).fetchJoin()
+                .fetchOne());
     }
 }
