@@ -11,6 +11,7 @@ public interface PostRepositoryCustom {
 
     Optional<Post> findActivePostWithBoardBy(Long id);
 
+    Optional<Post> findPessimisticLockActivePostWithBoardAndMemberBy(Long id);
 
     Post findWithOptimisticLock(Post post);
 

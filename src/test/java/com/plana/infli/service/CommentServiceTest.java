@@ -36,7 +36,11 @@ import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsRespons
 import com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -49,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@Slf4j
 class CommentServiceTest {
 
     @Autowired
@@ -455,6 +460,7 @@ class CommentServiceTest {
                         })
         );
     }
+
 
     /**
      * 대댓글 작성

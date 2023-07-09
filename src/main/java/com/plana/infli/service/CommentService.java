@@ -81,7 +81,7 @@ public class CommentService {
         throwExceptionIfMemberIsUncertified(member);
 
         // 댓글이 작성될 글이 존재하지 않거나, 삭제된 경우 예외 발생
-        Post post = postRepository.findActivePostWithBoardAndMemberBy(request.getPostId())
+        Post post = postRepository.findPessimisticLockActivePostWithBoardAndMemberBy(request.getPostId())
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
 
         // 회원은 소속된 대학이 아닌 다른 대학에서 작성된 글에 댓글을 달 수 없다.

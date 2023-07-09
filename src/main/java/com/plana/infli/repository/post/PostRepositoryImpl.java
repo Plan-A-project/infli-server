@@ -33,7 +33,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .innerJoin(post.board, board).fetchJoin()
                 .where(post.isDeleted.isFalse())
                 .where(post.id.eq(id))
-                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .fetchOne());
     }
 
@@ -43,6 +42,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .innerJoin(post.board, board).fetchJoin()
                 .where(post.isDeleted.isFalse())
                 .where(post.id.eq(id))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<Post> findPessimisticLockActivePostWithBoardAndMemberBy(Long id) {
+        return ofNullable(jpaQueryFactory.selectFrom(post)
+                .innerJoin(post.board, board).fetchJoin()
+                .where(post.isDeleted.isFalse())
+                .where(post.id.eq(id))
+                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
                 .fetchOne());
     }
 

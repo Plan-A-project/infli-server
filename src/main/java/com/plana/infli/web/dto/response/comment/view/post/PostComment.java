@@ -62,10 +62,12 @@ public class PostComment {
     // False -> 수정되지 않은 댓글임
     private final boolean isEdited;
 
+
     // 글 작성자가 본인의 글에 작성한 댓글인지 여부
     // True -> 글 작성자가 작성한 댓글임
     // False -> 글 작성자가 작성한 댓글 아님
     private final boolean isPostWriter;
+
 
     @QueryProjection
     public PostComment(Long id, String nickname, String profileImageUrl, boolean isDeleted,
