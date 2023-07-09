@@ -27,13 +27,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -79,14 +82,12 @@ public class CommentIdentifierConcurrentTest {
     @Autowired
     private BoardFactory boardFactory;
 
-    @Autowired
-    private CommentLikeFactory commentLikeFactory;
-
-    @BeforeEach
+    @AfterEach
     void tearDown() {
         commentRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
+        boardRepository.deleteAllInBatch();
         universityRepository.deleteAllInBatch();
     }
 
@@ -94,9 +95,10 @@ public class CommentIdentifierConcurrentTest {
     @Test
     void identifierConcurrency() throws InterruptedException {
         //given
-        University university = universityFactory.createUniversity("푸단대학교");
+        University university = universityFactory.createUniversity("서울대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(createStudentMember("postMember", university), board);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
 
         int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
@@ -130,19 +132,5 @@ public class CommentIdentifierConcurrentTest {
         Post findPost = postRepository.findPostById(post.getId()).get();
         assertThat(commentRepository.count()).isEqualTo(100);
         assertThat(findPost.getCommentMemberCount()).isEqualTo(100);
-    }
-
-    public Member createStudentMember(String nickname, University university) {
-        Member member = Member.builder()
-                .nickname(nickname)
-                .name(nickname)
-                .email(nickname + "@gmail.com")
-                .password("1234")
-                .university(university)
-                .role(Role.STUDENT)
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .build();
-
-        return memberRepository.save(member);
     }
 }

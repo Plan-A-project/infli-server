@@ -88,7 +88,6 @@ public class BoardController {
         return ok("해당 게시판에 글 작성 가능");
     }
 
-
     /**
      * 홈설정 기능 API 시작
      */
