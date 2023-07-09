@@ -39,4 +39,6 @@ public interface CommentRepositoryCustom {
     List<MyComment> findMyComments(Member member, PageRequest pageRequest);
 
     Long findActiveCommentsCountBy(Member member);
+
+    List<Comment> findAllOrderByIdAsc();
 }

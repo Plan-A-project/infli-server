@@ -43,6 +43,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -162,7 +163,7 @@ public class CommentService {
     private Integer loadIdentifierNumber(Post post, Member member) {
 
         // 글 작성자가 자신의 글에 댓글을 작성하려는 경우
-        if (post.getMember().equals(member)) {
+        if (post.getMember().getId().equals(member.getId())) {
 
             // 식별자 0번을 부여한다
             return 0;
@@ -175,32 +176,14 @@ public class CommentService {
         if (identifierNumber == null) {
 
             // 새로운 식별자 번호를 생성한후 부여한다
-            return createNewIdentifierNumber(post);
+
+            // 이 글에 작성된 댓글들에게 부여된 가장 최근 식별자 번호
+            return post.increaseCount();
         }
 
         // 식별자 번호가 존재하는 경우 기존 번호 그대로 다시 부여한다
         return identifierNumber;
     }
-
-    private Integer createNewIdentifierNumber(Post post) {
-
-        // 이 글에 작성된 댓글들에게 부여된 가장 최근 식별자 번호
-        Integer latestIdentifierNumber = commentRepository.findLatestIdentifierNumberBy(post);
-
-        // 식별자 번호가 없거나, 0번만 있는 경우
-        // 즉, 해당 글에 아무도 댓글을 달지 않았거나,
-        // 글 작성자 본인만 자신의 글에 댓글을 단 경우
-        if (latestIdentifierNumber == null || latestIdentifierNumber == 0) {
-
-            // 1번을 부여한다
-            return 1;
-        }
-
-        // 식별자 번호가 존재하는 경우
-        // 가장 최근 식별자 번호 + 1번을 부여한다
-        return latestIdentifierNumber + 1;
-    }
-
 
 
     @Transactional
@@ -323,7 +306,16 @@ public class CommentService {
     }
 
     private PageRequest createPageRequest(LoadCommentsInPostServiceRequest request) {
-        return of(request.getPage() == null ? 1 : max(1, request.getPage()), DEFAULT_SIZE);
+
+        int page;
+
+        try {
+            page = Integer.parseInt(request.getPage());
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
+
+        return of(request.getPage() == null ? 1 : max(1, page), DEFAULT_SIZE);
     }
 
     public MyCommentsResponse loadMyComments(Integer page, String email) {

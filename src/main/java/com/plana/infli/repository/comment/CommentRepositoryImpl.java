@@ -116,6 +116,13 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetchOne();
     }
 
+    @Override
+    public List<Comment> findAllOrderByIdAsc() {
+        return jpaQueryFactory.selectFrom(comment)
+                .orderBy(comment.id.asc())
+                .fetch();
+    }
+
     private Expression<String> profileImageUrlEq(boolean isAnonymousBoard) {
         return isAnonymousBoard ? nullExpression() : comment.member.profileImageUrl;
     }

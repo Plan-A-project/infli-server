@@ -66,6 +66,10 @@ public class BoardService {
         Member member = memberRepository.findActiveMemberBy(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
+        if (popularBoardRepository.existsByMember(member) == false) {
+            throw new BadRequestException(POPULAR_BOARD_NOT_FOUND);
+        }
+
         List<SinglePopularBoard> boards = popularBoardRepository.loadEnabledPopularBoardsBy(member);
 
         return createPopularBoardsResponse(boards);
@@ -291,12 +295,16 @@ public class BoardService {
     public void checkHasWritePermissionOnThisBoard(Long boardId, String email) {
 
         // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = memberRepository.findActiveMemberBy(email)
+        Member member = memberRepository.findActiveMemberWithUniversityBy(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
         // 게시판이 존재하지 않거나, 삭제된 경우 예외 발생
-        Board board = boardRepository.findActiveBoardBy(boardId)
+        Board board = boardRepository.findActiveBoardWithUniversityBy(boardId)
                 .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
+
+        if (member.getUniversity().equals(board.getUniversity()) == false) {
+            throw new AuthorizationFailedException();
+        }
 
         board.hasWritePermissionByWithThis(member.getRole());
     }

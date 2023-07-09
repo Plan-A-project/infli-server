@@ -9,6 +9,8 @@ import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.CommentLike;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
+import com.plana.infli.domain.University;
+import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -16,6 +18,7 @@ import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
+import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.commentlike.cancel.controller.CancelCommentLikeRequest;
 import com.plana.infli.web.dto.request.commentlike.cancel.service.CancelCommentLikeServiceRequest;
 import com.plana.infli.web.dto.request.commentlike.create.service.CreateCommentLikeServiceRequest;
@@ -34,6 +37,8 @@ public class CommentLikeService {
     private final PostRepository postRepository;
 
     private final CommentRepository commentRepository;
+
+    private final UniversityRepository universityRepository;
 
     @Transactional
     public void createCommentLike(CreateCommentLikeServiceRequest request, String email) {
@@ -61,11 +66,13 @@ public class CommentLikeService {
             Member member) {
 
         // 클라이언트가 전송한 글 ID 번호와, 좋아요를 누를 댓글의 글 번호는 일치해야 한다
-        Long postId = post.getId();
-        if (comment.getPost().getId().equals(postId) == false) {
+        if (comment.getPost().equals(post) == false) {
             throw new NotFoundException(COMMENT_NOT_FOUND);
         }
 
+        if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
+            throw new AuthorizationFailedException();
+        }
         // 이미 해당 댓글에 회원이 좋아요를 누른경우 예외가 발생한다
         if (commentLikeRepository.existsByMemberAndComment(member, comment)) {
             throw new ConflictException(ALREADY_PRESSED_LIKE_ON_THIS_COMMENT);

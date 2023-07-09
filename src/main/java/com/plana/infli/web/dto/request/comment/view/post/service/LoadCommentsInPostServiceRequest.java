@@ -8,10 +8,10 @@ public class LoadCommentsInPostServiceRequest {
 
     private final Long id;
 
-    private final Integer page;
+    private final String page;
 
     @Builder
-    public LoadCommentsInPostServiceRequest(Long id, Integer page) {
+    public LoadCommentsInPostServiceRequest(Long id, String page) {
         this.id = id;
         this.page = page;
     }
