@@ -1,7 +1,10 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.exception.custom.BadRequestException.*;
+
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.utils.S3Uploader;
 import com.plana.infli.web.dto.request.profile.MemberWithdrawalRequest;
@@ -51,7 +54,7 @@ public class MemberProfileService {
         if(passwordEncoder.matches(passwordConfirmRequest.getPassword(), member.getPassword())){
             return true;
         } else {
-            return false;
+            throw new BadRequestException(PASSWORD_NOT_MATCH);
         }
     }
 
