@@ -11,8 +11,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plana.infli.annotation.WithMockMember;
+import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.Post;
 import com.plana.infli.domain.Role;
+import com.plana.infli.domain.University;
+import com.plana.infli.factory.MemberFactory;
 import com.plana.infli.factory.UniversityFactory;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.web.dto.request.profile.MemberWithdrawalRequest;
@@ -52,6 +56,8 @@ class MemberProfileControllerTest {
     @Autowired
     private UniversityFactory universityFactory;
     @Autowired
+    private MemberFactory memberFactory;
+    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private MemberRepository memberRepository;
@@ -62,7 +68,7 @@ class MemberProfileControllerTest {
     private String accessToken;
 
 
-    @DisplayName("로그인 되어있을 때")
+    @DisplayName("로그인 상태일 때")
     @Nested
     class Describe_UnderLoginCondition{
 
@@ -72,7 +78,7 @@ class MemberProfileControllerTest {
         public void getMemberProfile() throws Exception{
             login();
             MemberProfileResponse responseDto = new MemberProfileResponse("testNickname", Role.STUDENT,
-                "testEmail@naver.com");
+                "testEmail@gmail.com");
 
             ResultActions perform = mockMvc.perform(get("/member/profile")
                 .header("Access-Token", accessToken)
@@ -93,7 +99,7 @@ class MemberProfileControllerTest {
         @Test
         public void nicknameModify() throws Exception{
             login();
-            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@naver.com", "change");
+            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@gmail.com", "change");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -117,7 +123,7 @@ class MemberProfileControllerTest {
         @Test
         public void nicknameModify_400Exception() throws Exception{
             login();
-            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@naver.com", "changeNickname");
+            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@gmail.com", "changeNickname");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -133,12 +139,12 @@ class MemberProfileControllerTest {
             assertThat(response).isEqualTo("{\"code\":400,\"message\":\"잘못된 요청입니다\",\"validation\":{\"afterNickname\":\"닉네임은 2~8자리여야 합니다. 한글, 영어, 숫자 조합 가능.\"}}");
         }
 
-        @DisplayName("비밀번호 확인 성공 - 사용자는 비밀번호를 변경하거나 회원 탈퇴 시 비밀번호를 확인받는다.")
+        @DisplayName("사용자는 비밀번호를 변경하거나 회원 탈퇴 시 비밀번호를 확인받는다. - 성공")
         @WithMockMember
         @Test
         public void passwordConfirm() throws Exception{
             login();
-            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@naver.com", "Test1234!");
+            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@gmail.com", "Test1234!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -151,12 +157,12 @@ class MemberProfileControllerTest {
                 .andExpect(status().isOk());
         }
 
-        @DisplayName("비밀번호 확인 실패 - 사용자는 비밀번호를 변경하거나 회원 탈퇴 시 비밀번호를 확인받는다.")
+        @DisplayName("사용자는 비밀번호를 변경하거나 회원 탈퇴 시 비밀번호를 확인받는다. - 실패")
         @WithMockMember
         @Test
         public void passwordConfirm_400Exception() throws Exception{
             login();
-            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@naver.com", "notMatch123!");
+            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@gmail.com", "notMatch123!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -177,7 +183,7 @@ class MemberProfileControllerTest {
         @Test
         public void passwordModify() throws Exception{
             login();
-            PasswordModifyRequest requestDto = new PasswordModifyRequest("testEmail@naver.com", "newPassword1234!");
+            PasswordModifyRequest requestDto = new PasswordModifyRequest("testEmail@gmail.com", "newPassword1234!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -211,16 +217,18 @@ class MemberProfileControllerTest {
                 resource.getInputStream()
             );
 
-            ResultActions resultActions = mockMvc
+            ResultActions perform = mockMvc
                 .perform(
                     multipart("/member/profile/image/modify")
                         .file(file)
-                        .header("Access-Token", accessToken))
+                        .header("Access-Token", accessToken));
+
+            perform
                 .andDo(print())
                 .andExpect(status().isOk());
 
-            String imageUrl = resultActions.andReturn().getResponse().getContentAsString();
-            Member member = memberRepository.findByEmail("testEmail@naver.com")
+            String imageUrl = perform.andReturn().getResponse().getContentAsString();
+            Member member = memberRepository.findByEmail("testEmail@gmail.com")
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
             assertThat(member.getProfileImageUrl()).isEqualTo(imageUrl);
@@ -232,7 +240,7 @@ class MemberProfileControllerTest {
         public void memberWithdrawal() throws Exception {
             login();
 
-            MemberWithdrawalRequest requestDto = new MemberWithdrawalRequest("testEmail@naver.com", "testNickname");
+            MemberWithdrawalRequest requestDto = new MemberWithdrawalRequest("testEmail@gmail.com", "testNickname");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -252,9 +260,147 @@ class MemberProfileControllerTest {
         }
     }
 
+    @DisplayName("비로그인 상태일 때")
+    @Nested
+    class Describe_UnderNonLoginCondition{
+
+        @DisplayName("사용자는 프로필을 조회할 수 없다.")
+        @Test
+        public void getMemberProfile_401Exception() throws Exception{
+            signup();
+            MemberProfileResponse responseDto = new MemberProfileResponse("testNickname", Role.STUDENT,
+                "testEmail@gmail.com");
+
+            ResultActions perform = mockMvc.perform(get("/member/profile")
+                .contentType(MediaType.APPLICATION_JSON));
+
+            perform
+                .andExpect(status().isUnauthorized());
+        }
+
+        @DisplayName("사용자는 닉네임을 변경할 수 없다.")
+        @Test
+        public void nicknameModify() throws Exception{
+            signup();
+            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@gmail.com", "change");
+
+            String content = objectMapper.writeValueAsString(requestDto);
+
+            ResultActions perform = mockMvc.perform(post("/member/profile/nickname/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+            perform
+                .andExpect(status().isUnauthorized());
+
+            Member member = memberRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException(
+                    requestDto.getEmail()));
+
+            assertThat(member.getNickname()).isNotEqualTo("change");
+        }
+
+        @DisplayName("사용자는 비밀번호 확인 요청을 할 수 없다.")
+        @Test
+        public void passwordConfirm() throws Exception{
+            signup();
+
+            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@gmail.com", "Test1234!");
+
+            String content = objectMapper.writeValueAsString(requestDto);
+
+            ResultActions perform = mockMvc.perform(post("/member/profile/password/confirm")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+            perform
+                .andExpect(status().isUnauthorized());
+        }
+
+        @DisplayName("사용자는 비밀번호를 변경할 수 없다.")
+        @Test
+        public void passwordModify() throws Exception{
+            signup();
+            PasswordModifyRequest requestDto = new PasswordModifyRequest("testEmail@gmail.com", "newPassword1234!");
+
+            String content = objectMapper.writeValueAsString(requestDto);
+
+            ResultActions perform = mockMvc.perform(post("/member/profile/password/modify")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+            perform
+                .andExpect(status().isUnauthorized());
+
+            Member member = memberRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException(
+                    requestDto.getEmail()));
+            assertFalse(passwordEncoder.matches("newPassword1234!", member.getPassword()));
+        }
+
+        @DisplayName("사용자는 프로필 사진을 변경할 수 없다.")
+        @Test
+        public void profileImageModify() throws Exception{
+            signup();
+            String fileName = "testImage.png";
+            Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
+
+            MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "testImage.png",
+                MediaType.IMAGE_PNG_VALUE,
+                resource.getInputStream()
+            );
+
+            ResultActions perform = mockMvc
+                .perform(
+                    multipart("/member/profile/image/modify")
+                        .file(file));
+
+            perform
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+
+            String imageUrl = perform.andReturn().getResponse().getContentAsString();
+            Member member = memberRepository.findByEmail("testEmail@gmail.com")
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+
+            assertThat(member.getProfileImageUrl()).isNotEqualTo(imageUrl);
+        }
+
+        @DisplayName("사용자는 회원 탈퇴할 수 없다.")
+        @Test
+        public void memberWithdrawal() throws Exception {
+            signup();
+            MemberWithdrawalRequest requestDto = new MemberWithdrawalRequest("testEmail@gmail.com", "testNickname");
+
+            String content = objectMapper.writeValueAsString(requestDto);
+
+            ResultActions perform = mockMvc.perform(post("/member/profile/withdrawal")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content));
+
+            perform
+                .andExpect(status().isUnauthorized());
+
+            Member member = memberRepository.findByEmail(requestDto.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException(
+                    requestDto.getEmail()));
+
+            assertFalse(member.isDeleted());
+        }
+
+
+    }
+    public void signup() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createStudentMember("testEmail", university);
+    }
+
     public void login() throws Exception{
         Map<String, String> requestMap = new HashMap<>();
-        requestMap.put("email", "testEmail@naver.com");
+        requestMap.put("email", "testEmail@gmail.com");
         requestMap.put("password", "Test1234!");
 
         String content = objectMapper.writeValueAsString(requestMap);
