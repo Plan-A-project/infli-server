@@ -126,6 +126,8 @@ public class SecurityConfig {
     configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000"));
     configuration.setAllowedMethods(Arrays.asList("*"));
     configuration.setAllowedHeaders(Arrays.asList("*"));
+    configuration.setExposedHeaders(Arrays.asList(jwtProperties.getAccessTokenHeaderName(),
+        jwtProperties.getRefreshTokenHeaderName()));
     configuration.setAllowCredentials(true);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
