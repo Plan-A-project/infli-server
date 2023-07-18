@@ -4,6 +4,8 @@ import static java.lang.annotation.RetentionPolicy.*;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import org.springframework.core.annotation.AliasFor;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithSecurityContext;
 
 @Retention(RUNTIME)
@@ -13,4 +15,7 @@ public @interface WithMockMember {
     String nickname() default "youngjin";
 
     String email() default "youngjin@gmail.com";
+
+    @AliasFor(annotation = WithSecurityContext.class)
+    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_EXECUTION;
 }

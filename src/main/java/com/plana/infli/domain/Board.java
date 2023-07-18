@@ -57,7 +57,7 @@ public class Board extends BaseEntity {
         return new Board(boardType, university);
     }
 
-    public void hasWritePermissionByWithThis(Role role) {
+    public void hasWritePermissionWithThisRole(Role role) {
         if (boardType.getRoles().contains(role) == false) {
             throw new AuthorizationFailedException();
         }

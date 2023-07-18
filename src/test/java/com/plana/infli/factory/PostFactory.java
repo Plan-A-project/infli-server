@@ -5,13 +5,14 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.repository.post.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
 @Component
 public class PostFactory {
 
-    private final PostRepository postRepository;
+    @Autowired
+    private PostRepository postRepository;
 
 
     public Post createPost(Member member, Board board) {
