@@ -10,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,19 +32,11 @@ public class CommentLike extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String email;
-
     @Builder
     private CommentLike(Comment comment, Member member) {
         this.member = member;
-        this.email = member.getEmail();
-        //양방향 연관관계 설정
-        bindCommentAndLike(comment);
-    }
-
-    private void bindCommentAndLike(Comment comment) {
         this.comment = comment;
-        comment.getCommentLikes().add(this);
+//        comment.getCommentLikes().add(this);
     }
 
     public static CommentLike create(Comment comment, Member member) {
