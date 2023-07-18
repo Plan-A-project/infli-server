@@ -34,13 +34,13 @@ import com.plana.infli.web.dto.response.comment.edit.EditCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
 import com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse;
+import jakarta.persistence.EntityManager;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @Slf4j
 class CommentServiceTest {
 
@@ -60,19 +59,19 @@ class CommentServiceTest {
     private CommentRepository commentRepository;
 
     @Autowired
-    private PostRepository postRepository;
+    private BoardRepository boardRepository;
+
+    @Autowired
+    private CommentLikeRepository commentLikeRepository;
 
     @Autowired
     private UniversityRepository universityRepository;
 
     @Autowired
-    private BoardRepository boardRepository;
+    private PostRepository postRepository;
 
     @Autowired
     private MemberRepository memberRepository;
-
-    @Autowired
-    private CommentLikeRepository commentLikeRepository;
 
     @Autowired
     private CommentService commentService;
@@ -94,6 +93,16 @@ class CommentServiceTest {
 
     @Autowired
     private CommentLikeFactory commentLikeFactory;
+
+    @AfterEach
+    void tearDown() {
+        commentLikeRepository.deleteAllInBatch();
+        commentRepository.deleteAllInBatch();
+        postRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+        boardRepository.deleteAllInBatch();
+        universityRepository.deleteAllInBatch();
+    }
 
     /**
      * 댓글 작성
@@ -1880,7 +1889,7 @@ class CommentServiceTest {
     void viewIdentifiedComment() {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createNonAnonymousBoard(university);
+        Board board = boardFactory.createClubBoard(university);
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
@@ -2541,7 +2550,7 @@ class CommentServiceTest {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createNonAnonymousBoard(university);
+        Board board = boardFactory.createClubBoard(university);
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
@@ -2554,7 +2563,8 @@ class CommentServiceTest {
         });
 
         //when
-        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
+        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
+                member.getEmail());
 
         //then
         assertThat(response).extracting("commentId", "postId", "isAnonymousBoard", "nickname",
@@ -2581,7 +2591,8 @@ class CommentServiceTest {
         });
 
         //when
-        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
+        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
+                member.getEmail());
 
         //then
         assertThat(response.isAnonymousBoard()).isTrue();
@@ -2606,8 +2617,11 @@ class CommentServiceTest {
                     memberFactory.createStudentMember("nickname" + i, university), comment);
         });
 
+        Member member = memberFactory.createStudentMember("member", university);
+
         //when
-        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
+        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
+                member.getEmail());
 
         //then
         assertThat(response).isNull();
@@ -2647,8 +2661,11 @@ class CommentServiceTest {
                     memberFactory.createStudentMember("nicknameC" + i, university), comment3);
         });
 
+        Member member = memberFactory.createStudentMember("member", university);
+
         //when
-        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
+        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
+                member.getEmail());
 
         //then
         assertThat(response.getCommentId()).isEqualTo(comment3.getId());
@@ -2689,8 +2706,11 @@ class CommentServiceTest {
                     memberFactory.createStudentMember("nicknameC" + i, university), comment3);
         });
 
+        Member member = memberFactory.createStudentMember("member", university);
+
         //when
-        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
+        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
+                member.getEmail());
 
         //then
         assertThat(response.getCommentId()).isEqualTo(comment1.getId());
@@ -2718,11 +2738,47 @@ class CommentServiceTest {
                     memberFactory.createStudentMember("nickname" + i, university), childComment);
         });
 
+        Member member = memberFactory.createStudentMember("member", university);
+
         //when
-        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId());
+        BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
+                member.getEmail());
 
         //then
         assertThat(response.getCommentId()).isEqualTo(childComment.getId());
+    }
+
+    @DisplayName("존재하지 않는 글의 베스트 댓글을 조회할수 없다")
+    @Test
+    void viewBestCommentInNotExistingPost() {
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createStudentMember("member", university);
+
+        //when //then
+        assertThatThrownBy(
+                () -> commentService.loadBestCommentInPost(999L, member.getEmail()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+    }
+
+    @DisplayName("삭제된 글의 베스트 댓글을 조회할수 없다")
+    @Test
+    void viewBestCommentInDeletedPost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        Member member = memberFactory.createStudentMember("member", university);
+
+        postRepository.delete(post);
+
+        //when //then
+        assertThatThrownBy(
+                () -> commentService.loadBestCommentInPost(999L, member.getEmail()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
 
     /**
@@ -2769,7 +2825,7 @@ class CommentServiceTest {
 
         Post post2 = postFactory.createPost(
                 memberFactory.createStudentMember("postMember2", university),
-                boardFactory.createNonAnonymousBoard(university));
+                boardFactory.createClubBoard(university));
 
         Comment myComment1 = commentFactory.createComment(member, post1);
 

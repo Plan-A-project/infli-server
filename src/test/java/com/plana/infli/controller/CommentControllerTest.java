@@ -22,11 +22,13 @@ import com.plana.infli.domain.Post;
 import com.plana.infli.domain.University;
 import com.plana.infli.factory.BoardFactory;
 import com.plana.infli.factory.CommentFactory;
+import com.plana.infli.factory.CommentLikeFactory;
 import com.plana.infli.factory.MemberFactory;
 import com.plana.infli.factory.PostFactory;
 import com.plana.infli.factory.UniversityFactory;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.comment.CommentRepository;
+import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
@@ -34,10 +36,13 @@ import com.plana.infli.web.dto.request.comment.create.controller.CreateCommentRe
 import com.plana.infli.web.dto.request.comment.delete.controller.DeleteCommentRequest;
 import com.plana.infli.web.dto.request.comment.edit.controller.EditCommentRequest;
 import java.util.List;
+import java.util.stream.IntStream;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -67,6 +72,9 @@ public class CommentControllerTest {
     private CommentRepository commentRepository;
 
     @Autowired
+    private CommentLikeRepository commentLikeRepository;
+
+    @Autowired
     private CommentFactory commentFactory;
 
     @Autowired
@@ -80,6 +88,19 @@ public class CommentControllerTest {
 
     @Autowired
     private MemberFactory memberFactory;
+
+    @Autowired
+    private CommentLikeFactory commentLikeFactory;
+
+    @AfterEach
+    void tearDown() {
+        commentLikeRepository.deleteAllInBatch();
+        commentRepository.deleteAllInBatch();
+        postRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+        boardRepository.deleteAllInBatch();
+        universityRepository.deleteAllInBatch();
+    }
 
     @DisplayName("댓글 작성")
     @WithMockMember
@@ -378,7 +399,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("댓글 내용 수정시 DB에 값이 변경된다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editComment() throws Exception {
         //given
@@ -387,7 +408,7 @@ public class CommentControllerTest {
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentFactory.createComment(member, post);
 
         String request = om.writeValueAsString(EditCommentRequest.builder()
@@ -415,7 +436,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("대댓글 내용 수정시 DB에 값이 변경된다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editChildComment() throws Exception {
         //given
@@ -427,7 +448,7 @@ public class CommentControllerTest {
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentRepository.save(
                 commentFactory.createChildComment(member, post, parentComment));
 
@@ -456,7 +477,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("댓글 내용 수정시 수정할 댓글 Id 번호는 필수다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editCommentWithoutCommentId() throws Exception {
         //given
@@ -484,7 +505,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("댓글 내용 수정시 내용은 필수다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editCommentWithoutContent() throws Exception {
         //given
@@ -493,7 +514,7 @@ public class CommentControllerTest {
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentFactory.createComment(member, post);
 
         String request = om.writeValueAsString(EditCommentRequest.builder()
@@ -515,7 +536,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("댓글 내용 수정시 내용은 필수다2")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editCommentWithoutContent2() throws Exception {
         //given
@@ -524,7 +545,7 @@ public class CommentControllerTest {
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentFactory.createComment(member, post);
 
         String request = om.writeValueAsString(EditCommentRequest.builder()
@@ -546,7 +567,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("대댓글 내용 수정시 내용은 필수다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editChildCommentWithoutContent() throws Exception {
         //given
@@ -558,7 +579,7 @@ public class CommentControllerTest {
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentRepository.save(
                 commentFactory.createChildComment(member, post, parentComment));
 
@@ -581,7 +602,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("대댓글 내용 수정시 내용은 필수다2")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editChildCommentWithoutContent2() throws Exception {
         //given
@@ -593,7 +614,7 @@ public class CommentControllerTest {
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentRepository.save(
                 commentFactory.createChildComment(member, post, parentComment));
 
@@ -616,7 +637,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("댓글 내용 수정시 글 ID 번호는  필수다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editCommentWithoutPostId() throws Exception {
         //given
@@ -625,7 +646,7 @@ public class CommentControllerTest {
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentFactory.createComment(member, post);
 
         String request = om.writeValueAsString(EditCommentRequest.builder()
@@ -647,7 +668,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("대댓글 내용 수정시 글 ID 번호는 필수다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void editChildCommentWithoutPostID() throws Exception {
         //given
@@ -659,7 +680,7 @@ public class CommentControllerTest {
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentRepository.save(
                 commentFactory.createChildComment(member, post, parentComment));
 
@@ -712,7 +733,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("댓글 삭제시 해당 댓글의 isDeleted 컬럼의 값이 true 가 된다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void deleteComment() throws Exception {
         //given
@@ -721,7 +742,7 @@ public class CommentControllerTest {
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentFactory.createComment(member, post);
 
         String request = om.writeValueAsString(DeleteCommentRequest.builder()
@@ -740,7 +761,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("대댓글 삭제시 해당 대댓글의 isDeleted 컬럼의 값이 true 가 된다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void deleteChildComment() throws Exception {
         //given
@@ -752,7 +773,7 @@ public class CommentControllerTest {
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentFactory.createChildComment(member, post, parentComment);
 
         String request = om.writeValueAsString(DeleteCommentRequest.builder()
@@ -771,7 +792,7 @@ public class CommentControllerTest {
     }
 
     @DisplayName("댓글 삭제시 삭제할 댓글의 Id 번호는 필수다")
-    @WithMockMember(nickname = "youngjin")
+    @WithMockMember
     @Test
     void deleteCommentWithoutCommentId() throws Exception {
         //given
@@ -780,7 +801,7 @@ public class CommentControllerTest {
         Post post = postFactory.createPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberRepository.findByNickname("youngjin").get();
+        Member member = findContextMember();
         Comment comment = commentFactory.createComment(member, post);
 
         String request = om.writeValueAsString(DeleteCommentRequest.builder()
@@ -867,5 +888,131 @@ public class CommentControllerTest {
                 .andExpect(jsonPath("$.comments[1].id").value(childComment1.getId()))
                 .andExpect(jsonPath("$.comments[2].id").value(childComment2.getId()))
                 .andExpect(jsonPath("$.comments[3].id").value(comment2.getId()));
+    }
+
+    @DisplayName("특정 글에 작성된 댓글 목록 조회시 글 Id 번호는 필수다")
+    @WithMockMember
+    @Test
+    void viewCommentsInPostWithoutPostId() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/api/posts/comments")
+                        .param("id", (String) null)
+                        .param("page", "1")
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.id").value("글 번호가 입력되지 않았습니다"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 글에 작성된 댓글 목록 조회시 페이지 정보가 없는 경우 1페이지가 조회된다")
+    @WithMockMember
+    @Test
+    void viewCommentsInPostWithoutPageInfo() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/api/posts/comments")
+                        .param("id", post.getId().toString())
+                        .param("page", "1")
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andDo(print());
+    }
+
+    @DisplayName("로그인 하지 않은 상태로 글에 작성된 댓글을 볼수 없다")
+    @Test
+    void viewCommentsInPostWithoutLogin() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/api/posts/comments")
+                        .param("id", post.getId().toString())
+                        .param("page", "1")
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(unauthenticated())
+                .andDo(print());
+    }
+
+    @DisplayName("특정 글에 작성된 베스트 댓글 조회")
+    @WithMockMember
+    @Test
+    void viewBestCommentInPost() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("member", university), post);
+
+        IntStream.rangeClosed(1, 10).forEach(i -> {
+            commentLikeFactory.createCommentLike(
+                    memberFactory.createStudentMember("likeMember" + i, university), comment);
+        });
+
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/api/posts/{postId}/comments/best", post.getId())
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.commentId").value(comment.getId()))
+                .andExpect(jsonPath("$.postId").value(post.getId()))
+                .andExpect(jsonPath("$.content").value("내용입니다"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 글에 좋아요 10개 이상 받은 댓글이 없는 경우 베스트 댓글은 존재하지 않는다")
+    @WithMockMember
+    @Test
+    void viewBestCommentInPostThatHasNoBestComment() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        Comment comment = commentFactory.createComment(
+                memberFactory.createStudentMember("member", university), post);
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/api/posts/{postId}/comments/best", post.getId())
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").doesNotExist())
+                .andDo(print());
+    }
+
+    private Member findContextMember() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findByEmail(email).get();
     }
 }

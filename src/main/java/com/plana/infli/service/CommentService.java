@@ -3,6 +3,7 @@ package com.plana.infli.service;
 import static com.plana.infli.domain.Board.isAnonymousBoard;
 import static com.plana.infli.domain.Comment.*;
 import static com.plana.infli.domain.Member.isAdmin;
+import static com.plana.infli.domain.Member.checkIsLoggedIn;
 import static com.plana.infli.domain.editor.comment.CommentContentEditor.editComment;
 import static com.plana.infli.exception.custom.BadRequestException.CHILD_COMMENTS_NOT_ALLOWED;
 import static com.plana.infli.exception.custom.BadRequestException.MAX_COMMENT_SIZE_EXCEEDED;
@@ -18,7 +19,6 @@ import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.Role;
-import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -43,7 +43,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -72,17 +71,15 @@ public class CommentService {
 
         //TODO
         // 인증하려는 객체가 없는 경우 401 에러를 발생한다
-        throwExceptionIfEmailIsNull(email);
+        checkIsLoggedIn(email);
 
         // 댓글을 작성할 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = memberRepository.findActiveMemberWithUniversityBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMemberWithUniversityJoined(email);
 
         throwExceptionIfMemberIsUncertified(member);
 
         // 댓글이 작성될 글이 존재하지 않거나, 삭제된 경우 예외 발생
-        Post post = postRepository.findPessimisticLockActivePostWithBoardAndMemberBy(request.getPostId())
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+        Post post = findPostWithBoardAndMemberJoined(request);
 
         // 회원은 소속된 대학이 아닌 다른 대학에서 작성된 글에 댓글을 달 수 없다.
         // 따라서 회원과 글이 동일한 대학에 존재하는지 검증 진행
@@ -102,21 +99,25 @@ public class CommentService {
         return CreateCommentResponse.of(savedComment, post, member);
     }
 
-    private static void throwExceptionIfMemberIsUncertified(Member member) {
-        if (member.getRole().equals(Role.UNCERTIFIED)) {
-            throw new AuthorizationFailedException();
-        }
-    }
-
     private void validateContentLength(String content) {
         if (content.length() > 500) {
             throw new BadRequestException(MAX_COMMENT_SIZE_EXCEEDED);
         }
     }
 
-    private  void throwExceptionIfEmailIsNull(String email) {
-        if (email == null) {
-            throw new AuthenticationFailedException();
+    private Member findMemberWithUniversityJoined(String email) {
+        return memberRepository.findActiveMemberWithUniversityBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
+
+    private Post findPostWithBoardAndMemberJoined(CreateCommentServiceRequest request) {
+        return postRepository.findPessimisticLockActivePostWithBoardAndMemberBy(request.getPostId())
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    }
+
+    private static void throwExceptionIfMemberIsUncertified(Member member) {
+        if (member.getRole().equals(Role.UNCERTIFIED)) {
+            throw new AuthorizationFailedException();
         }
     }
 
@@ -191,14 +192,13 @@ public class CommentService {
 
         // 인증하려는 객체가 없는 경우 401 에러를 발생한다
         //TODO
-        throwExceptionIfEmailIsNull(email);
+        checkIsLoggedIn(email);
 
         // 최대 허용 댓글 길이는 500자 이다
         validateContentLength(request.getContent());
 
         // 댓글 수정할 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
 
         //TODO 설명 맘에 안듬
         // 수정하고 싶은 댓글이 작성된 글이 존재하지 않거나, 삭제된 경우 예외 발생
@@ -217,6 +217,11 @@ public class CommentService {
         Comment editedComment = editComment(comment, request.getContent());
 
         return EditCommentResponse.of(editedComment, comment.getPost(), member);
+    }
+
+    private Member findMember(String email) {
+        return memberRepository.findActiveMemberBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
     private void validateEditRequest(Comment comment, Member member, Post post) {
@@ -243,11 +248,10 @@ public class CommentService {
 
         // 인증하려는 객체가 없는 경우 401 에러를 발생한다
         //TODO 설명 맘에 안듬
-        throwExceptionIfEmailIsNull(email);
+        checkIsLoggedIn(email);
 
         // 댓글 삭제 요청을 한 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
 
         // 삭제할 댓글 ID 목록
         List<Long> ids = request.getIds();
@@ -288,8 +292,7 @@ public class CommentService {
             String email) {
 
         // 댓글 조회를 요청한 회원
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
 
         // 존재하지 않거나, 삭제된 글에 작성된 댓글을 조회할수 없다
         Post post = postRepository.findActivePostWithBoardAndMemberBy(request.getId())
@@ -320,11 +323,10 @@ public class CommentService {
 
     public MyCommentsResponse loadMyComments(Integer page, String email) {
 
-        throwExceptionIfEmailIsNull(email);
+        checkIsLoggedIn(email);
 
         // 자신이 작성한 댓글 목록을 보고싶은 회원
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
 
         PageRequest pageRequest = of(page, 20);
 
@@ -342,11 +344,15 @@ public class CommentService {
         return commentRepository.findActiveCommentsCountIn(post);
     }
 
-    public BestCommentResponse loadBestCommentInPost(Long postId) {
+    public BestCommentResponse loadBestCommentInPost(Long postId, String email) {
 
         // 존재하지 않거나 삭제된 글에 작성된 베스트 댓글을 조회할수 없다
         Post post = postRepository.findActivePostWithBoardAndMemberBy(postId)
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+
+        Member member = findMember(email);
+
+        isPostAndMemberInSameUniversity(member, post);
 
         // 해당 글의 베스트 댓글 조회
         // 베스트 댓글 선정 기준
@@ -360,11 +366,10 @@ public class CommentService {
 
     public Long findCommentsCountByMember(String email) {
 
-        throwExceptionIfEmailIsNull(email);
+        checkIsLoggedIn(email);
 
         // 자신이 작성한 총 댓글 갯수를 보고싶은 회원
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
 
         return commentRepository.findActiveCommentsCountBy(member);
     }

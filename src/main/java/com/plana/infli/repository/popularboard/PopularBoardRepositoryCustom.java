@@ -1,5 +1,6 @@
 package com.plana.infli.repository.popularboard;
 
+import com.plana.infli.domain.Board;
 import com.plana.infli.domain.PopularBoard;
 import com.plana.infli.domain.Member;
 import com.plana.infli.web.dto.response.board.settings.polularboard.SinglePopularBoardForSetting;
@@ -15,7 +16,7 @@ public interface PopularBoardRepositoryCustom {
     // 테스트 케이스용 메서드
     List<PopularBoard> findAllMemberBoardWithMemberAndBoard();
 
-    List<PopularBoard> findAllWithBoardOrderByDefaultSequenceBy(Member member);
+    List<PopularBoard> findAllWithBoardOrderBySequenceByMember(Member member);
 
     Integer findLatestSequenceNumber();
 
@@ -24,4 +25,8 @@ public interface PopularBoardRepositoryCustom {
     Optional<PopularBoard> findWithMemberById(Long id);
 
     int findEnabledPopularBoardCountBy(Member member);
+
+    // 테스트 케이스용 메서드
+    PopularBoard findByBoardAndMember(Board board, Member member);
+
 }
