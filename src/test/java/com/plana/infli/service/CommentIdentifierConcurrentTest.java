@@ -58,23 +58,16 @@ public class CommentIdentifierConcurrentTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    @Autowired
-    private CommentLikeRepository commentLikeRepository;
 
     @Autowired
     private CommentService commentService;
 
-    @Autowired
-    private MemberService memberService;
 
     @Autowired
     private UniversityFactory universityFactory;
 
     @Autowired
     private MemberFactory memberFactory;
-
-    @Autowired
-    private CommentFactory commentFactory;
 
     @Autowired
     private PostFactory postFactory;
@@ -119,8 +112,7 @@ public class CommentIdentifierConcurrentTest {
                             .build(), member.getEmail());
 
                 } catch (Exception e) {
-                    System.out.println("에러 발생");
-                    System.out.println(e);
+                    System.out.println(e.getMessage());
                 } finally {
                     latch.countDown();
                 }

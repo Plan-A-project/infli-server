@@ -105,9 +105,11 @@ public class CommentController {
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<BestCommentResponse> loadBestCommentInPost(@PathVariable Long postId) {
+    public ResponseEntity<BestCommentResponse> loadBestCommentInPost(@PathVariable Long postId,
+            @AuthenticationPrincipal String email) {
 
-        @Nullable BestCommentResponse response = commentService.loadBestCommentInPost(postId);
+        @Nullable BestCommentResponse response = commentService.loadBestCommentInPost(postId,
+                email);
 
         return ResponseEntity.ok(response);
     }
@@ -126,7 +128,7 @@ public class CommentController {
     @ApiResponse(responseCode = "200", description = "정상적으로 조회 완료")
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
-    public ResponseEntity<MyCommentsResponse> loadMyComments(@RequestParam Integer page,
+    public ResponseEntity<MyCommentsResponse> loadMyComments(Integer page,
             @AuthenticationPrincipal String email) {
         return ok(commentService.loadMyComments(page, email));
     }

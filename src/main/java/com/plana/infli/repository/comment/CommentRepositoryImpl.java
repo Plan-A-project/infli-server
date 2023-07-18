@@ -21,7 +21,9 @@ import com.plana.infli.web.dto.response.comment.view.mycomment.QMyComment;
 import com.plana.infli.web.dto.response.comment.view.post.PostComment;
 import com.plana.infli.web.dto.response.comment.view.post.QPostComment;
 import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
@@ -48,24 +50,36 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                         comment.createdAt, comment.content,
                         comment.member.eq(findMember),
                         comment.commentLikes.size(),
-                        comment.id.in(select(commentLike.comment.id)
-                                .from(commentLike)
-                                .where(commentLike.member.eq(findMember))
-                                .where(commentLike.comment.post.eq(findPost))),
+                        comment.id.in(myCommentLikesInThisPost(findPost, findMember)),
                         comment.parentComment.isNull(), comment.isEdited,
                         comment.member.eq(findPost.getMember())))
                 .from(comment)
                 .innerJoin(comment.member, member)
                 .innerJoin(comment.post, post)
                 .where(comment.post.eq(findPost))
-                .where(comment.isDeleted.isFalse()
-                        .or(comment.isDeleted.isTrue()
-                                .and(comment.children.isNotEmpty()
-                                        .and(comment.children.any().isDeleted.isFalse()))))
+                .where(commentIsNotDeleted()
+                        .or(commentIsDeletedButChildCommentExists()))
                 .orderBy(comment.root.id.asc(), comment.id.asc())
                 .offset((long) (pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
                 .limit(pageRequest.getPageSize())
                 .fetch();
+    }
+
+    private static JPQLQuery<Long> myCommentLikesInThisPost(Post findPost, Member findMember) {
+        return select(commentLike.comment.id)
+                .from(commentLike)
+                .where(commentLike.member.eq(findMember))
+                .where(commentLike.comment.post.eq(findPost));
+    }
+
+    private static BooleanExpression commentIsNotDeleted() {
+        return comment.isDeleted.isFalse();
+    }
+
+    private static BooleanExpression commentIsDeletedButChildCommentExists() {
+        return comment.isDeleted.isTrue()
+                .and(comment.children.isNotEmpty()
+                        .and(comment.children.any().isDeleted.isFalse()));
     }
 
     @Override
@@ -84,7 +98,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .innerJoin(comment.member, member)
                 .innerJoin(comment.post, post)
                 .where(comment.post.eq(findPost))
-                .where(comment.isDeleted.isFalse())
+                .where(commentIsNotDeleted())
                 .where(comment.commentLikes.size().goe(10))
                 .orderBy(comment.commentLikes.size().desc())
                 .fetchFirst();
@@ -99,7 +113,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .innerJoin(comment.member, member)
                 .innerJoin(comment.post, post)
                 .where(comment.member.eq(findMember))
-                .where(comment.isDeleted.isFalse())
+                .where(commentIsNotDeleted())
                 .orderBy(comment.id.desc())
                 .offset((long) (pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
                 .limit(pageRequest.getPageSize())
@@ -111,7 +125,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         return jpaQueryFactory.select(comment.count())
                 .from(comment)
                 .innerJoin(comment.member, member)
-                .where(comment.isDeleted.isFalse())
+                .where(commentIsNotDeleted())
                 .where(comment.member.eq(findMember))
                 .fetchOne();
     }
@@ -138,7 +152,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .from(comment)
                 .innerJoin(comment.post, post)
                 .where(comment.post.eq(findPost))
-                .where(comment.isDeleted.isFalse())
+                .where(commentIsNotDeleted())
                 .fetchOne();
 
         return count != null ? count : 0;
@@ -157,7 +171,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         return ofNullable(jpaQueryFactory.selectFrom(comment)
                 .innerJoin(comment.member, member).fetchJoin()
                 .innerJoin(comment.post, post).fetchJoin()
-                .where(comment.isDeleted.isFalse())
+                .where(commentIsNotDeleted())
                 .where(comment.id.eq(commentId))
                 .fetchOne());
     }
@@ -166,7 +180,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     public List<Comment> findActiveCommentWithMemberByIdsIn(List<Long> ids) {
         return jpaQueryFactory.selectFrom(comment)
                 .innerJoin(comment.member, member).fetchJoin()
-                .where(comment.isDeleted.isFalse())
+                .where(commentIsNotDeleted())
                 .where(comment.id.in(ids))
                 .fetch();
     }
@@ -194,7 +208,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     public Long findAllActiveCommentCount() {
         return jpaQueryFactory.select(comment.count())
                 .from(comment)
-                .where(comment.isDeleted.isFalse())
+                .where(commentIsNotDeleted())
                 .fetchOne();
     }
 
