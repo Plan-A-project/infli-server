@@ -5,6 +5,7 @@ import static com.plana.infli.domain.QMember.member;
 import static com.plana.infli.domain.QPopularBoard.*;
 import static java.util.Optional.*;
 
+import com.plana.infli.domain.Board;
 import com.plana.infli.domain.PopularBoard;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.QPopularBoard;
@@ -12,6 +13,7 @@ import com.plana.infli.web.dto.response.board.settings.polularboard.QSinglePopul
 import com.plana.infli.web.dto.response.board.settings.polularboard.SinglePopularBoardForSetting;
 import com.plana.infli.web.dto.response.board.view.QSinglePopularBoard;
 import com.plana.infli.web.dto.response.board.view.SinglePopularBoard;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +36,7 @@ public class PopularBoardRepositoryImpl implements PopularBoardRepositoryCustom 
                 .from(popularBoard)
                 .innerJoin(popularBoard.board, board)
                 .innerJoin(popularBoard.member, member)
-                .where(popularBoard.isEnabled.isTrue())
+                .where(popularBoardIsEnabled())
                 .where(popularBoard.board.isDeleted.isFalse())
                 .where(popularBoard.member.eq(findMember))
                 .orderBy(popularBoard.sequence.asc())
@@ -50,7 +52,7 @@ public class PopularBoardRepositoryImpl implements PopularBoardRepositoryCustom 
     }
 
     @Override
-    public List<PopularBoard> findAllWithBoardOrderByDefaultSequenceBy(Member findMember) {
+    public List<PopularBoard> findAllWithBoardOrderBySequenceByMember(Member findMember) {
         return jpaQueryFactory.selectFrom(popularBoard)
                 .innerJoin(popularBoard.board, board).fetchJoin()
                 .innerJoin(popularBoard.member, member)
@@ -78,6 +80,7 @@ public class PopularBoardRepositoryImpl implements PopularBoardRepositoryCustom 
                 .innerJoin(popularBoard.board, board)
                 .innerJoin(popularBoard.member, member)
                 .where(popularBoard.member.eq(findMember))
+                .where(popularBoardIsEnabled())
                 .orderBy(popularBoard.sequence.asc())
                 .fetch();
     }
@@ -96,11 +99,22 @@ public class PopularBoardRepositoryImpl implements PopularBoardRepositoryCustom 
         Long count = jpaQueryFactory.select(popularBoard.count())
                 .from(popularBoard)
                 .innerJoin(popularBoard.member, member)
-                .where(popularBoard.isEnabled.isTrue())
+                .where(popularBoardIsEnabled())
                 .where(popularBoard.member.eq(findMember))
                 .fetchOne();
 
         return count != null ? count.intValue() : 0;
     }
 
+    private static BooleanExpression popularBoardIsEnabled() {
+        return popularBoard.isEnabled.isTrue();
+    }
+
+    @Override
+    public PopularBoard findByBoardAndMember(Board board, Member member) {
+        return jpaQueryFactory.selectFrom(popularBoard)
+                .where(popularBoard.board.eq(board))
+                .where(popularBoard.member.eq(member))
+                .fetchOne();
+    }
 }

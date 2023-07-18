@@ -8,6 +8,7 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.University;
 import com.plana.infli.web.dto.response.board.settings.board.QSingleBoard;
 import com.plana.infli.web.dto.response.board.settings.board.SingleBoard;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
@@ -20,12 +21,11 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
 
     @Override
     public List<SingleBoard> loadAllBoardBy(University findUniversity) {
-
         return jpaQueryFactory.select(new QSingleBoard(board.id, board.boardName))
                 .from(board)
                 .innerJoin(board.university, university)
                 .where(board.university.eq(findUniversity))
-                .where(board.isDeleted.isFalse())
+                .where(boardIsNotDeleted())
                 .orderBy(board.sequence.asc())
                 .fetch();
     }
@@ -34,14 +34,18 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     public Optional<Board> findActiveBoardBy(Long boardId) {
         return ofNullable(jpaQueryFactory.selectFrom(board)
                 .where(board.id.eq(boardId))
-                .where(board.isDeleted.isFalse())
+                .where(boardIsNotDeleted())
                 .fetchOne());
+    }
+
+    private static BooleanExpression boardIsNotDeleted() {
+        return board.isDeleted.isFalse();
     }
 
     @Override
     public List<Board> findAllActiveBoardBy(University university) {
         return jpaQueryFactory.selectFrom(board)
-                .where(board.isDeleted.isFalse())
+                .where(boardIsNotDeleted())
                 .where(board.university.eq(university))
                 .orderBy(board.sequence.asc())
                 .fetch();
@@ -51,7 +55,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     public List<Board> findAllWithUniversityByIdIn(List<Long> ids) {
         return jpaQueryFactory.selectFrom(board)
                 .where(board.id.in(ids))
-                .where(board.isDeleted.isFalse())
+                .where(boardIsNotDeleted())
                 .innerJoin(board.university, university).fetchJoin()
                 .fetch();
     }
@@ -59,7 +63,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     @Override
     public Optional<Board> findActiveBoardWithUniversityBy(Long boardId) {
         return ofNullable(jpaQueryFactory.selectFrom(board)
-                .where(board.isDeleted.isFalse())
+                .where(boardIsNotDeleted())
                 .where(board.id.eq(boardId))
                 .leftJoin(board.university, university).fetchJoin()
                 .fetchOne());
