@@ -1,7 +1,9 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.domain.Member.checkIsLoggedIn;
 import static com.plana.infli.domain.PopularBoard.newPopularBoard;
 import static com.plana.infli.domain.editor.popularboard.PopularBoardEditor.*;
+import static com.plana.infli.exception.custom.BadRequestException.NOT_ALL_POPULARBOARD_WAS_CHOSEN;
 import static com.plana.infli.exception.custom.ConflictException.DEFAULT_POPULAR_BOARD_EXISTS;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.response.board.settings.board.BoardListResponse.createBoardListResponse;
@@ -12,7 +14,6 @@ import com.plana.infli.domain.PopularBoard;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
-import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
@@ -21,7 +22,6 @@ import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.popularboard.PopularBoardRepository;
 import com.plana.infli.web.dto.request.board.popular.edit.service.EditPopularBoardSequenceServiceRequest;
-import com.plana.infli.web.dto.request.board.popular.enable.controller.ChangePopularBoardVisibilityRequest;
 import com.plana.infli.web.dto.request.board.popular.enable.service.ChangePopularBoardVisibilityServiceRequest;
 import com.plana.infli.web.dto.response.board.settings.board.BoardListResponse;
 import com.plana.infli.web.dto.response.board.settings.board.SingleBoard;
@@ -49,40 +49,57 @@ public class BoardService {
     public boolean popularBoardExistsBy(String email) {
 
         // 로그인하지 않은 회원인 경우 인기 게시판을 볼수 없다
-        if (email == null) {
-            throw new AuthenticationFailedException();
-        }
+        checkIsLoggedIn(email);
 
         // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
 
         return popularBoardRepository.existsByMember(member);
     }
 
+    private Member findMember(String email) {
+        return memberRepository.findActiveMemberBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
 
     public PopularBoardsResponse loadEnabledPopularBoardsBy(String email) {
 
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
+
+        checkPopularBoardExists(member);
 
         List<SinglePopularBoard> boards = popularBoardRepository.loadEnabledPopularBoardsBy(member);
 
         return createPopularBoardsResponse(boards);
     }
 
+    private void checkPopularBoardExists(Member member) {
+        if (popularBoardRepository.existsByMember(member) == false) {
+            throw new BadRequestException(POPULAR_BOARD_NOT_FOUND);
+        }
+    }
+
     @Transactional
     public void createDefaultPopularBoards(String email) {
 
-        Member member = memberRepository.findActiveMemberWithUniversityBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        checkIsLoggedIn(email);
 
+        Member member = findMemberWithUniversityJoined(email);
 
+        checkPopularBoardsAlreadyExists(member);
+
+        createWithDefaultSequence(member);
+    }
+
+    private void checkPopularBoardsAlreadyExists(Member member) {
         if (popularBoardRepository.existsByMember(member)) {
             throw new ConflictException(DEFAULT_POPULAR_BOARD_EXISTS);
         }
+    }
 
-        createWithDefaultSequence(member);
+    private Member findMemberWithUniversityJoined(String email) {
+        return memberRepository.findActiveMemberWithUniversityBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
     private void createWithDefaultSequence(Member member) {
@@ -107,8 +124,9 @@ public class BoardService {
 
     public PopularBoardsSettingsResponse loadEnabledPopularBoardsForSettingBy(String email) {
 
-        Member member = memberRepository.findActiveMemberWithUniversityBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        checkIsLoggedIn(email);
+
+        Member member = findMemberWithUniversityJoined(email);
 
 
         // 회원이 보고싶다고 설정한 "인기 게시판" 모두 조회
@@ -122,11 +140,12 @@ public class BoardService {
     public void changePopularBoardSequence(EditPopularBoardSequenceServiceRequest request,
             String email) {
 
+        checkIsLoggedIn(email);
+
         // "인기 게시판"의 ID 번호들이, 회원이 보고싶어하는 순서대로 담겨져 있다
         List<Long> ids = request.getPopularBoardIds();
 
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMember(email);
 
         List<PopularBoard> popularBoards = findPopularBoardsBy(ids);
 
@@ -152,18 +171,18 @@ public class BoardService {
     private void validateChangePopularBoardSequenceRequest(Member member,
             List<PopularBoard> popularBoards) {
 
-        int count = popularBoardRepository.findEnabledPopularBoardCountBy(member);
-
-        //TODO
-        if (popularBoards.size() != count) {
-            throw new BadRequestException("");
-        }
-
-
         for (PopularBoard popularBoard : popularBoards) {
             if (popularBoard.getMember().equals(member) == false) {
                 throw new AuthorizationFailedException();
             }
+        }
+
+
+        int count = popularBoardRepository.findEnabledPopularBoardCountBy(member);
+
+        //TODO
+        if (popularBoards.size() != count) {
+            throw new BadRequestException(NOT_ALL_POPULARBOARD_WAS_CHOSEN);
         }
     }
 
@@ -191,8 +210,9 @@ public class BoardService {
 
     public BoardListResponse loadAllBoard(String email) {
 
-        Member member = memberRepository.findActiveMemberWithUniversityBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        checkIsLoggedIn(email);
+
+        Member member = findMemberWithUniversityJoined(email);
 
         University university = member.getUniversity();
 
@@ -207,13 +227,14 @@ public class BoardService {
     public void changeBoardVisibility(ChangePopularBoardVisibilityServiceRequest request,
             String email) {
 
+        checkIsLoggedIn(email);
+
         // 보고싶은 인기 게시판에 해당되는 게시판의 Id 번호 List
         // Ex) 동아리 인기 게시판과 익명 인기 게시판을 보고싶은 경우,
         //     동아리 게시판의 ID 번호와 익명 게시판의 ID 번호 목록
         List<Long> boardIds = request.getBoardIds();
 
-        Member member = memberRepository.findActiveMemberWithUniversityBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMemberWithUniversityJoined(email);
 
         // 조회되길 희망하는 게시판 List
         List<Board> wantToSeeBoards = boardRepository.findAllWithUniversityByIdIn(boardIds);
@@ -224,7 +245,7 @@ public class BoardService {
         // DB에 저장된 해당 회원의 "인기 게시판" 모두 조회
         // 비활성화된 "인기 게시판"까지 전부 조회된다.
         //TODO 조회 정렬 순서 확인 필요
-        List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderByDefaultSequenceBy(
+        List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                 member);
 
         changeVisibility(wantToSeeBoards, popularBoards);
@@ -235,13 +256,13 @@ public class BoardService {
 
         // 클라이언트가 요청한 게시판 ID의 갯수와, 해당 ID를 토대로 실제 DB 에서 조회된 게시판의 갯수가 다른경우
         if (wandToSeeBoards.size() != boardIds.size()) {
-            throw new BadRequestException("");
+            throw new NotFoundException(BOARD_NOT_FOUND);
         }
 
         // 조회된 게시판이 해당 회원의 대학에 있는 게시판이 아닌, 다른 대학의 게시판인 경우
         for (Board board : wandToSeeBoards) {
             if (board.getUniversity().equals(university) == false) {
-                throw new BadRequestException("");
+                throw new AuthorizationFailedException();
             }
         }
     }
@@ -285,20 +306,25 @@ public class BoardService {
     // 해당 "보고싶은 게시판"이 활성화 되어 있지만, 이 게시판이 보고싶은 게시판 목록에 더이상 포함되지 않는 경우
     private boolean dontWantToSeeThisPopularBoard(PopularBoard popularBoard, List<Board> boardsToEnable) {
         return boardsToEnable.contains(popularBoard.getBoard()) == false
-                && popularBoard.isEnabled() == false;
+                && popularBoard.isEnabled();
     }
 
-    public void checkHasWritePermissionOnThisBoard(Long boardId, String email) {
+    public boolean checkHasWritePermissionOnThisBoard(Long boardId, String email) {
 
         // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMemberWithUniversityJoined(email);
 
         // 게시판이 존재하지 않거나, 삭제된 경우 예외 발생
-        Board board = boardRepository.findActiveBoardBy(boardId)
+        Board board = boardRepository.findActiveBoardWithUniversityBy(boardId)
                 .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
 
-        board.hasWritePermissionByWithThis(member.getRole());
+        if (member.getUniversity().equals(board.getUniversity()) == false) {
+            throw new AuthorizationFailedException();
+        }
+
+        board.hasWritePermissionWithThisRole(member.getRole());
+
+        return true;
     }
 }
 

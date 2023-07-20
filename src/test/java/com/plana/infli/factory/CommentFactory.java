@@ -8,15 +8,17 @@ import com.plana.infli.service.CommentService;
 import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class CommentFactory {
 
-    private final CommentService commentService;
+    @Autowired
+    private CommentService commentService;
 
-    private final CommentRepository commentRepository;
+    @Autowired
+    private CommentRepository commentRepository;
 
     public Comment createComment(Member member, Post post) {
 

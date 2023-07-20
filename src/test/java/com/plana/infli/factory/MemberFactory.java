@@ -5,14 +5,15 @@ import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
 import com.plana.infli.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class MemberFactory {
 
-    private final MemberRepository memberRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
     public Member createStudentMember(String nickname, University university) {
         Member member = Member.builder()

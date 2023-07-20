@@ -15,6 +15,7 @@ import org.hibernate.annotations.SQLDelete;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.jpa.repository.Lock;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED)
@@ -53,6 +54,9 @@ public class Post extends BaseEntity {
     private Member member;
 
     private int viewCount;
+
+    // 해당 글에 댓글을 작성한 회원의 갯수
+    private int commentMemberCount = 0;
 
     @OneToMany(mappedBy = "post",
             cascade = {CascadeType.REMOVE},
@@ -102,5 +106,10 @@ public class Post extends BaseEntity {
         this.enterprise = request.getEnterprise();
         this.startDate = request.getStartDate();
         this.endDate = request.getEndDate();
+    }
+
+    public int increaseCount() {
+        commentMemberCount++;
+        return commentMemberCount;
     }
 }

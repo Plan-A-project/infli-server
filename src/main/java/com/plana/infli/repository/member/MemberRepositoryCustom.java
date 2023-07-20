@@ -9,4 +9,5 @@ public interface MemberRepositoryCustom {
 
 
     Optional<Member> findActiveMemberWithUniversityBy(String email);
+
 }

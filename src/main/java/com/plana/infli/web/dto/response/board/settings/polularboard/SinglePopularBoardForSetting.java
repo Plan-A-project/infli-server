@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class SinglePopularBoardForSetting {
 
-    private final Long memberBoardId;
+    private final Long popularBoardId;
 
     private final String boardName;
 
@@ -14,8 +14,8 @@ public class SinglePopularBoardForSetting {
 
 
     @QueryProjection
-    public SinglePopularBoardForSetting(Long memberBoardId, String boardName, String boardType) {
-        this.memberBoardId = memberBoardId;
+    public SinglePopularBoardForSetting(Long popularBoardId, String boardName, String boardType) {
+        this.popularBoardId = popularBoardId;
         this.boardName = boardName;
         this.boardType = boardType;
     }

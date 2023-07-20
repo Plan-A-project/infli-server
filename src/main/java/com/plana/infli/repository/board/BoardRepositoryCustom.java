@@ -16,4 +16,7 @@ public interface BoardRepositoryCustom {
     List<Board> findAllActiveBoardBy(University university);
 
     List<Board> findAllWithUniversityByIdIn(List<Long> ids);
+
+    Optional<Board> findActiveBoardWithUniversityBy(Long boardId);
+
 }

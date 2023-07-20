@@ -18,11 +18,9 @@ public class BadRequestException extends DefaultException{
 
     public static final String NOT_ANONYMOUS_POST = "해당 글은 익명 글이 아닙니다";
 
+    public static final String NOT_ALL_POPULARBOARD_WAS_CHOSEN = "모든 보고싶은 게시판이 선택되지 않았습니다";
+
     public static final String PASSWORD_NOT_MATCH = "비밀번호가 일치하지 않습니다.";
-
-
-
-
 
     public BadRequestException(String message) {
         super(message);
