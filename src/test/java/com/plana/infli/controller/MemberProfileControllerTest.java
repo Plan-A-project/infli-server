@@ -77,8 +77,8 @@ class MemberProfileControllerTest {
         @Test
         public void getMemberProfile() throws Exception{
             login();
-            MemberProfileResponse responseDto = new MemberProfileResponse("testNickname", Role.STUDENT,
-                "testEmail@gmail.com");
+            MemberProfileResponse responseDto = new MemberProfileResponse("youngjin", Role.STUDENT,
+                "youngjin@gmail.com");
 
             ResultActions perform = mockMvc.perform(get("/member/profile")
                 .header("Access-Token", accessToken)
@@ -99,7 +99,7 @@ class MemberProfileControllerTest {
         @Test
         public void nicknameModify() throws Exception{
             login();
-            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@gmail.com", "change");
+            NicknameModifyRequest requestDto = new NicknameModifyRequest("youngjin@gmail.com", "change");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -123,7 +123,7 @@ class MemberProfileControllerTest {
         @Test
         public void nicknameModify_400Exception() throws Exception{
             login();
-            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@gmail.com", "changeNickname");
+            NicknameModifyRequest requestDto = new NicknameModifyRequest("youngjin@gmail.com", "changeNickname");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -144,7 +144,7 @@ class MemberProfileControllerTest {
         @Test
         public void passwordConfirm() throws Exception{
             login();
-            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@gmail.com", "Test1234!");
+            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("youngjin@gmail.com", "Test1234!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -162,7 +162,7 @@ class MemberProfileControllerTest {
         @Test
         public void passwordConfirm_400Exception() throws Exception{
             login();
-            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@gmail.com", "notMatch123!");
+            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("youngjin@gmail.com", "notMatch123!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -183,7 +183,7 @@ class MemberProfileControllerTest {
         @Test
         public void passwordModify() throws Exception{
             login();
-            PasswordModifyRequest requestDto = new PasswordModifyRequest("testEmail@gmail.com", "newPassword1234!");
+            PasswordModifyRequest requestDto = new PasswordModifyRequest("youngjin@gmail.com", "newPassword1234!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -228,7 +228,7 @@ class MemberProfileControllerTest {
                 .andExpect(status().isOk());
 
             String imageUrl = perform.andReturn().getResponse().getContentAsString();
-            Member member = memberRepository.findByEmail("testEmail@gmail.com")
+            Member member = memberRepository.findByEmail("youngjin@gmail.com")
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
             assertThat(member.getProfileImageUrl()).isEqualTo(imageUrl);
@@ -240,7 +240,7 @@ class MemberProfileControllerTest {
         public void memberWithdrawal() throws Exception {
             login();
 
-            MemberWithdrawalRequest requestDto = new MemberWithdrawalRequest("testEmail@gmail.com", "testNickname");
+            MemberWithdrawalRequest requestDto = new MemberWithdrawalRequest("youngjin@gmail.com", "testNickname");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -269,7 +269,7 @@ class MemberProfileControllerTest {
         public void getMemberProfile_401Exception() throws Exception{
             signup();
             MemberProfileResponse responseDto = new MemberProfileResponse("testNickname", Role.STUDENT,
-                "testEmail@gmail.com");
+                "youngjin@gmail.com");
 
             ResultActions perform = mockMvc.perform(get("/member/profile")
                 .contentType(MediaType.APPLICATION_JSON));
@@ -282,7 +282,7 @@ class MemberProfileControllerTest {
         @Test
         public void nicknameModify() throws Exception{
             signup();
-            NicknameModifyRequest requestDto = new NicknameModifyRequest("testEmail@gmail.com", "change");
+            NicknameModifyRequest requestDto = new NicknameModifyRequest("youngjin@gmail.com", "change");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -305,7 +305,7 @@ class MemberProfileControllerTest {
         public void passwordConfirm() throws Exception{
             signup();
 
-            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("testEmail@gmail.com", "Test1234!");
+            PasswordConfirmRequest requestDto = new PasswordConfirmRequest("youngjin@gmail.com", "Test1234!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -321,7 +321,7 @@ class MemberProfileControllerTest {
         @Test
         public void passwordModify() throws Exception{
             signup();
-            PasswordModifyRequest requestDto = new PasswordModifyRequest("testEmail@gmail.com", "newPassword1234!");
+            PasswordModifyRequest requestDto = new PasswordModifyRequest("youngjin@gmail.com", "newPassword1234!");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -362,7 +362,7 @@ class MemberProfileControllerTest {
                 .andExpect(status().isUnauthorized());
 
             String imageUrl = perform.andReturn().getResponse().getContentAsString();
-            Member member = memberRepository.findByEmail("testEmail@gmail.com")
+            Member member = memberRepository.findByEmail("youngjin@gmail.com")
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
 
             assertThat(member.getProfileImageUrl()).isNotEqualTo(imageUrl);
@@ -372,7 +372,7 @@ class MemberProfileControllerTest {
         @Test
         public void memberWithdrawal() throws Exception {
             signup();
-            MemberWithdrawalRequest requestDto = new MemberWithdrawalRequest("testEmail@gmail.com", "testNickname");
+            MemberWithdrawalRequest requestDto = new MemberWithdrawalRequest("youngjin@gmail.com", "testNickname");
 
             String content = objectMapper.writeValueAsString(requestDto);
 
@@ -395,12 +395,12 @@ class MemberProfileControllerTest {
     public void signup() throws Exception {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.createStudentMember("testEmail", university);
+        Member member = memberFactory.createStudentMember("youngjin", university);
     }
 
     public void login() throws Exception{
         Map<String, String> requestMap = new HashMap<>();
-        requestMap.put("email", "testEmail@gmail.com");
+        requestMap.put("email", "youngjin@gmail.com");
         requestMap.put("password", "Test1234!");
 
         String content = objectMapper.writeValueAsString(requestMap);
