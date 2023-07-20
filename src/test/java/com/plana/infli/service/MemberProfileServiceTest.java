@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
+import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.factory.UniversityFactory;
 import com.plana.infli.repository.member.MemberRepository;
@@ -112,9 +113,10 @@ class MemberProfileServiceTest {
 
         PasswordConfirmRequest passwordConfirmRequest = new PasswordConfirmRequest("testEmail@naver.com", "Test1234");
 
-        boolean result = memberProfileService.checkPassword(passwordConfirmRequest);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+            () -> memberProfileService.checkPassword(passwordConfirmRequest));
 
-        assertThat(result).isEqualTo(false);
+        assertEquals("비밀번호가 일치하지 않습니다.", badRequestException.getMessage());
     }
 
     @DisplayName("회원 비밀번호 변경 테스트")
