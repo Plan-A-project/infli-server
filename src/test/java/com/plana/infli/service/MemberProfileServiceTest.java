@@ -45,7 +45,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class MemberProfileServiceTest {
@@ -58,8 +57,6 @@ class MemberProfileServiceTest {
     private UniversityRepository universityRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -132,37 +129,6 @@ class MemberProfileServiceTest {
         assertTrue(passwordEncoder.matches(passwordModifyRequest.getNewPassword(), member.getPassword()));
     }
 
-    @DisplayName("프로필 사진 변경 테스트")
-    @Test
-    public void modifyProfileImage() throws Exception{
-        signup();
-        login();
-
-        String fileName = "testImage.png";
-        Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
-
-        MockMultipartFile file = new MockMultipartFile(
-            "file",
-            "testImage.png",
-            MediaType.IMAGE_PNG_VALUE,
-            resource.getInputStream()
-        );
-
-        ResultActions resultActions = mockMvc
-            .perform(
-                multipart("/member/profile/image/modify")
-                    .file(file)
-                    .header("Access-Token", accessToken))
-            .andDo(print())
-            .andExpect(status().isOk());
-
-        String imageUrl = resultActions.andReturn().getResponse().getContentAsString();
-        Member member = memberRepository.findByEmail("testEmail@naver.com")
-            .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-
-        assertThat(member.getProfileImageUrl()).isEqualTo(imageUrl);
-    }
-
     @DisplayName("회원 탈퇴 테스트")
     @Test
     public void deleteMember(){
@@ -185,43 +151,4 @@ class MemberProfileServiceTest {
         return memberRepository.save(member);
     }
 
-    public void signup() throws Exception {
-        universityFactory.createUniversity("푸단대학교");
-        Map<String, String> requestMap = new HashMap<>();
-        requestMap.put("email", "testEmail@naver.com");
-        requestMap.put("name", "LEE");
-        requestMap.put("password", "Test1234!");
-        requestMap.put("nickname", "LSH");
-        requestMap.put("universityId", "1");
-
-        String content = objectMapper.writeValueAsString(requestMap);
-
-        mockMvc
-            .perform(
-                post("/auth/signup")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(content)
-            )
-            .andDo(print())
-            .andExpect(status().isOk());
-    }
-
-    public void login() throws Exception{
-        Map<String, String> requestMap = new HashMap<>();
-        requestMap.put("email", "testEmail@naver.com");
-        requestMap.put("password", "Test1234!");
-
-        String content = objectMapper.writeValueAsString(requestMap);
-
-        ResultActions resultActions = mockMvc
-            .perform(
-                post("/auth/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(content)
-            )
-            .andDo(print())
-            .andExpect(status().isOk());
-
-        accessToken = resultActions.andReturn().getResponse().getHeader("Access-Token");
-    }
 }

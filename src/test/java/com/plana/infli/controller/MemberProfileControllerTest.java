@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.plana.infli.annotation.MockMvcTest;
 import com.plana.infli.annotation.WithMockMember;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
@@ -45,9 +46,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@SpringBootTest
+@MockMvcTest
 @Transactional
 class MemberProfileControllerTest {
 
