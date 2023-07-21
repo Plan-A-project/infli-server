@@ -16,12 +16,12 @@ public class PostLikeController {
     private final PostLikeService postLikeService;
 
     @PostMapping("/post/{postId}/post-like")
-    public ResponseEntity createPostLike(@PathVariable Long postId, @AuthenticatedPrincipal String email) {
+    public ResponseEntity<Long> createPostLike(@PathVariable Long postId, @AuthenticatedPrincipal String email) {
         return postLikeService.createPostLike(postId, email);
     }
 
     @DeleteMapping("/post/{postId}/post-like")
-    public ResponseEntity deletePostLike(@PathVariable Long postId, @AuthenticatedPrincipal String email) {
+    public ResponseEntity<Void> deletePostLike(@PathVariable Long postId, @AuthenticatedPrincipal String email) {
         return postLikeService.deletePostLike(postId, email);
     }
 }

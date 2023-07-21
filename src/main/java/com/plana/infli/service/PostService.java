@@ -29,7 +29,7 @@ public class PostService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
 
-    public ResponseEntity initPost(Long boardId, String type, String email) {
+    public ResponseEntity<Long> initPost(Long boardId, String type, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -52,7 +52,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity createNormalPost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
+    public ResponseEntity<Long> createNormalPost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -75,7 +75,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity createGatherPost(Long boardId, Long postId, String email, GatherPostCreateRq requestDto) {
+    public ResponseEntity<Long> createGatherPost(Long boardId, Long postId, String email, GatherPostCreateRq requestDto) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -98,7 +98,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity createNoticePost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
+    public ResponseEntity<Long> createNoticePost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -120,7 +120,7 @@ public class PostService {
         return ResponseEntity.ok().body(post.getId());
     }
 
-    public ResponseEntity isFistPost(String email) {
+    public ResponseEntity<Boolean> isFistPost(String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -133,7 +133,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity deletePost(Long boardId, Long postId, String email) {
+    public ResponseEntity<Void> deletePost(Long boardId, Long postId, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -153,7 +153,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity findPost(Long boardId, Long postId, String email) {
+    public ResponseEntity<PostFindResponse> findPost(Long boardId, Long postId, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -174,7 +174,7 @@ public class PostService {
         return ResponseEntity.ok(postFindResponse);
     }
 
-    public ResponseEntity findMyPost(String email) {
+    public ResponseEntity<List<PostFindResponse>> findMyPost(String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -186,7 +186,7 @@ public class PostService {
         return ResponseEntity.ok(postFindResponses);
     }
 
-    public ResponseEntity findPostList(Long boardId) {
+    public ResponseEntity<List<PostFindResponse>> findPostList(Long boardId) {
 
         List<Post> posts = postRepository.findAllByBoardIdAndIsDeletedFalseAndIsPublishedTrueOrderByCreatedAtDesc(boardId);
 

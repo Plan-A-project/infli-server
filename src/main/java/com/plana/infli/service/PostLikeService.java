@@ -21,7 +21,7 @@ public class PostLikeService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public ResponseEntity createPostLike(Long postId, String email) {
+    public ResponseEntity<Long> createPostLike(Long postId, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
@@ -42,7 +42,7 @@ public class PostLikeService {
 
 
     @Transactional
-    public ResponseEntity deletePostLike(Long postId, String email) {
+    public ResponseEntity<Void> deletePostLike(Long postId, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));

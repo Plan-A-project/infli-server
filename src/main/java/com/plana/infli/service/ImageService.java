@@ -27,7 +27,7 @@ public class ImageService {
 	private final S3Uploader s3Uploader;
 
 	@Transactional
-	public ResponseEntity createImage(Long postId, List<MultipartFile> files, String dirName) throws IOException {
+	public ResponseEntity<List<ImageCreateRs>> createImage(Long postId, List<MultipartFile> files, String dirName) throws IOException {
 
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + postId));
@@ -47,7 +47,7 @@ public class ImageService {
 				.isDeleted(false)
 				.page(index)
 				.build();
-			// image.setPost(post);
+			image.setPost(post);
 			imageRepository.save(image);
 			saveImages.add(new ImageCreateRs(image));
 			index++;

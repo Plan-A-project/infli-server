@@ -37,10 +37,10 @@ public class Image extends BaseEntity {
 		this.page = page;
 	}
 
-	// public void setPost(Post post) {
-	//     this.post = post;
-	//     if (!post.getImageList().contains(this)) {
-	//         post.getImageList().add(this);
-	//     }
-	// }
+	 public void setPost(Post post) {
+	     this.post = post;
+	     if (!post.getImageList().contains(this)) {
+	         post.getImageList().add(this);
+	     }
+	 }
 }

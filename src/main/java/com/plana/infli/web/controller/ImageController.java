@@ -2,6 +2,8 @@ package com.plana.infli.web.controller;
 
 import com.plana.infli.service.ImageService;
 import com.plana.infli.utils.S3Uploader;
+import com.plana.infli.web.dto.request.image.ImageCreateRs;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +20,12 @@ public class ImageController {
     private final S3Uploader s3Uploader;
 
     @PostMapping("/post/{postId}/image")
-    public ResponseEntity createImage(@PathVariable Long postId, @RequestParam("file") List<MultipartFile> files) throws IOException {
+    public ResponseEntity<List<ImageCreateRs>> createImage(@PathVariable Long postId, @RequestParam("file") List<MultipartFile> files) throws IOException {
         return imageService.createImage(postId, files, "post");
     }
 
-    // 테스트용
     @PostMapping("/upload")
+    @Operation(summary = "테스트용")
     public String upload(@RequestParam("file") MultipartFile multipartFile) throws IOException {
         return s3Uploader.upload(multipartFile, "static");
     }
