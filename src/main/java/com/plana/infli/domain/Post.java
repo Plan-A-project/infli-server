@@ -15,7 +15,6 @@ import org.hibernate.annotations.SQLDelete;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.data.jpa.repository.Lock;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED)
@@ -62,6 +61,13 @@ public class Post extends BaseEntity {
             cascade = {CascadeType.REMOVE},
             orphanRemoval = true)
     private List<Image> imageList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post")
+    private List<PostLike> likes = new ArrayList<>();
+
 
     @Builder
     public Post(String title, String main, PostType type, boolean isPublished,

@@ -21,6 +21,7 @@ import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.popularboard.PopularBoardRepository;
+import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.board.popular.edit.service.EditPopularBoardSequenceServiceRequest;
 import com.plana.infli.web.dto.request.board.popular.enable.service.ChangePopularBoardVisibilityServiceRequest;
 import com.plana.infli.web.dto.response.board.settings.board.BoardListResponse;
@@ -46,10 +47,13 @@ public class BoardService {
 
     private final MemberRepository memberRepository;
 
+    private final UniversityRepository universityRepository;
+
     public boolean popularBoardExistsBy(String email) {
 
         // 로그인하지 않은 회원인 경우 인기 게시판을 볼수 없다
         checkIsLoggedIn(email);
+
 
         // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
         Member member = findMember(email);
@@ -114,11 +118,7 @@ public class BoardService {
         // 새로 생성된 "보고싶은 게시판"의 기본 정렬순서는, 그에 대응하는 게시판의 기본 정렬 순서와 동일하다
         // EX) 동아리 게시판의 기본 정렬 순서: 3번
         //     생성된 "보고싶은 동아리 게시판"의 정렬순서 : 3번
-        boards.forEach(board -> {
-            PopularBoard popularBoard = newPopularBoard(member, board);
-
-            popularBoardRepository.save(popularBoard);
-        });
+        boards.forEach(board -> popularBoardRepository.save(newPopularBoard(member, board)));
     }
 
 
@@ -127,7 +127,6 @@ public class BoardService {
         checkIsLoggedIn(email);
 
         Member member = findMemberWithUniversityJoined(email);
-
 
         // 회원이 보고싶다고 설정한 "인기 게시판" 모두 조회
         List<SinglePopularBoardForSetting> popularBoards = popularBoardRepository.findAllEnabledPopularBoardsForSettingBy(
@@ -177,7 +176,6 @@ public class BoardService {
             }
         }
 
-
         int count = popularBoardRepository.findEnabledPopularBoardCountBy(member);
 
         //TODO
@@ -212,14 +210,17 @@ public class BoardService {
 
         checkIsLoggedIn(email);
 
-        Member member = findMemberWithUniversityJoined(email);
-
-        University university = member.getUniversity();
+        University university = findUniversityByMemberEmail(email);
 
         // 해당 대학에 존재하는 모든 게시판 조회
         List<SingleBoard> boards = boardRepository.loadAllBoardBy(university);
 
         return createBoardListResponse(university.getId(), boards);
+    }
+
+    private University findUniversityByMemberEmail(String email) {
+        return universityRepository.findByMemberEmail(email)
+                .orElseThrow(() -> new NotFoundException(UNIVERSITY_NOT_FOUND));
     }
 
 
@@ -277,7 +278,7 @@ public class BoardService {
                 // 다시 활성화 한 이후, 새로운 정렬 번호 부여
                 setNewSequenceAndEnableThis(popularBoard);
 
-            // 해당 "보고싶은 게시판"을 더이상 보고싶지 않은 경우
+                // 해당 "보고싶은 게시판"을 더이상 보고싶지 않은 경우
             } else if (dontWantToSeeThisPopularBoard(popularBoard, wantToSeeBoards)) {
 
                 // 해당 "보고싶은 게시판"을 비활성화 처리
@@ -285,7 +286,6 @@ public class BoardService {
             }
         });
     }
-
 
 
     // 해당 "보고싶은 게시판"이 비활성화 되어있지만, 이 게시판이 보고싶은 게시판 목록에 포함되어 있는 경우
@@ -304,27 +304,36 @@ public class BoardService {
     }
 
     // 해당 "보고싶은 게시판"이 활성화 되어 있지만, 이 게시판이 보고싶은 게시판 목록에 더이상 포함되지 않는 경우
-    private boolean dontWantToSeeThisPopularBoard(PopularBoard popularBoard, List<Board> boardsToEnable) {
+    private boolean dontWantToSeeThisPopularBoard(PopularBoard popularBoard,
+            List<Board> boardsToEnable) {
         return boardsToEnable.contains(popularBoard.getBoard()) == false
                 && popularBoard.isEnabled();
     }
 
     public boolean checkHasWritePermissionOnThisBoard(Long boardId, String email) {
 
+        checkIsLoggedIn(email);
+
         // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
         Member member = findMemberWithUniversityJoined(email);
 
         // 게시판이 존재하지 않거나, 삭제된 경우 예외 발생
-        Board board = boardRepository.findActiveBoardWithUniversityBy(boardId)
-                .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
+        Board board = findBoardWithUniversityJoined(boardId);
 
         if (member.getUniversity().equals(board.getUniversity()) == false) {
             throw new AuthorizationFailedException();
         }
 
-        board.hasWritePermissionWithThisRole(member.getRole());
+        if (board.hasWritePermission(member.getRole()) == false) {
+            throw new AuthorizationFailedException();
+        }
 
         return true;
+    }
+
+    private Board findBoardWithUniversityJoined(Long boardId) {
+        return boardRepository.findActiveBoardWithUniversityBy(boardId)
+                .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
     }
 }
 

@@ -69,7 +69,6 @@ public class Comment extends BaseEntity {
     // 글 작성자가 자신의 글에 댓글을 작성하는 경우 : 0번을 부여받는다
     // 글 작성자가 아닌 회원은 1번부터 부여 받으며,
     // 새로운 회원이 이 글에 댓글을 작성할 떄마다 1씩 증가된 번호를 부여받는다
-    //TODO 동시성 확인 필요
     private Integer identifierNumber;
 
 

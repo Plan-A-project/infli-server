@@ -61,7 +61,7 @@ public class CommentService {
     private final EntityManager em;
 
     // 특정 글에 작성된 댓글 목록 조회시 한 페이지당 조회되길 원하는 댓글 갯수
-    private static final Integer DEFAULT_SIZE = 100;
+    private static final Integer COMMENT_SIZE_PER_PAGE = 100;
 
     @Transactional
     public CreateCommentResponse createComment(CreateCommentServiceRequest request, String email) {
@@ -295,7 +295,7 @@ public class CommentService {
         Member member = findMember(email);
 
         // 존재하지 않거나, 삭제된 글에 작성된 댓글을 조회할수 없다
-        Post post = postRepository.findActivePostWithBoardAndMemberBy(request.getId())
+        Post post = postRepository.findActivePostBy(request.getId())
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
 
         PageRequest pageRequest = createPageRequest(request);
@@ -318,7 +318,7 @@ public class CommentService {
             page = 1;
         }
 
-        return of(request.getPage() == null ? 1 : max(1, page), DEFAULT_SIZE);
+        return of(request.getPage() == null ? 1 : max(1, page), COMMENT_SIZE_PER_PAGE);
     }
 
     public MyCommentsResponse loadMyComments(Integer page, String email) {
@@ -347,7 +347,7 @@ public class CommentService {
     public BestCommentResponse loadBestCommentInPost(Long postId, String email) {
 
         // 존재하지 않거나 삭제된 글에 작성된 베스트 댓글을 조회할수 없다
-        Post post = postRepository.findActivePostWithBoardAndMemberBy(postId)
+        Post post = postRepository.findActivePostBy(postId)
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
 
         Member member = findMember(email);
