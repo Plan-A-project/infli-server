@@ -11,7 +11,6 @@ import com.plana.infli.domain.University;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
-import com.plana.infli.repository.post.ImageRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.post.GatherPostCreateRq;
@@ -21,6 +20,7 @@ import com.plana.infli.web.dto.response.post.search.PostSearchResponse;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import lombok.Builder;
 import lombok.Getter;
+import com.plana.infli.web.dto.response.post.PostFindResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -39,11 +39,11 @@ public class PostService {
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
-    private final ImageRepository imageRepository;
+
 
     private final UniversityRepository universityRepository;
 
-    public ResponseEntity initPost(Long boardId, String type, String email) {
+    public ResponseEntity<Long> initPost(Long boardId, String type, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
@@ -56,7 +56,6 @@ public class PostService {
                 .main(null)
                 .type(PostType.of(type))
                 .isPublished(false)
-                .viewCount(0)
                 .build();
 
         post.setBoard(board);
@@ -67,8 +66,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity createNormalPost(Long boardId, Long postId, String email,
-            PostCreateRq requestDto) {
+    public ResponseEntity<Long> createNormalPost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
@@ -91,8 +89,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity createGatherPost(Long boardId, Long postId, String email,
-            GatherPostCreateRq requestDto) {
+    public ResponseEntity<Long> createGatherPost(Long boardId, Long postId, String email, GatherPostCreateRq requestDto) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
@@ -115,8 +112,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity createNoticePost(Long boardId, Long postId, String email,
-            PostCreateRq requestDto) {
+    public ResponseEntity<Long> createNoticePost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
@@ -138,7 +134,7 @@ public class PostService {
         return ResponseEntity.ok().body(post.getId());
     }
 
-    public ResponseEntity isFistPost(String email) {
+    public ResponseEntity<Boolean> isFistPost(String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
@@ -151,7 +147,7 @@ public class PostService {
     }
 
     @Transactional
-    public ResponseEntity deletePost(Long boardId, Long postId, String email) {
+    public ResponseEntity<Void> deletePost(Long boardId, Long postId, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
@@ -167,19 +163,50 @@ public class PostService {
         }
 
         postRepository.deleteById(postId);
-        return ResponseEntity.ok().body(post.getId());
+        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity findPost(Long boardId, Long postId) {
-        return null;
-    }
-
-    public ResponseEntity findMyPost(Long boardId, Long postId, String email) {
+    @Transactional
+    public ResponseEntity<PostFindResponse> findPost(Long boardId, Long postId, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
-        return null;
+        Post post = postRepository.findByIdAndIsPublishedTrue(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id=" + postId));
+
+        if (post.getBoard().getId() != boardId) {
+            throw new IllegalArgumentException("해당 게시글은 해당 게시판의 글이 아닙니다");
+        }
+
+        // 글 작성자 본인이 아닐 경우 조회수 증가
+        if (!post.getMember().equals(member)) {
+            post.plusViewCount();
+        }
+        PostFindResponse postFindResponse = new PostFindResponse(post);
+
+        return ResponseEntity.ok(postFindResponse);
+    }
+
+    public ResponseEntity<List<PostFindResponse>> findMyPost(String email) {
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
+
+        List<Post> posts = postRepository.findAllByMemberIdAndIsDeletedFalseAndIsPublishedTrueOrderByCreatedAtDesc(member.getId());
+
+        List<PostFindResponse> postFindResponses = posts.stream().map(PostFindResponse::new).toList();
+
+        return ResponseEntity.ok(postFindResponses);
+    }
+
+    public ResponseEntity<List<PostFindResponse>> findPostList(Long boardId) {
+
+        List<Post> posts = postRepository.findAllByBoardIdAndIsDeletedFalseAndIsPublishedTrueOrderByCreatedAtDesc(boardId);
+
+        List<PostFindResponse> postFindResponses = posts.stream().map(PostFindResponse::new).toList();
+
+        return ResponseEntity.ok(postFindResponses);
     }
 
     public PostSearchResponse searchPosts(SearchPostsByKeywordServiceRequest request,

@@ -91,6 +91,10 @@ public class Member extends BaseEntity {
 		this.password = password;
 	}
 
+	public void changeProfileImage(String profileImageUrl){
+		this.profileImageUrl = profileImageUrl;
+	}
+
 	public void deleteMember() {
 		this.isDeleted = true;
 	}

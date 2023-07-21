@@ -41,7 +41,7 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
         Member member = Member.builder()
                 .email(withMockMember.email())
                 .passwordEncoder(passwordEncoder)
-                .password("1234")
+                .password("Test1234!")
                 .name(withMockMember.nickname())
                 .nickname(withMockMember.nickname())
                 .role(STUDENT)
