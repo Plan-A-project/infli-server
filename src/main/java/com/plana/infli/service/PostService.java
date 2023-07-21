@@ -7,10 +7,10 @@ import com.plana.infli.domain.PostType;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
-import com.plana.infli.repository.post.ImageRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.web.dto.request.post.GatherPostCreateRq;
 import com.plana.infli.web.dto.request.post.PostCreateRq;
+import com.plana.infli.web.dto.response.post.PostFindResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,6 @@ public class PostService {
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
-    private final ImageRepository imageRepository;
 
     public ResponseEntity initPost(Long boardId, String type, String email) {
 
@@ -43,7 +42,6 @@ public class PostService {
                 .main(null)
                 .type(PostType.of(type))
                 .isPublished(false)
-                .viewCount(0)
                 .build();
 
         post.setBoard(board);
@@ -151,18 +149,49 @@ public class PostService {
         }
 
         postRepository.deleteById(postId);
-        return ResponseEntity.ok().body(post.getId());
+        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity findPost(Long boardId, Long postId) {
-        return null;
-    }
-
-    public ResponseEntity findMyPost(Long boardId, Long postId, String email) {
+    @Transactional
+    public ResponseEntity findPost(Long boardId, Long postId, String email) {
 
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
 
-        return null;
+        Post post = postRepository.findByIdAndIsPublishedTrue(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id=" + postId));
+
+        if (post.getBoard().getId() != boardId) {
+            throw new IllegalArgumentException("해당 게시글은 해당 게시판의 글이 아닙니다");
+        }
+
+        // 글 작성자 본인이 아닐 경우 조회수 증가
+        if (!post.getMember().equals(member)) {
+            post.plusViewCount();
+        }
+        PostFindResponse postFindResponse = new PostFindResponse(post);
+
+        return ResponseEntity.ok(postFindResponse);
+    }
+
+    public ResponseEntity findMyPost(String email) {
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
+
+        List<Post> posts = postRepository.findAllByMemberIdAndIsDeletedFalseAndIsPublishedTrueOrderByCreatedAtDesc(member.getId());
+
+        List<PostFindResponse> postFindResponses = posts.stream().map(PostFindResponse::new).toList();
+
+        return ResponseEntity.ok(postFindResponses);
+    }
+
+    public ResponseEntity findPostList(Long boardId) {
+
+        List<Post> posts = postRepository.findAllByBoardIdAndIsDeletedFalseAndIsPublishedTrueOrderByCreatedAtDesc(boardId);
+
+        List<PostFindResponse> postFindResponses = posts.stream().map(PostFindResponse::new).toList();
+
+        return ResponseEntity.ok(postFindResponses);
     }
 }

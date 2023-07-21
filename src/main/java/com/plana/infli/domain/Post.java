@@ -15,7 +15,6 @@ import org.hibernate.annotations.SQLDelete;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.data.jpa.repository.Lock;
 
 @Getter
 @NoArgsConstructor(access = PROTECTED)
@@ -53,19 +52,22 @@ public class Post extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private int viewCount;
+    // 조회수
+    private int viewCount = 0;
+
+    // 좋아요 수
+    private int likeCount = 0;
 
     // 해당 글에 댓글을 작성한 회원의 갯수
     private int commentMemberCount = 0;
 
-    @OneToMany(mappedBy = "post",
-            cascade = {CascadeType.REMOVE},
-            orphanRemoval = true)
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Image> imageList = new ArrayList<>();
 
     @Builder
     public Post(String title, String main, PostType type, boolean isPublished,
-                String enterprise, LocalDate startDate, LocalDate endDate, int viewCount) {
+                String enterprise, LocalDate startDate, LocalDate endDate) {
         this.title = title;
         this.main = main;
         this.type = type;
@@ -73,7 +75,6 @@ public class Post extends BaseEntity {
         this.enterprise = enterprise;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.viewCount = viewCount;
     }
 
     public void setBoard(Board board) {
@@ -111,5 +112,20 @@ public class Post extends BaseEntity {
     public int increaseCount() {
         commentMemberCount++;
         return commentMemberCount;
+    }
+
+    public int plusViewCount() {
+        viewCount++;
+        return viewCount;
+    }
+
+    public int plusLikeCount() {
+        likeCount++;
+        return likeCount;
+    }
+
+    public int minusLikeCount() {
+        likeCount--;
+        return likeCount;
     }
 }
