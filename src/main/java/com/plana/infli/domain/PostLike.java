@@ -3,6 +3,7 @@ package com.plana.infli.domain;
 import static jakarta.persistence.FetchType.*;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,4 +23,10 @@ public class PostLike extends BaseEntity{
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Builder
+    public PostLike(Post post, Member member) {
+        this.post = post;
+        this.member = member;
+    }
 }
