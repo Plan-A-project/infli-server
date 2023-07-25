@@ -1,0 +1,36 @@
+package com.plana.infli.web.dto.response.post;
+
+import java.time.LocalDateTime;
+import lombok.Getter;
+
+@Getter
+public abstract class DefaultPost {
+
+    private final Long postId;
+
+    private final String title;
+
+    private int commentCount;
+
+    private final int likeCount;
+
+    private final int viewCount;
+
+    private final LocalDateTime createdAt;
+
+    private final String thumbnailURL;
+
+    public DefaultPost(Long postId, String title, int likeCount, int viewCount,
+            LocalDateTime createdAt, String thumbnailURL) {
+        this.postId = postId;
+        this.title = title;
+        this.likeCount = likeCount;
+        this.viewCount = viewCount;
+        this.createdAt = createdAt;
+        this.thumbnailURL = thumbnailURL;
+    }
+
+    public void loadCommentCount(int commentCount) {
+        this.commentCount = commentCount;
+    }
+}
