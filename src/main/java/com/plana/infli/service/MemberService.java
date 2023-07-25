@@ -48,6 +48,7 @@ public class MemberService {
     }
   }
 
+  @Transactional
   public void signupCompanyMember(CompanyMemberCreateRequest request) {
     checkEmailDuplicated(request.getEmail());
 
