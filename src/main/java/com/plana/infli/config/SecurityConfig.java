@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+@EnableWebSecurity
 @Configuration
 public class SecurityConfig {
 
@@ -70,8 +72,10 @@ public class SecurityConfig {
             .requestMatchers("/auth/**").permitAll()
             .requestMatchers("/member/email/auth/**").permitAll()
             .requestMatchers("/member/student/auth/**").permitAll()
+            .requestMatchers("/member/company/auth/**").permitAll()
             .requestMatchers("/member/email/auth/send").authenticated()
             .requestMatchers("/member/student/auth/send").authenticated()
+            .requestMatchers("/member/company/auth/send").authenticated()
             .anyRequest().authenticated()
         );
 
