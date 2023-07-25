@@ -1,5 +1,7 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.exception.custom.NotFoundException.*;
+
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -26,7 +28,7 @@ public class MailService {
 	@Transactional
 	public void sendMemberAuthenticationEmail(String email) {
 		Member member = memberRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		EmailAuthentication emailAuthentication = EmailAuthentication.createEmailAuthentication(member);
 
@@ -49,8 +51,8 @@ public class MailService {
 	@Transactional
 	public void authenticateMemberEmail(String secret) {
 		EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
-				secret)
-			.orElseThrow(() -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
+						secret)
+				.orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
 
 		Member member = emailAuthentication.getMember();
 
@@ -60,7 +62,7 @@ public class MailService {
 	@Transactional
 	public void sendStudentAuthenticationEmail(String email, StudentAuthenticationRequest request) {
 		Member member = memberRepository.findByEmail(email)
-			.orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		String studentEmail = request.getStudentEmail();
 
@@ -86,7 +88,7 @@ public class MailService {
 	public void authenticateStudent(String secret) {
 		EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
 				secret)
-			.orElseThrow(() -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
+			.orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
 
 		Member member = emailAuthentication.getMember();
 

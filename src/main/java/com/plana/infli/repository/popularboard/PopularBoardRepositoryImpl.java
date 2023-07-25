@@ -28,8 +28,6 @@ public class PopularBoardRepositoryImpl implements PopularBoardRepositoryCustom 
     @Override
     public List<SinglePopularBoardForSetting> findAllEnabledPopularBoardsForSettingBy(Member findMember) {
 
-        //TODO
-        //정렬 순서
         return jpaQueryFactory.select(
                         new QSinglePopularBoardForSetting(popularBoard.id, popularBoard.board.boardName,
                                 popularBoard.board.boardType.stringValue()))

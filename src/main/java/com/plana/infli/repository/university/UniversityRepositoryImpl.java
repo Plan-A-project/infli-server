@@ -3,6 +3,7 @@ package com.plana.infli.repository.university;
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QPost.*;
 import static com.plana.infli.domain.QUniversity.*;
+import static java.util.Optional.ofNullable;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
@@ -12,6 +13,7 @@ import com.plana.infli.domain.QUniversity;
 import com.plana.infli.domain.University;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -21,11 +23,11 @@ public class UniversityRepositoryImpl implements UniversityRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public University findByMember(Member findMember) {
-        return jpaQueryFactory.select(member.university)
+    public Optional<University> findByMemberEmail(String email) {
+        return ofNullable(jpaQueryFactory.select(member.university)
                 .from(member)
-                .where(member.eq(findMember))
-                .fetchOne();
+                .where(member.email.eq(email))
+                .fetchOne());
     }
 
 

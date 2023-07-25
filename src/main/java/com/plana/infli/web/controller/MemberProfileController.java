@@ -33,8 +33,8 @@ public class MemberProfileController {
      * */
     @Operation(description = "회원 정보 조회")
     @GetMapping
-    public ResponseEntity<MemberProfileResponse> profile(@AuthenticatedPrincipal String email) {
-        return ResponseEntity.ok().body(memberProfileService.getMemberProfile(email));
+    public MemberProfileResponse profile(@AuthenticatedPrincipal String email) {
+        return memberProfileService.getMemberProfile(email);
     }
 
     /**
@@ -42,8 +42,8 @@ public class MemberProfileController {
      */
     @Operation(description = "회원 닉네임 변경")
     @PostMapping("/nickname/modify")
-    public ResponseEntity<Boolean> nicknameModify(@RequestBody @Validated NicknameModifyRequest nicknameModifyRequest){
-        return ResponseEntity.ok().body(memberProfileService.modifyNickname(nicknameModifyRequest));
+    public Boolean nicknameModify(@RequestBody @Validated NicknameModifyRequest nicknameModifyRequest){
+        return memberProfileService.modifyNickname(nicknameModifyRequest);
     }
 
     /**
@@ -51,8 +51,8 @@ public class MemberProfileController {
      * */
     @Operation(description = "비밀번호 확인 - 비밀번호 변경/탈퇴 시")
     @PostMapping("/password/confirm")
-    public ResponseEntity<Boolean> passwordConfirm(@RequestBody @Validated PasswordConfirmRequest passwordConfirmRequest){
-        return ResponseEntity.ok().body(memberProfileService.checkPassword(passwordConfirmRequest));
+    public boolean passwordConfirm(@RequestBody @Validated PasswordConfirmRequest passwordConfirmRequest){
+        return memberProfileService.checkPassword(passwordConfirmRequest);
     }
 
     /**
@@ -60,8 +60,8 @@ public class MemberProfileController {
      * */
     @Operation(description = "회원 비밀번호 변경")
     @PostMapping("/password/modify")
-    public ResponseEntity<Boolean> passwordModify(@RequestBody @Validated PasswordModifyRequest passwordModifyRequest){
-        return ResponseEntity.ok().body(memberProfileService.modifyPassword(passwordModifyRequest));
+    public boolean passwordModify(@RequestBody @Validated PasswordModifyRequest passwordModifyRequest){
+        return memberProfileService.modifyPassword(passwordModifyRequest);
     }
 
     /**
@@ -69,8 +69,8 @@ public class MemberProfileController {
      * */
     @Operation(description = "회원 프로필 사진 변경")
     @PostMapping("/image/modify")
-    public ResponseEntity<String> profileImageModify(@RequestParam("file") MultipartFile profileImage, @AuthenticatedPrincipal String email){
-        return ResponseEntity.ok().body(memberProfileService.modifyProfileImage(email, profileImage, "member"));
+    public String profileImageModify(@RequestParam("file") MultipartFile profileImage, @AuthenticatedPrincipal String email){
+        return memberProfileService.modifyProfileImage(email, profileImage, "member");
     }
 
     /**
@@ -78,7 +78,7 @@ public class MemberProfileController {
      */
     @Operation(description = "회원 탈퇴")
     @PostMapping("/withdrawal")
-    public ResponseEntity<Boolean> memberWithdrawal(@RequestBody MemberWithdrawalRequest memberWithdrawalRequest){
-        return ResponseEntity.ok().body(memberProfileService.deleteMember(memberWithdrawalRequest));
+    public Boolean memberWithdrawal(@RequestBody MemberWithdrawalRequest memberWithdrawalRequest){
+        return memberProfileService.deleteMember(memberWithdrawalRequest);
     }
 }

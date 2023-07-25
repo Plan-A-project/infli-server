@@ -1,5 +1,6 @@
 package com.plana.infli.repository.post;
 
+import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 
 import java.util.List;
@@ -10,11 +11,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, PostRepositor
 
     Optional<Post> findPostById(Long id);
 
-    List<Post> findAllByMemberId(Long memberId);
 
-    Optional<Post> findByIdAndIsPublishedTrue(Long id);
-
-    List<Post> findAllByMemberIdAndIsDeletedFalseAndIsPublishedTrueOrderByCreatedAtDesc(Long memberId);
-
-    List<Post> findAllByBoardIdAndIsDeletedFalseAndIsPublishedTrueOrderByCreatedAtDesc(Long boardId);
+    boolean existsByMember(Member member);
 }

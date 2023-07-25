@@ -233,7 +233,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(get("/api/boards/permissions/{boardId}", anonymousBoard.getId()));
+                .perform(get("/api/boards/permissions/{boardId}?postType=NORMAL", anonymousBoard.getId()));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -252,7 +252,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(get("/api/boards/permissions/{boardId}", employmentBoard.getId()));
+                .perform(get("/api/boards/permissions/{boardId}?postType=ANNOUNCEMENT", employmentBoard.getId()));
 
         //then
         resultActions.andExpect(status().isForbidden())

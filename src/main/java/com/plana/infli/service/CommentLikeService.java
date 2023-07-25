@@ -2,7 +2,7 @@ package com.plana.infli.service;
 
 import static com.plana.infli.domain.CommentLike.*;
 import static com.plana.infli.domain.Member.checkIsLoggedIn;
-import static com.plana.infli.exception.custom.BadRequestException.DIDNT_PRESSED_LIKE_ON_THIS_COMMENT;
+import static com.plana.infli.exception.custom.BadRequestException.COMMENT_LIKE_NOT_FOUND;
 import static com.plana.infli.exception.custom.ConflictException.ALREADY_PRESSED_LIKE_ON_THIS_COMMENT;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 
@@ -112,7 +112,7 @@ public class CommentLikeService {
 
         // 좋아요를 누르지 않은 댓글에 좋아요 취소 요청을 할수 없다
         CommentLike commentLike = commentLikeRepository.findByCommentAndMember(comment, member)
-                .orElseThrow(() -> new BadRequestException(DIDNT_PRESSED_LIKE_ON_THIS_COMMENT));
+                .orElseThrow(() -> new BadRequestException(COMMENT_LIKE_NOT_FOUND));
 
         commentLikeRepository.delete(commentLike);
     }

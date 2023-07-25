@@ -6,7 +6,6 @@ import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
-import com.plana.infli.exception.custom.AuthorizationFailedException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
@@ -57,10 +56,8 @@ public class Board extends BaseEntity {
         return new Board(boardType, university);
     }
 
-    public void hasWritePermissionWithThisRole(Role role) {
-        if (boardType.getRoles().contains(role) == false) {
-            throw new AuthorizationFailedException();
-        }
+    public boolean hasWritePermission(Role role) {
+        return this.boardType.getRoles().contains(role);
     }
 
     public static boolean isAnonymousBoard(Board board) {

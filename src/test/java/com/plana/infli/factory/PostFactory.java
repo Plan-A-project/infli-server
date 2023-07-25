@@ -15,14 +15,10 @@ public class PostFactory {
     private PostRepository postRepository;
 
 
+    /// TODO Post 클래스 생성자 확인 필요
     public Post createPost(Member member, Board board) {
 
-        Post post = Post.builder()
-                .title("제목")
-                .main("내용").build();
-
-        post.setBoard(board);
-        post.setMember(member);
+        Post post = new Post(board, "제목입니다", "내용입니다", member);
 
         return postRepository.save(post);
     }

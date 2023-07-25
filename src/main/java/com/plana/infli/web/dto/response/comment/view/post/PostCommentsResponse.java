@@ -38,7 +38,7 @@ public class PostCommentsResponse {
     private final boolean isAdmin;
 
     // 조회된 댓글 목록
-    private final List<PostComment> comments ;
+    private final List<PostComment> comments;
 
     @Builder
     public PostCommentsResponse(Long postId, boolean isAnonymousBoard,

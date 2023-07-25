@@ -29,10 +29,7 @@ public class BestCommentResponse {
     @Nullable
     private final String profileImageUrl;
 
-    //TODO 수정 필요
     // 댓글 식별자
-    // 글 작성자가 자신의 글에 댓글을 작성한 경우 : 작성자
-    // 그 외의 경우 : 익명1, 익명2, 익명3 ...
     private final Integer identifier;
 
     private final LocalDateTime createdAt;
