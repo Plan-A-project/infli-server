@@ -1,6 +1,5 @@
 package com.plana.infli.web.dto.response.post;
 
-import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Post;
 import jakarta.annotation.Nullable;
 import lombok.Getter;
@@ -11,7 +10,7 @@ import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
-public class PostFindResponse {
+public class SinglePostResponse {
 
     //글 ID
     private Long id;
@@ -46,16 +45,16 @@ public class PostFindResponse {
     @Nullable
     private LocalDate endDate;
 
-    public PostFindResponse(Post post) {
+    public SinglePostResponse(Post post) {
         this.id = post.getId();
         this.userId = post.getMember().getId();
         this.nickname = post.getMember().getNickname();
         this.boardName = post.getBoard().getBoardName();
         this.title = post.getTitle();
-        this.main = post.getMain();
+        this.main = post.getContent();
         this.enterprise = post.getEnterprise();
-        this.startDate = post.getStartDate();
-        this.endDate = post.getEndDate();
+        this.startDate = post.getRecruitmentStartDate();
+        this.endDate = post.getRecruitmentEndDate();
         this.viewCount = post.getViewCount();
         this.likeCount = post.getViewCount();
         this.commentMemberCount = post.getCommentMemberCount();
