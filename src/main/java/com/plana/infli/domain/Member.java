@@ -58,10 +58,12 @@ public class Member extends BaseEntity {
 
 	private boolean isAuthenticated = false;
 
+	private boolean agreedOnPostPolicy = false;
+
 	public Member(String email, String password, String name, String nickname,
 			University university,
 			PasswordEncoder passwordEncoder) {
-		this(email, password, name, nickname, Role.UNCERTIFIED, university, passwordEncoder);
+		this(email, password, name, nickname, UNCERTIFIED, university, passwordEncoder);
 	}
 
 	@Builder
@@ -80,7 +82,7 @@ public class Member extends BaseEntity {
 	}
 
 	public void authenticateStudent() {
-		role = Role.STUDENT;
+		role = STUDENT;
 	}
 
 	public void changeNickname(String nickname) {
@@ -99,7 +101,6 @@ public class Member extends BaseEntity {
 		this.isDeleted = true;
 	}
 
-
 	public static Boolean isAdmin(Member member) {
 		return member.role.equals(ADMIN);
 	}
@@ -108,6 +109,10 @@ public class Member extends BaseEntity {
 		if (email == null) {
 			throw new AuthenticationFailedException();
 		}
+	}
+
+	public void agreedOnPostWritePolicy() {
+		this.agreedOnPostPolicy = true;
 	}
 }
 

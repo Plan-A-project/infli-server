@@ -13,6 +13,7 @@ import com.plana.infli.web.dto.request.profile.PasswordConfirmRequest;
 import com.plana.infli.web.dto.request.profile.PasswordModifyRequest;
 import com.plana.infli.web.dto.response.profile.MemberProfileResponse;
 import java.io.IOException;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -27,7 +28,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberProfileService {
 
     private final MemberRepository memberRepository;
+
     private final S3Uploader s3Uploader;
+
     private final PasswordEncoder passwordEncoder;
 
     public MemberProfileResponse getMemberProfile(String email) {
@@ -37,7 +40,7 @@ public class MemberProfileService {
         return new MemberProfileResponse(member.getNickname(), member.getRole(), member.getEmail());
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public boolean modifyNickname(NicknameModifyRequest nicknameModifyRequest) {
         Member member = memberRepository.findByEmail(nicknameModifyRequest.getEmail())
             .orElseThrow(() -> new UsernameNotFoundException(nicknameModifyRequest.getEmail() + "is not found"));
@@ -58,7 +61,7 @@ public class MemberProfileService {
         }
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public boolean modifyPassword(PasswordModifyRequest passwordModifyRequest) {
         String encodeAfterPassword = new BCryptPasswordEncoder().encode(passwordModifyRequest.getNewPassword());
 
@@ -69,7 +72,7 @@ public class MemberProfileService {
         return true;
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public String modifyProfileImage(String email, MultipartFile profileImage, String dirName){
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email + " is not found"));
 
@@ -77,18 +80,14 @@ public class MemberProfileService {
 
         String path = dirName + "/member_" + member.getId();
 
-        String imageUrl = "";
+        String imageUrl = s3Uploader.upload(profileImage, path);
 
-        try {
-            imageUrl = s3Uploader.upload(profileImage, path);
-            member.changeProfileImage(imageUrl);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        member.changeProfileImage(imageUrl);
+
         return imageUrl;
     }
 
-    @Transactional(readOnly = false)
+    @Transactional
     public boolean deleteMember(MemberWithdrawalRequest memberWithdrawalRequest){
         Member member = memberRepository.findByEmail(memberWithdrawalRequest.getEmail()).orElseThrow(() -> new UsernameNotFoundException(
                 memberWithdrawalRequest.getEmail() + " is not found"));

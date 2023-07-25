@@ -1,26 +1,18 @@
 package com.plana.infli.domain;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Getter
 public enum PostType {
-    NORMAL("normal"),
-    GATHER("gather"),
-    NOTICE("notice");
+
+    NORMAL("일반"),
+
+    RECRUITMENT("모집"),
+
+    ANNOUNCEMENT("공지"),
+    ;
 
     private final String name;
-
-    public static PostType of(String type) {
-        if (type == null) {
-            throw new IllegalArgumentException();
-        }
-
-        for (PostType o : PostType.values()) {
-            if (o.name.equals(type)) {
-                return o;
-            }
-        }
-
-        throw new IllegalArgumentException("일치하는 이름이 없습니다.");
-    }
 }

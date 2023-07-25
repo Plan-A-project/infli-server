@@ -14,13 +14,19 @@ public class BadRequestException extends DefaultException{
 
     public static final String MAX_COMMENT_SIZE_EXCEEDED = "최대 댓글 길이를 초과하였습니다";
 
-    public static final String DIDNT_PRESSED_LIKE_ON_THIS_COMMENT = "해당 댓글에 좋아요를 누르지 않았습니다";
+    public static final String COMMENT_LIKE_NOT_FOUND = "해당 댓글에 좋아요를 누르지 않았습니다";
+
+    public static final String POST_LIKE_NOT_FOUND = "해당 댓글에 좋아요를 누르지 않았습니다";
 
     public static final String NOT_ANONYMOUS_POST = "해당 글은 익명 글이 아닙니다";
 
     public static final String NOT_ALL_POPULARBOARD_WAS_CHOSEN = "모든 보고싶은 게시판이 선택되지 않았습니다";
 
     public static final String PASSWORD_NOT_MATCH = "비밀번호가 일치하지 않습니다.";
+
+    public static final String MAX_IMAGE_UPLOAD_SIZE_EXCEEDED = "최대 사진 업로드 갯수를 초과하였습니다";
+
+    public static final String IMAGE_NOT_PROVIDED = "업로드할 사진이 선택되지 않았습니다 ";
 
     public BadRequestException(String message) {
         super(message);

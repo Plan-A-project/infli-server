@@ -2,6 +2,7 @@ package com.plana.infli.web.controller;
 
 import static org.springframework.http.ResponseEntity.*;
 
+import com.plana.infli.domain.PostType;
 import com.plana.infli.service.BoardService;
 import com.plana.infli.web.dto.request.board.popular.enable.controller.ChangePopularBoardVisibilityRequest;
 import com.plana.infli.web.dto.request.board.popular.edit.controller.EditPopularBoardSequenceRequest;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -75,9 +77,9 @@ public class BoardController {
     @ApiResponse(responseCode = "403", description = "해당 게시판에 글 작성 권한 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
     public ResponseEntity<Boolean> checkHasWritePermissionOnThisBoard(@PathVariable Long boardId,
-            @AuthenticationPrincipal String email) {
+            @AuthenticationPrincipal String email, @RequestParam PostType postType) {
 
-        return ok(boardService.checkHasWritePermissionOnThisBoard(boardId, email));
+        return ok(boardService.checkHasWritePermissionOnThisBoard(boardId, email, postType));
     }
 
     /**

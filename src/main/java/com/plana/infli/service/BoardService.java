@@ -13,6 +13,7 @@ import static com.plana.infli.web.dto.response.board.view.PopularBoardsResponse.
 import com.plana.infli.domain.PopularBoard;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.PostType;
 import com.plana.infli.domain.University;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
@@ -310,7 +311,8 @@ public class BoardService {
                 && popularBoard.isEnabled();
     }
 
-    public boolean checkHasWritePermissionOnThisBoard(Long boardId, String email) {
+    public boolean checkHasWritePermissionOnThisBoard(Long boardId, String email,
+            PostType postType) {
 
         checkIsLoggedIn(email);
 

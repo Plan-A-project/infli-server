@@ -5,6 +5,10 @@ import lombok.Getter;
 @Getter
 public abstract class DefaultException extends RuntimeException {
 
+    public DefaultException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
     public DefaultException(String message) {
         super(message);
     }
