@@ -1,10 +1,12 @@
 package com.plana.infli.domain;
 
 import static jakarta.persistence.FetchType.*;
+import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class PostLike extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = IDENTITY)
     @Column(name = "post_like_id")
     private Long id;
 
@@ -27,8 +29,15 @@ public class PostLike extends BaseEntity {
     private Member member;
 
     @Builder
-    public PostLike(Post post, Member member) {
+    private PostLike(Post post, Member member) {
         this.post = post;
         this.member = member;
+    }
+
+    public static PostLike create(Post post, Member member) {
+        return PostLike.builder()
+                .post(post)
+                .member(member)
+                .build();
     }
 }
