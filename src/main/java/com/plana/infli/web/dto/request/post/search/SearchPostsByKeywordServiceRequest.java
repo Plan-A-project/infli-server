@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.post.search.service;
+package com.plana.infli.web.dto.request.post.search;
 
 import lombok.Builder;
 import lombok.Getter;

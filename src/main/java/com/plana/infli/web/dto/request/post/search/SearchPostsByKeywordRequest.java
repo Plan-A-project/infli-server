@@ -1,6 +1,5 @@
-package com.plana.infli.web.dto.request.post.search.controller;
+package com.plana.infli.web.dto.request.post.search;
 
-import com.plana.infli.web.dto.request.post.search.service.SearchPostsByKeywordServiceRequest;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Getter;

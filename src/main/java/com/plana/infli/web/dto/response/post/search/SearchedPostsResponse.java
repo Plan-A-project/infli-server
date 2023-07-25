@@ -4,7 +4,7 @@ import java.util.List;
 import lombok.Getter;
 
 @Getter
-public class PostSearchResponse {
+public class SearchedPostsResponse {
 
 
     // 한 페이지당 조회되길 희망하는 글 갯수
@@ -20,11 +20,12 @@ public class PostSearchResponse {
     // 검색된 글 목록
     private final List<SearchedPost> posts;
 
-    public PostSearchResponse(int sizeRequest, int actualSize, int currentPage,
+    public SearchedPostsResponse(int sizeRequest, int actualSize, int currentPage,
             List<SearchedPost> posts) {
         this.sizeRequest = sizeRequest;
         this.actualSize = actualSize;
         this.currentPage = currentPage;
         this.posts = posts;
     }
+
 }
