@@ -8,24 +8,26 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class EditPostRequest {
 
     @NotNull(message = "글 Id 번호를 입력해주세요")
-    private final Long postId;
+    private Long postId;
 
     @NotEmpty(message = "글 제목을 입력해주세요")
-    private final String title;
+    private String title;
 
     @NotEmpty(message = "글 내용을 입력해주세요")
-    private final String content;
+    private String content;
 
     @Nullable
-    private final String thumbnailUrl;
+    private String thumbnailUrl;
 
     @Nullable
-    private final EditRecruitmentRequest recruitment;
+    private EditRecruitmentRequest recruitment;
 
 
     @Builder
@@ -52,16 +54,17 @@ public class EditPostRequest {
 
 
     @Getter
+    @NoArgsConstructor
     public static class EditRecruitmentRequest {
 
         @NotNull(message = "회사명을 입력해주세요")
-        private final String companyName;
+        private String companyName;
 
         @NotNull(message = "모집 시작일을 입력해주세요")
-        private final LocalDateTime startDate;
+        private LocalDateTime startDate;
 
         @NotNull(message = "모집 종료일을 입력해주세요")
-        private final LocalDateTime endDate;
+        private LocalDateTime endDate;
 
         @Builder
         private EditRecruitmentRequest(String companyName, LocalDateTime startDate,

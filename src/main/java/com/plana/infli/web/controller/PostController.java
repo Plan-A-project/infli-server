@@ -77,8 +77,8 @@ public class PostController {
     @GetMapping("/posts/boards/{boardId}")
     @Operation(summary = "특정 게시판에 작성된 글 목록 조회")
     public BoardPostsResponse loadsPostsByBoard(@PathVariable Long boardId,
-            LoadPostsByBoardRequest request,
-            @AuthenticatedPrincipal String email) {
+            @Validated LoadPostsByBoardRequest request, @AuthenticatedPrincipal String email) {
+
         return postService.loadPostsByBoard(request.toServiceRequest(boardId, email));
     }
 

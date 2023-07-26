@@ -17,6 +17,7 @@ public class BoardPost extends DefaultPost {
 
     private final LocalDateTime recruitmentEndDate;
 
+
     @Builder
     @QueryProjection
     public BoardPost(Long postId, String title, LocalDateTime createdAt,
