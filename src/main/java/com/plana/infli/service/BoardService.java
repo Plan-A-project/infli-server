@@ -1,6 +1,5 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.Member.checkIsLoggedIn;
 import static com.plana.infli.domain.PopularBoard.newPopularBoard;
 import static com.plana.infli.domain.editor.popularboard.PopularBoardEditor.*;
 import static com.plana.infli.exception.custom.BadRequestException.NOT_ALL_POPULARBOARD_WAS_CHOSEN;
@@ -15,6 +14,7 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.domain.University;
+import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
@@ -60,6 +60,12 @@ public class BoardService {
         Member member = findMember(email);
 
         return popularBoardRepository.existsByMember(member);
+    }
+
+    private void checkIsLoggedIn(String email) {
+        if (email == null) {
+            throw new AuthenticationFailedException();
+        }
     }
 
     private Member findMember(String email) {

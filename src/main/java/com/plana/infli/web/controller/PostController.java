@@ -4,10 +4,12 @@ import static org.springframework.http.HttpStatus.*;
 
 import com.plana.infli.service.PostService;
 import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardRequest;
-import com.plana.infli.web.dto.request.post.initialize.PostInitializeRequest;
+import com.plana.infli.web.dto.request.post.create.CreatePostRequest;
 import com.plana.infli.web.dto.request.post.edit.EditPostRequest;
-import com.plana.infli.web.dto.response.post.PostsByBoardResponse;
+import com.plana.infli.web.dto.request.post.view.search.SearchPostsByKeywordRequest;
+import com.plana.infli.web.dto.response.post.board.BoardPostsResponse;
 import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
+import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,41 +39,54 @@ public class PostController {
 
     @ResponseStatus(CREATED)
     @PostMapping("/posts")
-    public Long initializePost(@Validated @RequestBody PostInitializeRequest request,
+    @Operation(summary = "글 단건 생성")
+    public Long write(@Validated @RequestBody CreatePostRequest request,
             @AuthenticatedPrincipal String email) {
-        return postService.createInitialPost(request.toServiceRequest(), email);
+        return postService.createPost(request.toServiceRequest(email));
     }
 
     @PatchMapping("/posts")
-    public void editPost(@Validated @RequestBody EditPostRequest request,
+    @Operation(summary = "내가 작성한 글 단건 수정")
+    public void edit(@Validated @RequestBody EditPostRequest request,
             @AuthenticatedPrincipal String email) {
-        postService.edit(request.toServiceRequest(), email);
+        postService.editPost(request.toServiceRequest(email));
     }
 
     @DeleteMapping("/posts/{postId}")
-    public void deletePost(@PathVariable Long postId,
+    @Operation(summary = "내가 작성한 글 단건 삭제")
+    public void delete(@PathVariable Long postId,
             @AuthenticatedPrincipal String email) {
         postService.deletePost(postId, email);
     }
 
     @GetMapping("/posts/{postId}")
     @Operation(summary = "글 단건 조회")
-    public SinglePostResponse findSinglePost(@PathVariable Long postId,
+    public SinglePostResponse loadSinglePost(@PathVariable Long postId,
             @AuthenticatedPrincipal String email) {
 
-        return postService.findSinglePost(postId, email);
+        return postService.loadSinglePost(postId, email);
     }
 
     @GetMapping("/members/posts")
-    public MyPostsResponse findMyPosts(String page,
+    @Operation(summary = "내가 작성한 글 목록 조회")
+    public MyPostsResponse loadMyPosts(@RequestParam(defaultValue = "1") String page,
             @AuthenticatedPrincipal String email) {
-        return postService.findMyPosts(email, page);
+        return postService.loadMyPosts(email, page);
     }
 
     @GetMapping("/posts/boards/{boardId}")
-    public PostsByBoardResponse loadsPostsByBoard(@PathVariable Long boardId,
+    @Operation(summary = "특정 게시판에 작성된 글 목록 조회")
+    public BoardPostsResponse loadsPostsByBoard(@PathVariable Long boardId,
             LoadPostsByBoardRequest request,
             @AuthenticatedPrincipal String email) {
-        return postService.loadPostsByBoard(boardId, request.toServiceRequest(), email);
+        return postService.loadPostsByBoard(request.toServiceRequest(boardId, email));
     }
+
+    @GetMapping("/posts/search")
+    @Operation(summary = "글 키워드로 검색")
+    public SearchedPostsResponse searchPostsByKeyword(SearchPostsByKeywordRequest request,
+            @AuthenticatedPrincipal String email) {
+        return postService.searchPostsByKeyword(request.toServiceRequest(email));
+    }
+
 }

@@ -2,11 +2,10 @@ package com.plana.infli.service;
 
 import static com.plana.infli.domain.BoardType.*;
 import static com.plana.infli.domain.Member.isAdmin;
-import static com.plana.infli.domain.Post.*;
 import static com.plana.infli.domain.PostType.*;
-import static com.plana.infli.domain.editor.post.PostEditor.editPost;
-import static com.plana.infli.exception.custom.BadRequestException.INVALID_REQUIRED_PARAM;
 import static com.plana.infli.exception.custom.NotFoundException.*;
+import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
+import static com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.*;
 import static com.plana.infli.web.dto.response.post.my.MyPostsResponse.loadMyPostsResponse;
 import static java.lang.Integer.*;
 
@@ -16,6 +15,8 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.editor.post.PostEditor;
+import com.plana.infli.domain.embeddable.Recruitment;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -23,17 +24,20 @@ import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.web.dto.request.post.edit.EditPostRequest.RecruitmentInfo;
+import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
+import com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.CreateRecruitmentServiceRequest;
+import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest.EditRecruitmentServiceRequest;
 import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardServiceRequest;
-import com.plana.infli.web.dto.request.post.initialize.PostInitializeServiceRequest;
+import com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest;
-import com.plana.infli.web.dto.request.post.search.SearchPostsByKeywordServiceRequest;
-import com.plana.infli.web.dto.response.post.BoardPostDTO;
-import com.plana.infli.web.dto.response.post.PostsByBoardResponse;
+import com.plana.infli.web.dto.request.post.view.search.SearchPostsByKeywordServiceRequest;
+import com.plana.infli.web.dto.response.post.board.BoardPost;
+import com.plana.infli.web.dto.response.post.board.BoardPostsResponse;
 import com.plana.infli.web.dto.response.post.my.MyPost;
 import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
+import jakarta.annotation.Nullable;
 import lombok.Builder;
 import lombok.Getter;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
@@ -76,11 +80,10 @@ public class PostService {
         member.agreedOnPostWritePolicy();
     }
 
-
     @Transactional
-    public Long createInitialPost(PostInitializeServiceRequest request, String email) {
+    public Long createPost(CreatePostServiceRequest request) {
 
-        Member member = findMemberWithUniversity(email);
+        Member member = findMemberWithUniversity(request.getEmail());
 
         Board board = findBoardWithUniversity(request);
 
@@ -88,9 +91,183 @@ public class PostService {
 
         validateTypes(request.getPostType(), board.getBoardType());
 
-        Post savedPost = postRepository.save(initializePost(member, board, request.getPostType()));
+        @Nullable Recruitment recruitment = loadRecruitmentIfExists(request.getRecruitment());
 
-        return savedPost.getId();
+        Post post = of(member, board, request, recruitment);
+
+        return postRepository.save(post).getId();
+    }
+
+    private Member findMemberWithUniversity(String email) {
+        return memberRepository.findActiveMemberWithUniversityBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
+
+    private Board findBoardWithUniversity(CreatePostServiceRequest request) {
+        return boardRepository.findActiveBoardWithUniversityBy(request.getBoardId())
+                .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
+    }
+
+    private void checkMemberAndBoardIsInSameUniversity(Member member, Board board) {
+        if (member.getUniversity().equals(board.getUniversity()) == false) {
+            throw new AuthorizationFailedException();
+        }
+    }
+
+    private Recruitment loadRecruitmentIfExists(CreateRecruitmentServiceRequest recruitmentRequest) {
+
+        return recruitmentRequest != null ? Recruitment.create(recruitmentRequest.getCompanyName(),
+                recruitmentRequest.getStartDate(), recruitmentRequest.getEndDate())
+                : null;
+    }
+
+
+    @Transactional
+    public void editPost(EditPostServiceRequest request) {
+
+        Member member = findMemberBy(request.getEmail());
+
+        Post post = findPostBy(request.getPostId());
+
+        validateEditRequest(request, post, member);
+
+        PostEditor.editPost(request, post);
+    }
+
+    private Post findPostBy(Long postId) {
+        return postRepository.findActivePostBy(postId)
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    }
+
+    //TODO
+    private void validateEditRequest(EditPostServiceRequest request, Post post, Member member) {
+
+        checkThisMemberIsPostWriter(member, post);
+
+        EditRecruitmentServiceRequest recruitment = request.getRecruitment();
+
+        if (recruitment == null) {
+            return;
+        }
+
+        if (postTypeIsNotRecruitment(post)) {
+            throw new BadRequestException("");
+        }
+    }
+
+    private void checkThisMemberIsPostWriter(Member member, Post post) {
+        if (post.getMember().equals(member) == false) {
+            throw new AuthorizationFailedException();
+        }
+    }
+
+    private boolean postTypeIsNotRecruitment(Post post) {
+        return post.getPostType() != RECRUITMENT;
+    }
+
+    @Transactional
+    public void deletePost(Long postId, String email) {
+
+        Member member = findMemberBy(email);
+
+        Post post = findPostWithMemberBy(postId);
+
+        validateDeleteRequest(member, post);
+
+        postRepository.delete(post);
+    }
+
+    private Post findPostWithMemberBy(Long postId) {
+        return postRepository.findActivePostWithMemberBy(postId)
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    }
+
+    private void validateDeleteRequest(Member member, Post post) {
+
+        if (isAdmin(member)) {
+            return;
+        }
+
+        checkThisMemberIsPostWriter(member, post);
+    }
+
+    @Transactional
+    public SinglePostResponse loadSinglePost(Long postId, String email) {
+
+        Member member = findMemberBy(email);
+
+        Post post = findPostWithBoardBy(postId);
+
+        checkMemberAndPostIsInSameUniversity(member, post);
+
+        //TODO 동시성 고려 필요
+        post.plusViewCount();
+
+        PostQueryRequest request = singlePost(post, member);
+
+        return postRepository.loadSinglePostResponse(request);
+    }
+
+    private Post findPostWithBoardBy(Long postId) {
+        return postRepository.findActivePostWithBoardBy(postId)
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    }
+
+    private void checkMemberAndPostIsInSameUniversity(Member member, Post post) {
+        if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
+            throw new AuthorizationFailedException();
+        }
+    }
+
+
+    public MyPostsResponse loadMyPosts(String email, String page) {
+
+        Member member = findMemberBy(email);
+
+        PostQueryRequest request = myPosts(member, page, 20);
+
+        List<MyPost> posts = postRepository.loadMyPosts(request);
+
+        return loadMyPostsResponse(request, posts);
+    }
+
+
+
+    private Board findBoardBy(Long boardId) {
+        return boardRepository.findActiveBoardBy(boardId)
+                .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
+    }
+
+
+    public SearchedPostsResponse searchPostsByKeyword(SearchPostsByKeywordServiceRequest request) {
+
+        Member member = findMemberWithUniversity(request.getEmail());
+
+        PostQueryRequest queryRequest = searchByKeyword(member, request.getKeyword(),
+                request.getPage(), 20);
+
+        List<SearchedPost> posts = postRepository.searchPostByKeyWord(queryRequest);
+
+
+        return null;
+    }
+
+
+    public BoardPostsResponse loadPostsByBoard(LoadPostsByBoardServiceRequest request) {
+
+        Member member = findMemberBy(request.getEmail());
+
+        Board board = findBoardBy(request.getBoardId());
+
+        checkMemberAndBoardIsInSameUniversity(member, board);
+
+        validateTypes(request.getType(), board.getBoardType());
+
+        PostQueryRequest queryRequest = postsByBoard(board, member, request, 20);
+
+        List<BoardPost> posts = postRepository.loadPostsByBoard(queryRequest);
+
+        return BoardPostsResponse.loadResponse(posts, queryRequest);
     }
 
     //TODO
@@ -110,327 +287,5 @@ public class PostService {
 
         throw new BadRequestException("");
     }
-
-    private Member findMemberWithUniversity(String email) {
-        return memberRepository.findActiveMemberWithUniversityBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-    }
-
-    private Board findBoardWithUniversity(PostInitializeServiceRequest request) {
-        return boardRepository.findActiveBoardWithUniversityBy(request.getBoardId())
-                .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
-    }
-
-    private void checkMemberAndBoardIsInSameUniversity(Member member, Board board) {
-        if (member.getUniversity().equals(board.getUniversity()) == false) {
-            throw new AuthorizationFailedException();
-        }
-    }
-
-    @Transactional
-    public void edit(EditPostServiceRequest request, String email) {
-
-        Member member = findMemberBy(email);
-
-        Post post = findNotDeletedPost(request.getPostId());
-
-        validateEditRequest(request, post, member);
-
-        editPost(request, post);
-    }
-
-    private void validateEditRequest(EditPostServiceRequest request, Post post, Member member) {
-
-        checkThisMemberIsPostWriter(member, post);
-
-        if (post.getPostType() == RECRUITMENT) {
-            validateRecruitmentRequest(request);
-        }
-    }
-
-    private void validateRecruitmentRequest(EditPostServiceRequest request) {
-        RecruitmentInfo recruitmentInfo = request.getRecruitmentInfo();
-
-        if (recruitmentInfo == null || anyNullExists(recruitmentInfo)) {
-            throw new BadRequestException(INVALID_REQUIRED_PARAM);
-        }
-    }
-
-    private boolean anyNullExists(RecruitmentInfo recruitmentInfo) {
-        return recruitmentInfo.getStartDate() == null || recruitmentInfo.getEndDate() == null
-                || recruitmentInfo.getCompanyName() == null;
-    }
-
-    private Post findNotDeletedPost(Long postId) {
-        return postRepository.findNotDeletedPostWithMemberBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
-    }
-
-    private void checkThisMemberIsPostWriter(Member member, Post post) {
-        if (post.getMember().equals(member) == false) {
-            throw new AuthorizationFailedException();
-        }
-    }
-
-
-    @Transactional
-    public void deletePost(Long postId, String email) {
-
-        Member member = findMemberBy(email);
-
-        Post post = findNotDeletedPost(postId);
-
-        validateDeleteRequest(member, post);
-
-        postRepository.delete(post);
-    }
-
-    private void validateDeleteRequest(Member member, Post post) {
-
-        if (isAdmin(member)) {
-            return;
-        }
-
-        checkThisMemberIsPostWriter(member, post);
-    }
-
-    @Transactional
-    public SinglePostResponse findSinglePost(Long postId, String email) {
-
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-
-        Post post = postRepository.findActivePostWithBoardBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
-
-        checkMemberAndPostIsInSameUniversity(member, post);
-
-        //TODO 동시성 고려 필요
-        post.plusViewCount();
-
-        return postRepository.loadSinglePostResponse(post, member);
-    }
-
-    private void checkMemberAndPostIsInSameUniversity(Member member, Post post) {
-        if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
-            throw new AuthorizationFailedException();
-        }
-    }
-
-
-    public MyPostsResponse findMyPosts(String email, String page) {
-
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow((() -> new NotFoundException(MEMBER_NOT_FOUND)));
-
-        List<MyPost> posts = postRepository.loadMyPosts(member, loadPage(page));
-
-        return loadMyPostsResponse(loadPage(page), posts);
-    }
-
-    //TODO
-    private int loadPage(String page) {
-        try {
-            return Math.max(1, parseInt(page));
-        } catch (NumberFormatException e) {
-            return 1;
-        }
-    }
-
-
-
-
-    private Board findBoardBy(Long boardId) {
-        return boardRepository.findActiveBoardBy(boardId)
-                .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
-    }
-
-
-
-
-
-
-    private int loadPage(Integer page) {
-        return page != null ? Math.max(1, page) : 1;
-
-    }
-
-
-
-    public SearchedPostsResponse searchPosts(SearchPostsByKeywordServiceRequest request,
-            String email) {
-
-//        University university = universityRepository.findByMemberEmail(email)
-//                .orElseThrow(() -> new NotFoundException(UNIVERSITY_NOT_FOUND));
-//
-//        KeywordSearch keywordSearch = createRequestEntity(request, university);
-//
-//        List<SearchedPost> posts = postRepository.searchPostByKeyWord(keywordSearch);
-
-
-        return null;
-    }
-
-    private KeywordSearch createRequestEntity(SearchPostsByKeywordServiceRequest request,
-            University university) {
-
-
-        int page;
-        try {
-            page = Math.max(parseInt(request.getPage()), 1);
-        } catch (NumberFormatException e) {
-            page = 1;
-        }
-
-        return KeywordSearch.create(university, request.getKeyword(), page);
-    }
-
-
-    public PostsByBoardResponse loadPostsByBoard(Long boardId,
-            LoadPostsByBoardServiceRequest request, String email) {
-
-        Board board = findBoardBy(boardId);
-
-        Member member = findMemberBy(email);
-
-        checkMemberAndBoardIsInSameUniversity(member, board);
-
-        request.validatePageRequest();
-
-        validateTypes(request.getType(), board.getBoardType());
-
-        List<BoardPostDTO> posts = postRepository.loadPostsByBoard(board, request);
-
-        return PostsByBoardResponse.loadResponse(posts, request.getPage(), board);
-    }
-
-
-
-
-    @Getter
-    public static class KeywordSearch {
-
-        private static final int SIZE_PER_SEARCH = 50;
-
-        private University university;
-
-        private String keyword;
-
-        private int page;
-
-        private int size = SIZE_PER_SEARCH;
-
-        @Builder
-        private KeywordSearch(University university, String keyword, int page) {
-            this.university = university;
-            this.keyword = keyword;
-            this.page = page;
-        }
-
-        public static KeywordSearch create(University university, String keyword,
-                int page) {
-
-            return KeywordSearch.builder()
-                    .university(university)
-                    .keyword(keyword)
-                    .page(page)
-                    .build();
-        }
-
-        public long loadOffset() {
-            return (long) (page - 1) * size;
-        }
-    }
-
-
-    //    public ResponseEntity<Long> initPost(Long boardId, String type, String email) {
-//
-//        Member member = findMember(email);
-//
-//        Board board = boardRepository.findById(boardId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 게시판이 없습니다. id=" + boardId));
-//
-//        Post post = builder()
-//                .title(null)
-//                .content(null)
-//                .type(of(type))
-//                .isPublished(false)
-//                .build();
-//
-//        post.setBoard(board);
-//        post.setMember(member);
-//        postRepository.save(post);
-//
-//        return ResponseEntity.ok().body(post.getId());
-//    }
-
-//    @Transactional
-//    public ResponseEntity<Long> createNormalPost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
-//
-//        Member member = memberRepository.findByEmail(email)
-//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-//
-//        Post post = postRepository.findById(postId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id=" + postId));
-//
-//        if (post.getBoard().getId() != boardId) {
-//            throw new IllegalArgumentException("해당 게시글은 해당 게시판의 글이 아닙니다");
-//        }
-//        if (!post.getPostType().equals(NORMAL)) {
-//            throw new IllegalArgumentException("해당 게시글은 일반글이 아닙니다");
-//        }
-//        if (!post.getMember().equals(member)) {
-//            throw new IllegalArgumentException("잘못된 접근입니다");
-//        }
-//
-//        post.publish(requestDto);
-//        return ResponseEntity.ok().body(post.getId());
-//    }
-
-//    @Transactional
-//    public ResponseEntity<Long> createGatherPost(Long boardId, Long postId, String email, GatherPostCreateRq requestDto) {
-//
-//        Member member = memberRepository.findByEmail(email)
-//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-//
-//        Post post = postRepository.findById(postId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id=" + postId));
-//
-//        if (post.getBoard().getId() != boardId) {
-//            throw new IllegalArgumentException("해당 게시글은 해당 게시판의 글이 아닙니다");
-//        }
-//        if (!post.getPostType().equals(RECRUITMENT)) {
-//            throw new IllegalArgumentException("해당 게시글은 모집글이 아닙니다");
-//        }
-//        if (!post.getMember().equals(member)) {
-//            throw new IllegalArgumentException("잘못된 접근입니다");
-//        }
-//
-//        post.publish(requestDto);
-//        return ResponseEntity.ok().body(post.getId());
-//    }
-//
-//    @Transactional
-//    public ResponseEntity<Long> createNoticePost(Long boardId, Long postId, String email, PostCreateRq requestDto) {
-//
-//        Member member = memberRepository.findByEmail(email)
-//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-//
-//        Post post = postRepository.findById(postId)
-//                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다 id=" + postId));
-//
-//        if (post.getBoard().getId() != boardId) {
-//            throw new IllegalArgumentException("해당 게시글은 해당 게시판의 글이 아닙니다");
-//        }
-//        if (!post.getPostType().equals(NOTICE)) {
-//            throw new IllegalArgumentException("해당 게시글은 공지글이 아닙니다");
-//        }
-//        if (!post.getMember().equals(member)) {
-//            throw new IllegalArgumentException("잘못된 접근입니다");
-//        }
-//
-//        post.publish(requestDto);
-//        return ResponseEntity.ok().body(post.getId());
-//    }
 
 }

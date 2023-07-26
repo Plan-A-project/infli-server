@@ -1,5 +1,6 @@
 package com.plana.infli.web.dto.request.comment.create.controller;
 
+
 import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,11 +16,11 @@ public class CreateCommentRequest {
     @NotNull(message = "글 번호가 입력되지 않았습니다")
     private Long postId;
 
-    @Nullable
-    private Long parentCommentId;
-
     @NotBlank(message = "내용을 입력해주세요")
     private String content;
+
+    @Nullable
+    private Long parentCommentId;
 
     @Builder
     private CreateCommentRequest(Long postId, @Nullable Long parentCommentId, String content) {
@@ -28,11 +29,13 @@ public class CreateCommentRequest {
         this.content = content;
     }
 
-    public CreateCommentServiceRequest toServiceRequest() {
+    public CreateCommentServiceRequest toServiceRequest(String email) {
         return CreateCommentServiceRequest.builder()
+                .email(email)
                 .postId(postId)
                 .parentCommentId(parentCommentId)
                 .content(content)
                 .build();
     }
+
 }

@@ -1,7 +1,6 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.CommentLike.*;
-import static com.plana.infli.domain.Member.checkIsLoggedIn;
 import static com.plana.infli.exception.custom.BadRequestException.COMMENT_LIKE_NOT_FOUND;
 import static com.plana.infli.exception.custom.ConflictException.ALREADY_PRESSED_LIKE_ON_THIS_COMMENT;
 import static com.plana.infli.exception.custom.NotFoundException.*;
@@ -10,6 +9,7 @@ import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.CommentLike;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
+import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
@@ -66,6 +66,12 @@ public class CommentLikeService {
         CommentLike savedCommentLike = commentLikeRepository.save(create(comment, member));
 
         return savedCommentLike.getId();
+    }
+
+    private void checkIsLoggedIn(String email) {
+        if (email == null) {
+            throw new AuthenticationFailedException();
+        }
     }
 
     private void validateCreateCommentLikeRequest(Post post, Comment comment,

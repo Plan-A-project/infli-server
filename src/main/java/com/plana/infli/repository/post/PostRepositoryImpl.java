@@ -1,14 +1,16 @@
 package com.plana.infli.repository.post;
 
-import static com.plana.infli.domain.Board.*;
 import static com.plana.infli.domain.BoardType.*;
+import static com.plana.infli.domain.PostType.*;
 import static com.plana.infli.domain.QBoard.*;
 import static com.plana.infli.domain.QComment.*;
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QPost.*;
-import static com.plana.infli.web.dto.request.post.view.PostViewOrder.popular;
+import static com.plana.infli.domain.QPostLike.*;
+import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder.popular;
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
+import static com.querydsl.jpa.JPAExpressions.*;
 import static java.util.Collections.*;
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.groupingBy;
@@ -17,25 +19,28 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
-import com.plana.infli.service.PostService.KeywordSearch;
-import com.plana.infli.web.dto.request.post.view.PostViewOrder;
-import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardServiceRequest;
-import com.plana.infli.web.dto.response.post.BoardPostDTO;
-import com.plana.infli.web.dto.response.post.QBoardPostDTO;
-import com.plana.infli.web.dto.response.post.board.normal.NormalPost;
-import com.plana.infli.web.dto.response.post.board.normal.QNormalPost;
+import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
+import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
+import com.plana.infli.web.dto.response.post.QCommentCount;
+import com.plana.infli.web.dto.response.post.board.BoardPost;
+import com.plana.infli.web.dto.response.post.DefaultPost;
+import com.plana.infli.web.dto.response.post.board.QBoardPost;
 import com.plana.infli.web.dto.response.post.my.MyPost;
 import com.plana.infli.web.dto.response.post.my.QMyPost;
-import com.plana.infli.web.dto.response.post.search.CommentCount;
-import com.plana.infli.web.dto.response.post.search.QCommentCount;
+import com.plana.infli.web.dto.response.post.CommentCount;
 import com.plana.infli.web.dto.response.post.search.QSearchedPost;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import com.plana.infli.web.dto.response.post.single.QSinglePostResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.DateTimeExpression;
+import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -59,23 +64,12 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression postIsActive() {
-        return post.isDeleted.isFalse().and(post.isPublished.isTrue());
+        return post.isDeleted.isFalse();
     }
 
     private BooleanExpression postIdEqual(Long id) {
         return post.id.eq(id);
     }
-
-    @Override
-    public Optional<Post> findNotDeletedPostWithMemberBy(Long id) {
-        return ofNullable(jpaQueryFactory
-                .selectFrom(post)
-                .innerJoin(post.member, member).fetchJoin()
-                .where(post.isDeleted.isFalse())
-                .where(postIdEqual(id))
-                .fetchOne());
-    }
-
 
     @Override
     public Optional<Post> findActivePostWithBoardBy(Long id) {
@@ -95,7 +89,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
 
-
     @Override
     public Optional<Post> findActivePostWithMemberBy(Long id) {
         return ofNullable(jpaQueryFactory
@@ -106,26 +99,57 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public SinglePostResponse loadSinglePostResponse(Post findPost, Member findMember) {
-
-        boolean isAnonymousBoard = isAnonymousBoard(findPost.getBoard());
+    public SinglePostResponse loadSinglePostResponse(PostQueryRequest request) {
 
         return jpaQueryFactory.select(new QSinglePostResponse(
                         post.board.boardName, post.board.id, post.postType.stringValue(),
-                        nicknameEq(isAnonymousBoard), post.id, post.title, post.content, post.createdAt,
-                        post.member.eq(findMember), isAdmin(findMember), post.viewCount, post.likes.size(),
-                        post.thumbnailUrl))
+                        nicknameEq(), post.id, post.title, post.content,
+                        post.createdAt, postWriterEqual(request.getMember()),
+                        isAdmin(request.getMember()), post.viewCount, post.likes.size(),
+                        pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
+                        companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
                 .from(post)
-                .where(postEqual(findPost))
+                .where(post.eq(request.getPost()))
                 .fetchOne();
     }
 
-    private BooleanExpression postEqual(Post findPost) {
-        return post.eq(findPost);
+
+    private StringExpression nicknameEq() {
+        return new CaseBuilder()
+                .when(post.board.boardType.eq(ACTIVITY)).then(post.member.nickname)
+                .when(post.board.boardType.eq(ANONYMOUS)).then(nullExpression())
+                .otherwise(post.member.nickname);
     }
 
-    private Expression<String> nicknameEq(boolean isAnonymousBoard) {
-        return isAnonymousBoard ? nullExpression() : post.member.nickname;
+    private BooleanExpression pressedLikeOnThisPost(Member member) {
+        return post.in(myLikedPosts(member));
+    }
+
+    private JPQLQuery<Post> myLikedPosts(Member findMember) {
+        return selectFrom(postLike.post)
+                .where(postLike.member.eq(findMember));
+    }
+
+    private BooleanExpression postWriterEqual(Member findMember) {
+        return post.member.eq(findMember);
+    }
+
+    private StringExpression companyNameEqual() {
+        return new CaseBuilder()
+                .when(post.postType.eq(RECRUITMENT)).then(post.recruitment.companyName)
+                .otherwise(nullExpression());
+    }
+
+    private DateTimeExpression<LocalDateTime> recruitmentStartDateEqual() {
+        return new CaseBuilder()
+                .when(postTypeEqual(RECRUITMENT)).then(post.recruitment.startDate)
+                .otherwise(nullExpression());
+    }
+
+    private DateTimeExpression<LocalDateTime> recruitmentEndDateEqual() {
+        return new CaseBuilder()
+                .when(postTypeEqual(RECRUITMENT)).then(post.recruitment.endDate)
+                .otherwise(nullExpression());
     }
 
     private Expression<Boolean> isAdmin(Member member) {
@@ -133,105 +157,86 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public List<MyPost> loadMyPosts(Member findMember, int intPage) {
+    public List<MyPost> loadMyPosts(PostQueryRequest request) {
 
-//        List<Long> ids = findMyPostIds(findMember, intPage);
-//
-//        List<MyPost> posts = findMyPosts(ids);
-//
-//        setCommentCount(ids, posts);
+        List<Long> ids = findMyPostIds(request);
 
-        return null;
-    }
-
-    @Override
-    public List<BoardPostDTO> loadPostsByBoard(Board findBoard,
-            LoadPostsByBoardServiceRequest request) {
-
-        List<Long> ids = findPostIdsByBoard(findBoard, request);
-
-        List<BoardPostDTO> posts = findPostsByBoard(findBoard, ids);
+        List<MyPost> posts = findMyPosts(ids, request.getMember());
 
         setCommentCount(ids, posts);
 
         return null;
     }
 
-    private List<Long> findPostIdsByBoard(Board findBoard, LoadPostsByBoardServiceRequest request) {
+    private List<Long> findMyPostIds(PostQueryRequest request) {
         return jpaQueryFactory.select(post.id)
                 .from(post)
-                .where(post.board.eq(findBoard))
-                .where(postIsActive())
-                .where(viewOrderEqual(request.getOrder()))
-                .where(postTypeEqual(request.getType()))
+                .where(postIsActiveAndWriterEqual(request.getMember()))
                 .orderBy(post.id.desc())
-                .offset(getOffset(request.getPage()))
-                .limit(20)
+                .offset(request.getOffset())
+                .limit(request.getSize())
+                .fetch();
+    }
+
+    private List<MyPost> findMyPosts(List<Long> ids, Member findMember) {
+
+        return jpaQueryFactory.select(
+                        new QMyPost(post.id, post.title, pressedLikeOnThisPost(findMember),
+                                post.likes.size(), post.viewCount, post.createdAt,
+                                post.thumbnailUrl, post.board.boardName,
+                                companyNameEqual(),
+                                recruitmentStartDateEqual(),
+                                recruitmentEndDateEqual()))
+                .from(post)
+                .where(idsEqual(ids))
+                .orderBy(post.id.desc())
                 .fetch();
     }
 
 
-    private List<BoardPostDTO> findPostsByBoard(Board findBoard, List<Long> ids) {
-        return jpaQueryFactory.select(
-                        new QBoardPostDTO(post.id, post.title, post.createdAt, post.thumbnailUrl,
-                                getMemberRole(findBoard), post.likes.size(), post.viewCount,
-                                post.recruitment.companyName, post.recruitment.startDate,
-                                post.recruitment.endDate))
+    @Override
+    public List<BoardPost> loadPostsByBoard(PostQueryRequest request) {
+
+        List<Long> ids = findPostIdsByBoard(request);
+
+        List<BoardPost> posts = findPostsByBoard(request, ids);
+
+        setCommentCount(ids, posts);
+
+        return null;
+    }
+
+    private List<Long> findPostIdsByBoard(PostQueryRequest request) {
+        return jpaQueryFactory.select(post.id)
+                .from(post)
+                .where(post.board.eq(request.getBoard()))
+                .where(postIsActive())
+                .where(viewOrderEqual(request.getViewOrder()))
+                .where(postTypeEqual(request.getType()))
+                .offset(request.getOffset())
+                .limit(request.getSize())
+                .orderBy(post.id.desc())
+                .fetch();
+    }
+
+    private List<BoardPost> findPostsByBoard(PostQueryRequest request, List<Long> ids) {
+        return jpaQueryFactory
+                .select(new QBoardPost(post.id, post.title, post.createdAt, post.thumbnailUrl,
+                        getMemberRole(request.getBoard()), post.likes.size(),
+                        pressedLikeOnThisPost(request.getMember()), post.viewCount,
+                        post.recruitment.companyName, post.recruitment.startDate,
+                        post.recruitment.endDate))
                 .from(post)
                 .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
     }
 
-
     private Expression<String> getMemberRole(Board board) {
         return board.getBoardType().equals(ANONYMOUS) ? nullExpression()
                 : post.member.role.stringValue();
     }
 
-//    @Override
-//    public List<NormalPost> findNormalPostsByBoard(Board findBoard, int page,
-//            PostViewOrder viewOrder) {
-//
-//        List<Long> ids = findPostIdsByBoard(findBoard, page, viewOrder);
-//
-//        List<NormalPost> posts = loadNormalBoardPostsBy(ids);
-//
-//        setCommentCount(ids, posts);
-//
-//        return posts;
-//    }
-//
-//    @Override
-//
-//    public List<AnnouncementPost> loadAnnouncementPostsByBoard(Board board, int page,
-//            PostViewOrder viewOrder) {
-//        return null;
-//    }
-//
-//    private List<Long> findPostIdsByBoard(Board findBoard, int page, PostViewOrder viewOrder) {
-//
-//        return jpaQueryFactory.select(post.id)
-//                .from(post)
-//                .where(boardEqual(findBoard))
-//                .where(postIsActive())
-//                .where(viewOrderEqual(viewOrder))
-//                .where(postTypeEqual(NORMAL))
-//                .offset(getOffset(page))
-//                .limit(20)
-//                .orderBy(post.id.desc())
-//                .fetch();
-//    }
-
-    private List<NormalPost> loadNormalBoardPostsBy(List<Long> ids) {
-        return jpaQueryFactory.select(
-                        new QNormalPost(post.id, post.title, post.likes.size(), post.viewCount,
-                                post.createdAt, post.thumbnailUrl))
-                .from(post)
-                .where(idsEqual(ids))
-                .orderBy(post.id.desc())
-                .fetch();
-    }
 
     private BooleanExpression idsEqual(List<Long> ids) {
         return post.id.in(ids);
@@ -254,36 +259,34 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return post.postType.eq(postType);
     }
 
-    private BooleanExpression boardEqual(Board findBoard) {
-        return post.board.eq(findBoard);
-    }
-
-    private List<Long> findMyPostIds(Member findMember, int intPage) {
-        return jpaQueryFactory.select(post.id)
-                .from(post)
-                .where(postIsActiveAndWriterEqual(findMember))
-                .orderBy(post.id.desc())
-                .offset(getOffset(intPage))
-                .limit(20)
-                .fetch();
-    }
 
     private BooleanExpression postIsActiveAndWriterEqual(Member findMember) {
         return postIsActive().and(postWriterEqual(findMember));
     }
 
 
-    private BooleanExpression postWriterEqual(Member findMember) {
-        return post.member.eq(findMember);
+
+    @Override
+    public List<SearchedPost> searchPostByKeyWord(PostQueryRequest request) {
+
+        List<Long> ids = findPostIds(request);
+
+        List<SearchedPost> result = searchPostsByPostIds(ids, request.getMember());
+
+        setCommentCount(ids, result);
+
+        return result;
     }
 
-    private List<MyPost> findMyPosts(List<Long> ids) {
-        return jpaQueryFactory.select(
-                        new QMyPost(post.id, post.title, post.likes.size(), post.viewCount, post.createdAt,
-                                post.thumbnailUrl, post.board.boardName))
+    private List<Long> findPostIds(PostQueryRequest request) {
+        return jpaQueryFactory.select(post.id)
                 .from(post)
-                .where(idsEqual(ids))
+                .where(post.board.university.eq(request.getMember().getUniversity()))
+                .where(contentOrTitleEq(request.getKeyword()))
+                .where(postIsActive())
                 .orderBy(post.id.desc())
+                .offset(request.getOffset())
+                .limit(request.getSize())
                 .fetch();
     }
 
@@ -297,43 +300,19 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .orElse(null);
     }
 
-//    @Override
-//    public List<SearchedPost> searchPostByKeyWord(KeywordSearch request) {
-//
-//        List<Long> ids = findPostIds(request);
-//
-//        List<SearchedPost> result = searchPostsByIds(ids);
-//
-//        setCommentCount(ids, result);
-//
-//        return result;
-//    }
 
-    // TODO where post.isPublished.isTrue 전부 사용하도록 바꿔야됨
-    private List<Long> findPostIds(KeywordSearch request) {
-        return jpaQueryFactory.select(post.id)
-                .from(post)
-                .where(post.board.university.eq(request.getUniversity()))
-                .where(contentOrTitleEq(request.getKeyword()))
-                .where(postIsActive())
-                .orderBy(post.id.desc())
-                .offset(request.loadOffset())
-                .limit(request.getSize())
-                .fetch();
-    }
-
-
-    private List<SearchedPost> searchPostsByIds(List<Long> ids) {
-        return jpaQueryFactory.select(new QSearchedPost(
-                        post.id, post.title, post.likes.size(), post.viewCount
-                        , post.createdAt, post.thumbnailUrl, post.content))
+    private List<SearchedPost> searchPostsByPostIds(List<Long> ids, Member member) {
+        return jpaQueryFactory
+                .select(new QSearchedPost(
+                        post.id, post.title, post.likes.size(), pressedLikeOnThisPost(member),
+                        post.viewCount, post.createdAt, post.thumbnailUrl, post.content))
                 .from(post)
                 .where(idsEqual(ids))
                 .orderBy(post.id.desc())
                 .fetch();
     }
 
-    private void setCommentCount(List<Long> ids, List<BoardPostDTO> result) {
+    private void setCommentCount(List<Long> ids, List<? extends DefaultPost> result) {
 
         Map<Long, List<CommentCount>> map = findCommentCount(ids);
 
@@ -350,11 +329,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetch().stream().collect(groupingBy(CommentCount::getPostId));
     }
 
-    private int findCommentCounts(Map<Long, List<CommentCount>> map, BoardPostDTO post) {
+    private int findCommentCounts(Map<Long, List<CommentCount>> map, DefaultPost post) {
         return map.getOrDefault(post.getPostId(), emptyList()).size();
-    }
-
-    private long getOffset(int page) {
-        return (page - 1) * 20L;
     }
 }

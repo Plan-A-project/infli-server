@@ -19,14 +19,6 @@ public class PostLikeController {
 
     private final PostLikeService postLikeService;
 
-//TODO
-
-//    @GetMapping("/posts/likes/{postId}")
-//    public ResponseEntity<Boolean> pressedLikeOnThisPost(@PathVariable Long postId,
-//            @AuthenticatedPrincipal String email) {
-//        postLikeService.
-//    }
-
     @PostMapping("/posts/likes/{postId}")
     public ResponseEntity<String> createPostLike(@PathVariable Long postId,
             @AuthenticatedPrincipal String email) {

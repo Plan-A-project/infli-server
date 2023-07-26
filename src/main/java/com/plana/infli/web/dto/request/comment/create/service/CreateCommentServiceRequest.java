@@ -5,18 +5,20 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class CreateCommentServiceRequest {
 
-    private Long postId;
+    private final String email;
 
-    private Long parentCommentId;
+    private final Long postId;
 
-    private String content;
+    private final Long parentCommentId;
 
+    private final String content;
 
     @Builder
-    private CreateCommentServiceRequest(Long postId, Long parentCommentId, String content) {
+    private CreateCommentServiceRequest(String email, Long postId,
+            Long parentCommentId, String content) {
+        this.email = email;
         this.postId = postId;
         this.parentCommentId = parentCommentId;
         this.content = content;

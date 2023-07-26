@@ -54,8 +54,6 @@ public class Post extends BaseEntity {
 
     private boolean isDeleted = false;
 
-    private boolean isPublished = false;
-
     @Embedded
     @Nullable
     private Recruitment recruitment;
@@ -64,27 +62,14 @@ public class Post extends BaseEntity {
     private List<PostLike> likes = new ArrayList<>();
 
     @Builder
-    private Post(Board board, PostType postType, Member member) {
+    private Post(Board board, PostType postType, Member member, String title, String content,
+            Recruitment recruitment) {
         this.board = board;
         this.postType = postType;
         this.member = member;
-    }
-
-    public Post(Board board, String title, String content, Member member) {
-        this.board = board;
         this.title = title;
         this.content = content;
-        this.member = member;
-        this.isPublished = true;
-    }
-
-
-    public static Post initializePost(Member member, Board board, PostType postType) {
-        return Post.builder()
-                .member(member)
-                .board(board)
-                .postType(postType)
-                .build();
+        this.recruitment = recruitment;
     }
 
     public PostEditor.PostEditorBuilder toEditor() {
@@ -92,7 +77,6 @@ public class Post extends BaseEntity {
                 .title(title)
                 .content(content)
                 .thumbnailUrl(thumbnailUrl)
-                .isPublished(isPublished)
                 .recruitment(recruitment);
     }
 

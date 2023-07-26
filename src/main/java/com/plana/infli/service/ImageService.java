@@ -61,7 +61,7 @@ public class ImageService {
 	@Transactional
 	public List<String> uploadImagesToS3(Long postId, List<MultipartFile> multipartFiles, String email) {
 
-		checkImagesExist(multipartFiles);
+		validateImages(multipartFiles);
 
 		Member member = memberRepository.findActiveMemberBy(email)
 				.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
@@ -114,7 +114,11 @@ public class ImageService {
 
 
 	//TODO
-	private  void checkImagesExist(List<MultipartFile> files) {
+	private  void validateImages(List<MultipartFile> files) {
+
+		if (files.size() > 11) {
+			throw new BadRequestException("");
+		}
 
 		if (files.isEmpty()) {
 			throw new BadRequestException(IMAGE_NOT_PROVIDED);

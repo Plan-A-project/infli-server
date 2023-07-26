@@ -49,11 +49,10 @@ public class CommentController {
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "403", description = "미인증 회원인 경우 댓글 작성 권한 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<CreateCommentResponse> write(
-            @Validated @RequestBody CreateCommentRequest request,
+    public CreateCommentResponse write(@Validated @RequestBody CreateCommentRequest request,
             @AuthenticationPrincipal String email) {
 
-        return ok(commentService.createComment(request.toServiceRequest(), email));
+        return commentService.createComment(request.toServiceRequest(email));
     }
 
     @PatchMapping("/comments")
@@ -63,11 +62,10 @@ public class CommentController {
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "403", description = "타인의 댓글 수정할 수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<EditCommentResponse> edit(
-            @Validated @RequestBody EditCommentRequest request,
+    public EditCommentResponse edit(@Validated @RequestBody EditCommentRequest request,
             @AuthenticationPrincipal String email) {
 
-        return ok(commentService.editContent(request.toServiceRequest(), email));
+        return commentService.editContent(request.toServiceRequest(email));
     }
 
     @DeleteMapping("/comments")
@@ -77,12 +75,10 @@ public class CommentController {
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "403", description = "타인의 댓글 삭제할 수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<Void> delete(
-            @Validated @RequestBody DeleteCommentRequest request,
+    public void delete(@Validated @RequestBody DeleteCommentRequest request,
             @AuthenticationPrincipal String email) {
 
-        commentService.delete(request.toServiceRequest(), email);
-        return ok().build();
+        commentService.delete(request.toServiceRequest(email));
     }
 
     @GetMapping("/posts/comments")
@@ -91,12 +87,10 @@ public class CommentController {
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<PostCommentsResponse> loadCommentsInPost(
-            @Validated LoadCommentsInPostRequest request,
+    public PostCommentsResponse loadCommentsInPost(@Validated LoadCommentsInPostRequest request,
             @AuthenticationPrincipal String email) {
 
-        return ok(commentService.loadCommentsInPost(
-                request.toServiceRequest(), email));
+        return commentService.loadCommentsInPost(request.toServiceRequest(email));
     }
 
     @GetMapping("/posts/{postId}/comments/best")
@@ -105,13 +99,13 @@ public class CommentController {
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<BestCommentResponse> loadBestCommentInPost(@PathVariable Long postId,
+    public BestCommentResponse loadBestCommentInPost(@PathVariable Long postId,
             @AuthenticationPrincipal String email) {
 
         @Nullable BestCommentResponse response = commentService.loadBestCommentInPost(postId,
                 email);
 
-        return ResponseEntity.ok(response);
+        return response;
     }
 
     @GetMapping("/posts/{postId}/comments/count")

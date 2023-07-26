@@ -1,12 +1,15 @@
 package com.plana.infli.utils;
 
+import static com.amazonaws.services.s3.model.CannedAccessControlList.*;
 import static com.plana.infli.exception.custom.InternalServerErrorException.*;
 
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.plana.infli.exception.custom.InternalServerErrorException;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,19 +38,19 @@ public class S3Uploader {
 
         String storeFileName = generateStoreFileName(multipartFile.getOriginalFilename());
 
-        String fullPath = generateFullPath(directoryPath, storeFileName);
+        String fullPathName = generateFullPath(directoryPath, storeFileName);
 
-        File file = new File(fullPath);
+        File file = convertToFile(multipartFile, storeFileName);
 
-        writeIntoFile(multipartFile, file);
+        PutObjectRequest request = generatePutObjectRequest(fullPathName, file);
 
-        PutObjectRequest request = generatePutObjectRequest(fullPath, file);
+        amazonS3Client.putObject(
+                new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
 
-        amazonS3Client.putObject(request);
 
         file.delete();
 
-        return amazonS3Client.getUrl(bucket, fullPath).toString();
+        return amazonS3Client.getUrl(bucket, fullPathName).toString();
     }
 
     private PutObjectRequest generatePutObjectRequest(String fullPath, File file) {
@@ -58,16 +61,22 @@ public class S3Uploader {
         return request;
     }
 
-    private void writeIntoFile(MultipartFile multipartFile, File file) {
+    //TODO
+    private File convertToFile(MultipartFile multipartFile, String fullPathName) {
+
+        File file = new File(fullPathName);
+
         try {
-            if (file.createNewFile()) {
-                try (FileOutputStream fos = new FileOutputStream(file)) {
-                    fos.write(multipartFile.getBytes());
-                }
+            file.createNewFile();
+
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                fos.write(multipartFile.getBytes());
             }
         } catch (IOException e) {
             throw new InternalServerErrorException(IMAGE_UPLOAD_FAILED, e);
         }
+
+        return file;
     }
 
     private String generateStoreFileName(String originalFilename) {
