@@ -22,16 +22,20 @@ public class EditCommentRequest {
     private String content;
 
     @Builder
-    public EditCommentRequest(Long postId, Long commentId, String content) {
+    private EditCommentRequest(Long postId, Long commentId, String content) {
         this.postId = postId;
         this.commentId = commentId;
         this.content = content;
     }
 
-    public EditCommentServiceRequest toServiceRequest() {
+    public EditCommentServiceRequest toServiceRequest(String email) {
+
         return EditCommentServiceRequest.builder()
-                .postId(this.postId)
-                .commentId(this.commentId)
-                .content(this.content).build();
+                .email(email)
+                .postId(postId)
+                .commentId(commentId)
+                .content(content)
+                .build();
     }
+
 }

@@ -23,12 +23,13 @@ public class CommentFactory {
     public Comment createComment(Member member, Post post) {
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .parentCommentId(null)
                 .postId(post.getId())
                 .content("내용입니다")
                 .build();
 
-        CreateCommentResponse response = commentService.createComment(request, member.getEmail());
+        CreateCommentResponse response = commentService.createComment(request);
 
         return commentRepository.findById(response.getCommentId()).get();
     }
@@ -36,12 +37,13 @@ public class CommentFactory {
     public Comment createChildComment(Member member, Post post, Comment parentComment) {
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .parentCommentId(parentComment.getId())
                 .postId(post.getId())
                 .content("내용입니다")
                 .build();
 
-        CreateCommentResponse response = commentService.createComment(request, member.getEmail());
+        CreateCommentResponse response = commentService.createComment(request);
 
         return commentRepository.findById(response.getCommentId()).get();
     }

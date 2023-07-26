@@ -4,15 +4,15 @@ import com.plana.infli.web.dto.request.comment.view.post.service.LoadCommentsInP
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 public class LoadCommentsInPostRequest {
 
     @NotNull(message = "글 번호가 입력되지 않았습니다")
-    private final Long id;
+    private Long id;
 
-    private final String page;
-
+    private String page;
 
     @Builder
     public LoadCommentsInPostRequest(Long id, String page) {
@@ -20,8 +20,9 @@ public class LoadCommentsInPostRequest {
         this.page = page;
     }
 
-    public LoadCommentsInPostServiceRequest toServiceRequest() {
+    public LoadCommentsInPostServiceRequest toServiceRequest(String email) {
         return LoadCommentsInPostServiceRequest.builder()
+                .email(email)
                 .id(id)
                 .page(page)
                 .build();

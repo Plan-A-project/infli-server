@@ -1,5 +1,6 @@
 package com.plana.infli.web.dto.response.post.my;
 
+import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.response.post.DefaultPost;
 import com.plana.infli.web.dto.response.post.DefaultPostsResponse;
 import java.util.List;
@@ -16,11 +17,13 @@ public class MyPostsResponse extends DefaultPostsResponse {
         super(sizeRequest, actualSize, currentPage, posts);
     }
 
-    public static MyPostsResponse loadMyPostsResponse(int page, List<? extends DefaultPost> posts) {
+    public static MyPostsResponse loadMyPostsResponse(PostQueryRequest request,
+            List<? extends DefaultPost> posts) {
+
         return MyPostsResponse.builder()
-                .sizeRequest(20)
+                .sizeRequest(request.getSize())
                 .actualSize(posts.size())
-                .currentPage(page)
+                .currentPage(request.getPage())
                 .posts(posts)
                 .build();
     }

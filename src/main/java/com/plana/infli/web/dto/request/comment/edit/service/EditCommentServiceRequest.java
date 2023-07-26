@@ -5,17 +5,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class EditCommentServiceRequest {
 
-    private Long postId;
+    private final String email;
 
-    private Long commentId;
+    private final Long postId;
 
-    private String content;
+    private final Long commentId;
+
+    private final String content;
 
     @Builder
-    private EditCommentServiceRequest(Long postId, Long commentId, String content) {
+    private EditCommentServiceRequest(String email, Long postId,
+            Long commentId, String content) {
+
+        this.email = email;
         this.postId = postId;
         this.commentId = commentId;
         this.content = content;

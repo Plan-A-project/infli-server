@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.response.post.search;
+package com.plana.infli.web.dto.response.post;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;

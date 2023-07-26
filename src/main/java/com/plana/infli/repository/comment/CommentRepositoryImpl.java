@@ -65,18 +65,18 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetch();
     }
 
-    private static JPQLQuery<Long> myCommentLikesInThisPost(Post findPost, Member findMember) {
+    private JPQLQuery<Long> myCommentLikesInThisPost(Post findPost, Member findMember) {
         return select(commentLike.comment.id)
                 .from(commentLike)
                 .where(commentLike.member.eq(findMember))
                 .where(commentLike.comment.post.eq(findPost));
     }
 
-    private static BooleanExpression commentIsNotDeleted() {
+    private BooleanExpression commentIsNotDeleted() {
         return comment.isDeleted.isFalse();
     }
 
-    private static BooleanExpression commentIsDeletedButChildCommentExists() {
+    private BooleanExpression commentIsDeletedButChildCommentExists() {
         return comment.isDeleted.isTrue()
                 .and(comment.children.isNotEmpty()
                         .and(comment.children.any().isDeleted.isFalse()));

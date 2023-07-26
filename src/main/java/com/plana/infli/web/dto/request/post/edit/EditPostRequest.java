@@ -1,8 +1,7 @@
 package com.plana.infli.web.dto.request.post.edit;
 
 
-import static com.plana.infli.web.dto.request.post.edit.EditPostRequest.RecruitmentInfo.*;
-
+import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest.EditRecruitmentServiceRequest;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -26,64 +25,61 @@ public class EditPostRequest {
     private final String thumbnailUrl;
 
     @Nullable
-    private final RecruitmentInfo recruitmentInfo;
+    private final EditRecruitmentRequest recruitment;
 
 
     @Builder
     public EditPostRequest(Long postId, String title, String content, String thumbnailUrl,
-            LocalDateTime recruitmentStartDate, LocalDateTime recruitmentEndDate, String recruitmentCompanyName) {
+            EditRecruitmentRequest recruitment) {
+
         this.postId = postId;
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
-        this.recruitmentInfo = create(recruitmentCompanyName, recruitmentStartDate,
-                recruitmentEndDate);
+        this.recruitment = recruitment;
     }
 
-    @Getter
-    public static class RecruitmentInfo {
-
-        private final String companyName;
-
-        private final LocalDateTime startDate;
-
-        private final LocalDateTime endDate;
-
-        @Builder
-        private RecruitmentInfo(String companyName, LocalDateTime recruitmentStartDate,
-                LocalDateTime recruitmentEndDate) {
-            this.companyName = companyName;
-            this.startDate = recruitmentStartDate;
-            this.endDate = recruitmentEndDate;
-        }
-
-
-        public static RecruitmentInfo create(String companyName, LocalDateTime recruitmentStartDate,
-                LocalDateTime recruitmentEndDate) {
-
-            if (allNull(companyName, recruitmentStartDate, recruitmentEndDate)) {
-                return null;
-            }
-
-            return new RecruitmentInfo(companyName, recruitmentStartDate, recruitmentEndDate);
-        }
-
-        private static boolean allNull(String companyName, LocalDateTime recruitmentStartDate,
-                LocalDateTime recruitmentEndDate) {
-            return companyName == null && recruitmentStartDate == null
-                    && recruitmentEndDate == null;
-        }
-    }
-
-
-    //TODO 코드 리팩토링 필요
-    public EditPostServiceRequest toServiceRequest() {
+    public EditPostServiceRequest toServiceRequest(String email) {
         return EditPostServiceRequest.builder()
+                .email(email)
                 .postId(postId)
                 .title(title)
                 .content(content)
                 .thumbnailUrl(thumbnailUrl)
-                .recruitmentInfo(recruitmentInfo)
+                .recruitment(recruitment.toServiceRequest())
                 .build();
     }
+
+
+    @Getter
+    public static class EditRecruitmentRequest {
+
+        @NotNull(message = "회사명을 입력해주세요")
+        private final String companyName;
+
+        @NotNull(message = "모집 시작일을 입력해주세요")
+        private final LocalDateTime startDate;
+
+        @NotNull(message = "모집 종료일을 입력해주세요")
+        private final LocalDateTime endDate;
+
+        @Builder
+        private EditRecruitmentRequest(String companyName, LocalDateTime startDate,
+                LocalDateTime endDate) {
+            this.companyName = companyName;
+            this.startDate = startDate;
+            this.endDate = endDate;
+        }
+
+        public EditRecruitmentServiceRequest toServiceRequest() {
+            return EditRecruitmentServiceRequest.builder()
+                    .companyName(companyName)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .build();
+        }
+    }
+
+
+
 }

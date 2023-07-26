@@ -105,11 +105,7 @@ public class Member extends BaseEntity {
 		return member.role.equals(ADMIN);
 	}
 
-	public static void checkIsLoggedIn(String email) {
-		if (email == null) {
-			throw new AuthenticationFailedException();
-		}
-	}
+
 
 	public void agreedOnPostWritePolicy() {
 		this.agreedOnPostPolicy = true;

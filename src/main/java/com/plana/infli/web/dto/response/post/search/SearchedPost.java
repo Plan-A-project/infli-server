@@ -11,9 +11,9 @@ public class SearchedPost extends DefaultPost {
     private final String content;
 
     @QueryProjection
-    public SearchedPost(Long postId, String title, int likeCount, int viewCount,
+    public SearchedPost(Long postId, String title, int likeCount, boolean pressedLike,int viewCount,
             LocalDateTime createdAt, String thumbnailURL, String content) {
-        super(postId, title, likeCount, viewCount, createdAt, thumbnailURL);
+        super(postId, title, pressedLike, likeCount, viewCount, createdAt, thumbnailURL);
         this.content = content;
     }
 }

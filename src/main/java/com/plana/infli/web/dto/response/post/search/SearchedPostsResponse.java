@@ -8,7 +8,7 @@ public class SearchedPostsResponse {
 
 
     // 한 페이지당 조회되길 희망하는 글 갯수
-    // 기본값 : 100개씩 조회
+    // 기본값 : 20개씩 조회
     private final int sizeRequest;
 
     // 현재 페이지에 실제로 조회된 글의 갯수

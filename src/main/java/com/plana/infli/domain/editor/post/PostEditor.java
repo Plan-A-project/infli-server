@@ -5,6 +5,8 @@ import static com.plana.infli.domain.embeddable.Recruitment.*;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.embeddable.Recruitment;
 import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest;
+import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest.EditRecruitmentServiceRequest;
+import jakarta.annotation.Nullable;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -33,32 +35,20 @@ public class PostEditor {
 
     public static void editPost(EditPostServiceRequest request, Post post) {
 
-
-        Recruitment newRecruitment = createNewRecruitment(request);
-
+        @Nullable Recruitment recruitment = of(request.getRecruitment());
 
         post.edit(post.toEditor()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .thumbnailUrl(request.getThumbnailUrl())
                 .isPublished(true)
-                .recruitment(newRecruitment)
+                .recruitment(recruitment)
                 .build());
-
-
-
     }
 
-    private static Recruitment createNewRecruitment(EditPostServiceRequest request) {
+    private static Recruitment of(EditRecruitmentServiceRequest request) {
 
-        if (request.getRecruitmentInfo() == null) {
-            return null;
-        }
-
-        return create(
-                request.getRecruitmentInfo().getCompanyName(),
-                request.getRecruitmentInfo().getStartDate(),
-                request.getRecruitmentInfo().getEndDate());
+        return request != null ? create(request.getCompanyName(), request.getStartDate(),
+                request.getEndDate()) : null;
     }
-
 }

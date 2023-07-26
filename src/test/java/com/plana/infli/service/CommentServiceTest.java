@@ -34,13 +34,11 @@ import com.plana.infli.web.dto.response.comment.edit.EditCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
 import com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse;
-import jakarta.persistence.EntityManager;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -48,7 +46,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -120,13 +117,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when
-        CreateCommentResponse response = commentService.createComment(request, member.getEmail());
+        CreateCommentResponse response = commentService.createComment(request);
 
         //then
         Comment findComment = commentRepository.findById(response.getCommentId()).get();
@@ -149,13 +147,14 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("postmember", university), board);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email("aaa")
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, "aaa"))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
 
@@ -172,13 +171,14 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("postmember", university), board);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(null)
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, null))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(AuthenticationFailedException.class)
                 .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
@@ -198,13 +198,14 @@ class CommentServiceTest {
         memberRepository.delete(member);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
@@ -223,13 +224,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("하".repeat(500))
                 .parentCommentId(null)
                 .build();
 
         //when
-        commentService.createComment(request, member.getEmail());
+        commentService.createComment(request);
 
         //then
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(1);
@@ -247,13 +249,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("하".repeat(501))
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("최대 댓글 길이를 초과하였습니다");
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
@@ -269,13 +272,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(999L)
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
@@ -295,13 +299,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
@@ -320,13 +325,14 @@ class CommentServiceTest {
         Member member = memberFactory.createUncertifiedMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
     }
@@ -345,13 +351,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", myUniversity);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
     }
@@ -375,14 +382,14 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member1.getEmail())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
                             //when
-                            CreateCommentResponse response = commentService.createComment(request,
-                                    member1.getEmail());
+                            CreateCommentResponse response = commentService.createComment(request);
 
                             //then
                             assertThat(response.getIdentifierNumber()).isEqualTo(1);
@@ -392,14 +399,14 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member2.getEmail())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
                             //when
-                            CreateCommentResponse response = commentService.createComment(request,
-                                    member2.getEmail());
+                            CreateCommentResponse response = commentService.createComment(request);
 
                             assertThat(response.getIdentifierNumber()).isEqualTo(2);
                         }),
@@ -407,13 +414,13 @@ class CommentServiceTest {
                 dynamicTest("글 작성자가 자신의 글에 댓글을 단 경우, 식별자 번호 0번을 부여받는다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(postMember.getEmail())
                                     .postId(post.getId())
                                     .content("글 작성자가 남기는 댓글")
                                     .parentCommentId(null)
                                     .build();
 
-                            CreateCommentResponse response = commentService.createComment(request,
-                                    postMember.getEmail());
+                            CreateCommentResponse response = commentService.createComment(request);
 
                             assertThat(response.getIdentifierNumber()).isEqualTo(0);
                         }),
@@ -422,14 +429,14 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member3.getEmail())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
                             //when
-                            CreateCommentResponse response = commentService.createComment(request,
-                                    member3.getEmail());
+                            CreateCommentResponse response = commentService.createComment(request);
 
                             assertThat(response.getIdentifierNumber()).isEqualTo(3);
                         }),
@@ -438,14 +445,14 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member2.getEmail())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
                             //when
-                            CreateCommentResponse response = commentService.createComment(request,
-                                    member2.getEmail());
+                            CreateCommentResponse response = commentService.createComment(request);
 
                             //then
                             assertThat(response.getIdentifierNumber()).isEqualTo(2);
@@ -455,14 +462,14 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member1.getEmail())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
                             //when
-                            CreateCommentResponse response = commentService.createComment(request,
-                                    member1.getEmail());
+                            CreateCommentResponse response = commentService.createComment(request);
 
                             //then
                             assertThat(response.getIdentifierNumber()).isEqualTo(1);
@@ -489,13 +496,14 @@ class CommentServiceTest {
 
         Member member = memberFactory.createStudentMember("nickname", university);
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("대댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when
-        CreateCommentResponse response = commentService.createComment(request, member.getEmail());
+        CreateCommentResponse response = commentService.createComment(request);
 
         //then
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(2);
@@ -522,18 +530,19 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email("aaa")
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, "aaa"))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
 
-    @DisplayName("로그인 하지 않은 상태로 댓글을 작성할 수 없다")
+    @DisplayName("로그인 하지 않은 상태로 대댓글을 작성할 수 없다")
     @Test
     void writeChildCommentWithoutLogIn() {
         //given
@@ -546,13 +555,14 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(null)
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, null))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(AuthenticationFailedException.class)
                 .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
     }
@@ -572,13 +582,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("하".repeat(500))
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when
-        CreateCommentResponse response = commentService.createComment(request, member.getEmail());
+        CreateCommentResponse response = commentService.createComment(request);
 
         //then
         assertThat(response.getContent().length()).isEqualTo(500);
@@ -599,15 +610,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("하".repeat(501))
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("최대 댓글 길이를 초과하였습니다");
+
     }
 
 
@@ -628,13 +641,14 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
@@ -651,15 +665,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(999L)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("존재하지 않는 댓글에 대댓글을 작성할수 없습니다");
+
     }
 
     @DisplayName("삭제된 댓글에 대댓글을 작성할 수 없다")
@@ -679,15 +695,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("삭제된 댓글에 대댓글을 작성할수 없습니다");
+
     }
 
     @DisplayName("대댓글에 대댓글을 작성할 수 없다")
@@ -709,15 +727,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(childComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("대댓글에는 자식댓글을 작성할수 없습니다");
+
     }
 
     @DisplayName("내가 소속된 대학이 아닌, 다른 대학에 작성된 글에 대댓글을 달 수 없다")
@@ -738,15 +758,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", myUniversity);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
+
     }
 
     @DisplayName("미인증 회원은 대댓글을 작성할 수 없다")
@@ -764,15 +786,17 @@ class CommentServiceTest {
         Member member = memberFactory.createUncertifiedMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.createComment(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.createComment(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
+
     }
 
     //TODO 대댓글 identifier number 테스트 필요
@@ -795,14 +819,14 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request,
-                member.getEmail());
+        EditCommentResponse response = commentService.editContent(request);
 
         //then
         assertThat(response).extracting("commentId", "content", "writerId", "postId",
@@ -828,12 +852,13 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member.getEmail())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
-                            commentService.createComment(request, member.getEmail());
+                            commentService.createComment(request);
                         }),
 
                 dynamicTest("해당 댓글을 수정하더라도 식별자 번호는 변하지 않는다",
@@ -842,15 +867,14 @@ class CommentServiceTest {
                             Comment comment = commentRepository.findAll().get(0);
 
                             EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                                    .email(member.getEmail())
                                     .postId(post.getId())
                                     .commentId(comment.getId())
                                     .content("수정된 댓글입니다")
                                     .build();
 
                             //when
-                            EditCommentResponse response = commentService.editContent(
-                                    request,
-                                    member.getEmail());
+                            EditCommentResponse response = commentService.editContent(request);
 
                             assertThat(response.getIdentifierNumber()).isEqualTo(
                                     comment.getIdentifierNumber());
@@ -872,14 +896,14 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("하".repeat(500))
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request,
-                member.getEmail());
+        EditCommentResponse response = commentService.editContent(request);
 
         //then
         assertThat(response.getContent()).isEqualTo("하".repeat(500));
@@ -899,15 +923,17 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("하".repeat(501))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("최대 댓글 길이를 초과하였습니다");
+
     }
 
 
@@ -924,13 +950,14 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email("aaa")
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, "aaa"))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
@@ -948,15 +975,17 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(null)
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, null))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(AuthenticationFailedException.class)
                 .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
+
     }
 
     @DisplayName("탈퇴한 회원은 자신이 작성한 댓글을 수정할수 없다")
@@ -975,15 +1004,17 @@ class CommentServiceTest {
         memberRepository.delete(member);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
+
     }
 
     @DisplayName("내가 작성하지 않은 댓글을 수정할수 없다")
@@ -1002,15 +1033,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
+
     }
 
     @DisplayName("존재하지 않는 댓글을 수정할수 없다")
@@ -1025,15 +1058,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(999L)
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("이미 삭제된 댓글을 수정할수 없다")
@@ -1052,15 +1087,17 @@ class CommentServiceTest {
         commentRepository.delete(comment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("이미 삭제된 타인의 댓글을 수정할수 없다")
@@ -1076,17 +1113,19 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(commentMember, post);
         commentRepository.delete(comment);
 
+        Member member = memberFactory.createStudentMember("nickname", university);
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
-        Member member = memberFactory.createStudentMember("nickname", university);
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("요청값으로 전달된 글 ID 번호와, 댓글 ID 번호를 통해 DB 에서 조회한 글 ID 번호는 동일해야 한다")
@@ -1103,15 +1142,15 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
         Comment comment = commentFactory.createComment(member, post);
 
-
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(anotherPost.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
     }
@@ -1130,15 +1169,17 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(999L)
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("삭제된 글에 작성된 댓글을 수정할수 없다")
@@ -1157,15 +1198,17 @@ class CommentServiceTest {
         postRepository.delete(post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     /**
@@ -1188,14 +1231,14 @@ class CommentServiceTest {
         Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request,
-                member.getEmail());
+        EditCommentResponse response = commentService.editContent(request);
 
         //then
         assertThat(response).extracting("commentId", "content", "writerId", "postId",
@@ -1220,15 +1263,17 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("childMember", university), post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email("aaa")
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, "aaa"))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
+
     }
 
     @DisplayName("수정후 대댓글의 길이는 500자 이하여야 한다")
@@ -1248,14 +1293,14 @@ class CommentServiceTest {
         Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("하".repeat(500))
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request,
-                member.getEmail());
+        EditCommentResponse response = commentService.editContent(request);
 
         //then
         assertThat(response.getContent()).isEqualTo("하".repeat(500));
@@ -1279,15 +1324,17 @@ class CommentServiceTest {
                 member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("하".repeat(501))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("최대 댓글 길이를 초과하였습니다");
+
     }
 
     @DisplayName("탈퇴한 회원은 자신이 작성한 대댓글을 수정할수 없다")
@@ -1310,15 +1357,17 @@ class CommentServiceTest {
         memberRepository.delete(member);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
+
     }
 
     @DisplayName("내가 작성하지 않은 대댓글을 수정할수 없다")
@@ -1339,15 +1388,17 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
+
     }
 
 
@@ -1371,15 +1422,17 @@ class CommentServiceTest {
         commentRepository.delete(childComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("이미 삭제된 타인의 대댓글을 수정할수 없다")
@@ -1400,18 +1453,20 @@ class CommentServiceTest {
 
         commentRepository.delete(childComment);
 
+        Member member = memberFactory.createStudentMember("nickname", university);
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
-        Member member = memberFactory.createStudentMember("nickname", university);
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
 
@@ -1434,15 +1489,17 @@ class CommentServiceTest {
         postRepository.delete(post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.editContent(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.editContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     /**
@@ -1462,11 +1519,12 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(member, post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .ids(List.of(comment.getId()))
                 .build();
 
         //when
-        commentService.delete(request, member.getEmail());
+        commentService.delete(request);
 
         //then
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
@@ -1488,13 +1546,15 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email("aaa")
                 .ids(List.of(comment.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, "aaa"))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
+
     }
 
     @DisplayName("로그인 하지 않은 상태로 댓글을 삭제할수 없다")
@@ -1510,13 +1570,15 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(null)
                 .ids(List.of(comment.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, null))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(AuthenticationFailedException.class)
                 .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
+
     }
 
     @DisplayName("존재하지 않는 댓글을 삭제할수 없다")
@@ -1529,13 +1591,15 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .ids(List.of(999L))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("이미 삭제된 댓글을 삭제할수 없다")
@@ -1554,13 +1618,15 @@ class CommentServiceTest {
         commentRepository.delete(comment);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .ids(List.of(comment.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("타인이 작성한 댓글을 삭제할수 없다")
@@ -1578,13 +1644,15 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .ids(List.of(comment.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
+
     }
 
     @DisplayName("관리자는 자신이 작성하지 않은 댓글도 삭제할수 있다")
@@ -1602,11 +1670,12 @@ class CommentServiceTest {
         Member admin = memberFactory.createAdminMember("admin", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(admin.getEmail())
                 .ids(List.of(comment.getId()))
                 .build();
 
         //when
-        commentService.delete(request, admin.getEmail());
+        commentService.delete(request);
 
         // then
         assertThat(commentRepository.findAllActiveCommentCount()).isZero();
@@ -1633,11 +1702,12 @@ class CommentServiceTest {
                 member, post, parentComment);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .ids(List.of(childComment.getId()))
                 .build();
 
         //when
-        commentService.delete(request, member.getEmail());
+        commentService.delete(request);
 
         //then
         Comment deletedComment = commentRepository.findById(childComment.getId()).get();
@@ -1661,13 +1731,15 @@ class CommentServiceTest {
                 parentComment);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email("aaa")
                 .ids(List.of(childComment.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, "aaa"))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
+
     }
 
     @DisplayName("로그인 하지 않은 상태로 댓글을 삭제할수 없다")
@@ -1683,13 +1755,15 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(null)
                 .ids(List.of(comment.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, null))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(AuthenticationFailedException.class)
                 .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
+
     }
 
     @DisplayName("이미 삭제된 대댓글을 삭제할수 없다")
@@ -1711,13 +1785,15 @@ class CommentServiceTest {
         commentRepository.delete(childComment);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .ids(List.of(childComment.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("타인이 작성한 대댓글을 삭제할수 없다")
@@ -1736,16 +1812,18 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("childCommentMember", university), post,
                 parentComment);
 
+        Member member = memberFactory.createStudentMember("nickname", university);
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(member.getEmail())
                 .ids(List.of(childComment.getId()))
                 .build();
 
-        Member member = memberFactory.createStudentMember("nickname", university);
 
         //when //then
-        assertThatThrownBy(() -> commentService.delete(request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.delete(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
+
     }
 
     @DisplayName("관리자는 자신이 작성하지 않은 대댓글도 삭제할수 있다")
@@ -1767,11 +1845,12 @@ class CommentServiceTest {
         Member admin = memberFactory.createAdminMember("admin", university);
 
         DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
+                .email(admin.getEmail())
                 .ids(List.of(childComment.getId()))
                 .build();
 
         //when
-        commentService.delete(request, admin.getEmail());
+        commentService.delete(request);
 
         // then
         Comment findComment = commentRepository.findById(childComment.getId()).get();
@@ -1799,32 +1878,35 @@ class CommentServiceTest {
                 dynamicTest("member1이 댓글을 작성한다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member1.getEmail())
                                     .postId(post.getId())
                                     .content("1번 댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
-                            commentService.createComment(request, member1.getEmail());
+                            commentService.createComment(request);
                         }),
                 dynamicTest("member2가 댓글을 작성한다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member2.getEmail())
                                     .postId(post.getId())
                                     .content("2번 댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
-                            commentService.createComment(request, member2.getEmail());
+                            commentService.createComment(request);
                         }),
                 dynamicTest("member3이 댓글을 작성한다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+                                    .email(member3.getEmail())
                                     .postId(post.getId())
                                     .content("3번 댓글입니다")
                                     .parentCommentId(null)
                                     .build();
 
-                            commentService.createComment(request, member3.getEmail());
+                            commentService.createComment(request);
                         }),
 
                 dynamicTest("해당 글에 작성된 댓글을 조회한다",
@@ -1832,13 +1914,14 @@ class CommentServiceTest {
                             //given
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                                    .email(member1.getEmail())
                                     .id(post.getId())
                                     .page("1")
                                     .build();
 
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request, member1.getEmail());
+                                    request);
 
                             //then
                             assertThat(response).extracting("postId", "isAnonymousBoard",
@@ -1872,13 +1955,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).isEmpty();
@@ -1900,13 +1983,13 @@ class CommentServiceTest {
         Comment comment2 = commentFactory.createComment(member2, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member1.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member1.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(2)
@@ -1932,13 +2015,13 @@ class CommentServiceTest {
         });
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response)
@@ -1960,13 +2043,13 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(member, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -1988,13 +2071,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2018,13 +2101,13 @@ class CommentServiceTest {
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2046,13 +2129,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2075,11 +2158,13 @@ class CommentServiceTest {
                 dynamicTest("댓글이 수정된다",
                         () -> {
                             EditCommentServiceRequest request = EditCommentServiceRequest.builder()
+                                    .email(commentMember.getEmail())
                                     .commentId(comment.getId())
                                     .postId(post.getId())
                                     .content("수정후 댓글")
                                     .build();
-                            commentService.editContent(request, commentMember.getEmail());
+
+                            commentService.editContent(request);
 
                         }),
 
@@ -2090,13 +2175,14 @@ class CommentServiceTest {
                                     university);
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                                    .email(member.getEmail())
                                     .id(post.getId())
                                     .page("1")
                                     .build();
 
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request, member.getEmail());
+                                    request);
 
                             //then
                             assertThat(response.getComments()).hasSize(1)
@@ -2120,13 +2206,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2147,13 +2233,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2174,13 +2260,13 @@ class CommentServiceTest {
         Comment comment = commentFactory.createComment(member, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2202,13 +2288,13 @@ class CommentServiceTest {
         Member admin = memberFactory.createAdminMember("admin", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(admin.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(
-                request, admin.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.isAdmin()).isTrue();
@@ -2223,15 +2309,16 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(999L)
                 .page("1")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.loadCommentsInPost(
-                request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.loadCommentsInPost(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("삭제된 글에 작성된 댓글을 조회할수 없다")
@@ -2248,15 +2335,16 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.loadCommentsInPost(
-                request, member.getEmail()))
+        assertThatThrownBy(() -> commentService.loadCommentsInPost(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+
     }
 
     @DisplayName("페이지 요청값이 0인 경우 1페이지가 조회된다")
@@ -2274,13 +2362,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("0")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request,
-                member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getCurrentPage()).isEqualTo(1);
@@ -2301,13 +2389,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("aaaa")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request,
-                member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getCurrentPage()).isEqualTo(1);
@@ -2328,13 +2416,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("-1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request,
-                member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getCurrentPage()).isEqualTo(1);
@@ -2357,13 +2445,13 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request,
-                member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments().size()).isZero();
@@ -2382,54 +2470,60 @@ class CommentServiceTest {
 
         CreateCommentResponse parentComment1 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
+                        .email(member.getEmail())
                         .postId(post.getId())
                         .content("1번 댓글입니다")
                         .parentCommentId(null)
-                        .build(), member.getEmail());
+                        .build());
 
         CreateCommentResponse parentComment2 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
+                        .email(member.getEmail())
                         .postId(post.getId())
                         .content("2번 댓글입니다")
                         .parentCommentId(null)
-                        .build(), member.getEmail());
+                        .build());
 
         CreateCommentResponse childComment1 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
+                        .email(member.getEmail())
                         .postId(post.getId())
                         .content("1번 댓글의 첫번쨰 대댓글 입니다")
                         .parentCommentId(parentComment1.getCommentId())
-                        .build(), member.getEmail());
+                        .build());
 
         CreateCommentResponse parentComment3 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
+                        .email(member.getEmail())
                         .postId(post.getId())
                         .content("3번 댓글입니다")
                         .parentCommentId(null)
-                        .build(), member.getEmail());
+                        .build());
 
         CreateCommentResponse childComment2 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
+                        .email(member.getEmail())
                         .postId(post.getId())
                         .content("1번 댓글의 두번쨰 대댓글 입니다")
                         .parentCommentId(parentComment1.getCommentId())
-                        .build(), member.getEmail());
+                        .build());
 
         CreateCommentResponse childComment3 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
+                        .email(member.getEmail())
                         .postId(post.getId())
                         .content("2번 댓글의 첫번쨰 대댓글 입니다")
                         .parentCommentId(parentComment2.getCommentId())
-                        .build(), member.getEmail());
+                        .build());
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request,
-                member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(6)
@@ -2466,13 +2560,13 @@ class CommentServiceTest {
         commentRepository.delete(childComment);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                .email(member.getEmail())
                 .id(post.getId())
                 .page("1")
                 .build();
 
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request,
-                member.getEmail());
+        PostCommentsResponse response = commentService.loadCommentsInPost(request);
 
         //then
         assertThat(response.getComments()).hasSize(1);
@@ -2502,14 +2596,14 @@ class CommentServiceTest {
                             commentRepository.delete(parentComment);
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                                    .email(member.getEmail())
                                     .id(post.getId())
                                     .page("1")
                                     .build();
 
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request,
-                                    member.getEmail());
+                                    request);
 
                             //then
                             assertThat(response.getComments()).hasSize(2)
@@ -2526,13 +2620,14 @@ class CommentServiceTest {
                             commentRepository.delete(childComment);
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
+                                    .email(member.getEmail())
                                     .id(post.getId())
                                     .page("1")
                                     .build();
 
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request, member.getEmail());
+                                    request);
 
                             //then
                             assertThat(response.getComments()).hasSize(0);

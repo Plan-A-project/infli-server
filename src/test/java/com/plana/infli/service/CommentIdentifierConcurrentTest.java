@@ -106,10 +106,11 @@ public class CommentIdentifierConcurrentTest {
                             university);
 
                     commentService.createComment(CreateCommentServiceRequest.builder()
+                            .email(member.getEmail())
                             .content("댓글")
                             .parentCommentId(null)
                             .postId(post.getId())
-                            .build(), member.getEmail());
+                            .build());
 
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
