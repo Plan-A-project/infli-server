@@ -196,7 +196,7 @@ class MemberProfileServiceTest {
 
         mockMvc
             .perform(
-                post("/auth/signup")
+                post("/auth/signup/student")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(content)
             )
