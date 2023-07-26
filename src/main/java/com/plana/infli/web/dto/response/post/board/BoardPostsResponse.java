@@ -16,7 +16,7 @@ public class BoardPostsResponse extends DefaultPostsResponse {
 
     @Builder
     public BoardPostsResponse(Long boardId, String boardName, int sizeRequest, int actualSize,
-            int currentPage, List<? extends DefaultPost> posts) {
+            int currentPage, List<BoardPost> posts) {
         super(sizeRequest, actualSize, currentPage, posts);
         this.boardId = boardId;
         this.boardName = boardName;

@@ -7,24 +7,26 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class CreatePostRequest {
 
     @NotNull(message = "게시판 ID를 입력해주세요")
-    private final Long boardId;
+    private Long boardId;
 
     @NotNull(message = "게시글 종류를 선택해주세요")
-    private final PostType postType;
+    private PostType postType;
 
     @NotNull(message = "글 제목을 입력해주세요")
-    private final String title;
+    private String title;
 
     @NotNull(message = "글 내용을 입력해주세요")
-    private final String content;
+    private String content;
 
     @Nullable
-    private final CreateRecruitmentRequest recruitment;
+    private CreateRecruitmentRequest recruitment;
 
     @Builder
     public CreatePostRequest(Long boardId, PostType postType, String title, String content,
@@ -52,16 +54,17 @@ public class CreatePostRequest {
     }
 
     @Getter
+    @NoArgsConstructor
     public static class CreateRecruitmentRequest {
 
         @NotNull(message = "회사명을 입력해주세요")
-        private final String companyName;
+        private String companyName;
 
         @NotNull(message = "모집 시작일을 입력해주세요")
-        private final LocalDateTime startDate;
+        private LocalDateTime startDate;
 
         @NotNull(message = "모집 종료일을 입력해주세요")
-        private final LocalDateTime endDate;
+        private LocalDateTime endDate;
 
         @Builder
         public CreateRecruitmentRequest(String companyName,
