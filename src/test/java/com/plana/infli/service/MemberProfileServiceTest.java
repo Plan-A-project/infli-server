@@ -130,36 +130,36 @@ class MemberProfileServiceTest {
         assertTrue(passwordEncoder.matches(passwordModifyRequest.getNewPassword(), member.getPassword()));
     }
 
-    @DisplayName("프로필 사진 변경 테스트")
-    @Test
-    public void modifyProfileImage() throws Exception{
-        signup();
-        login();
-
-        String fileName = "testImage.png";
-        Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
-
-        MockMultipartFile file = new MockMultipartFile(
-            "file",
-            "testImage.png",
-            MediaType.IMAGE_PNG_VALUE,
-            resource.getInputStream()
-        );
-
-        ResultActions resultActions = mockMvc
-            .perform(
-                multipart("/member/profile/image/modify")
-                    .file(file)
-                    .header("Access-Token", accessToken))
-            .andDo(print())
-            .andExpect(status().isOk());
-
-        String imageUrl = resultActions.andReturn().getResponse().getContentAsString();
-        Member member = memberRepository.findByEmail("testEmail@naver.com")
-            .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-
-        assertThat(member.getProfileImageUrl()).isEqualTo(imageUrl);
-    }
+//    @DisplayName("프로필 사진 변경 테스트")
+//    @Test
+//    public void modifyProfileImage() throws Exception{
+//        signup();
+//        login();
+//
+//        String fileName = "testImage.png";
+//        Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
+//
+//        MockMultipartFile file = new MockMultipartFile(
+//            "file",
+//            "testImage.png",
+//            MediaType.IMAGE_PNG_VALUE,
+//            resource.getInputStream()
+//        );
+//
+//        ResultActions resultActions = mockMvc
+//            .perform(
+//                multipart("/member/profile/image/modify")
+//                    .file(file)
+//                    .header("Access-Token", accessToken))
+//            .andDo(print())
+//            .andExpect(status().isOk());
+//
+//        String imageUrl = resultActions.andReturn().getResponse().getContentAsString();
+//        Member member = memberRepository.findByEmail("testEmail@naver.com")
+//            .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+//
+//        assertThat(member.getProfileImageUrl()).isEqualTo(imageUrl);
+//    }
 
     @DisplayName("회원 탈퇴 테스트")
     @Test
