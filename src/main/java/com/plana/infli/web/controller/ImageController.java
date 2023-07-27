@@ -10,6 +10,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api")
 public class ImageController {
 
     private final ImageService imageService;
