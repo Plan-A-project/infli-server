@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class SearchPostsByKeywordRequest {
 
     @NotEmpty(message = "검색어를 입력해주세요")

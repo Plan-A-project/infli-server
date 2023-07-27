@@ -15,11 +15,12 @@ public abstract class DefaultPostsResponse {
 
     private final List<? extends DefaultPost> posts;
 
-    public DefaultPostsResponse(int sizeRequest, int actualSize, int currentPage,
-            List<? extends DefaultPost> posts) {
+    public DefaultPostsResponse(int sizeRequest, int currentPage,
+            int actualSize, List<? extends DefaultPost> posts) {
+
         this.sizeRequest = sizeRequest;
-        this.actualSize = actualSize;
         this.currentPage = currentPage;
         this.posts = posts != null ? posts : new ArrayList<>();
+        this.actualSize = actualSize;
     }
 }

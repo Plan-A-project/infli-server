@@ -126,7 +126,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private JPQLQuery<Post> myLikedPosts(Member findMember) {
-        return selectFrom(postLike.post)
+        return select(postLike.post)
+                .from(postLike)
                 .where(postLike.member.eq(findMember));
     }
 
@@ -203,7 +204,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         setCommentCount(ids, posts);
 
-        return null;
+        return posts;
     }
 
     private List<Long> findPostIdsByBoard(PostQueryRequest request) {
@@ -230,6 +231,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
+
     }
 
     private Expression<String> getMemberRole(Board board) {

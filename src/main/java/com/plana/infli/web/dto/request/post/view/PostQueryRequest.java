@@ -39,7 +39,7 @@ public class PostQueryRequest {
         this.size = size;
         this.type = type;
         this.viewOrder = viewOrder;
-        this.keyword = keyword.trim();
+        this.keyword = keyword;
     }
 
     public static PostQueryRequest singlePost(Post post, Member member) {
