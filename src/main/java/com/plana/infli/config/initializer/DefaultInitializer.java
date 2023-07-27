@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"dev", "prod"})
+@Profile({"dev", "prod", "local"})
 public class DefaultInitializer implements CommandLineRunner {
 
     private static final String FUDAN = "푸단대학교";
