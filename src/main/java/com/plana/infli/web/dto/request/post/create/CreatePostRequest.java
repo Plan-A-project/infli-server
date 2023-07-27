@@ -3,13 +3,17 @@ package com.plana.infli.web.dto.request.post.create;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.CreateRecruitmentServiceRequest;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.stereotype.Service;
 
 @Getter
+@Setter
 @NoArgsConstructor
 public class CreatePostRequest {
 
@@ -19,10 +23,10 @@ public class CreatePostRequest {
     @NotNull(message = "게시글 종류를 선택해주세요")
     private PostType postType;
 
-    @NotNull(message = "글 제목을 입력해주세요")
+    @NotEmpty(message = "글 제목을 입력해주세요")
     private String title;
 
-    @NotNull(message = "글 내용을 입력해주세요")
+    @NotEmpty(message = "글 내용을 입력해주세요")
     private String content;
 
     @Nullable
