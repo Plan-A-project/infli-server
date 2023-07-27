@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class LoadPostsByBoardRequest {
 
     @NotNull(message = "글 종류를 선택해주세요")
