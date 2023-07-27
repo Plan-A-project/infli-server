@@ -1,6 +1,8 @@
 package com.plana.infli.domain;
 
+import static com.plana.infli.domain.PostType.*;
 import static com.plana.infli.domain.Role.*;
+import static java.util.List.*;
 
 import java.util.List;
 import lombok.Getter;
@@ -10,15 +12,15 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum BoardType {
 
-    EMPLOYMENT("채용", 1, List.of(COMPANY)),
+    EMPLOYMENT("채용", 1,  of(NORMAL, RECRUITMENT)),
 
-    ACTIVITY("대외활동", 2, List.of(COMPANY)),
+    ACTIVITY("대외활동", 2,  of(NORMAL, RECRUITMENT)),
 
-    CLUB("동아리", 3, List.of(STUDENT_COUNCIL)),
+    CLUB("동아리", 3,  of(NORMAL)),
 
-    ANONYMOUS("익명", 4, List.of(COMPANY, STUDENT_COUNCIL, STUDENT)),
+    ANONYMOUS("익명", 4, of(NORMAL)),
 
-    CAMPUS_LIFE("학교생활", 5, List.of(COMPANY, STUDENT_COUNCIL, STUDENT)),
+    CAMPUS_LIFE("학교생활", 5, of(NORMAL, ANNOUNCEMENT)),
 
     ;
 
@@ -28,6 +30,11 @@ public enum BoardType {
     // 게시판 기본 정렬순서
     private final int defaultSequence;
 
-    // 각 게시판 종류마다 글 작성이 허용되는 회원 Role
-    private final List<Role> roles;
+    private final List<PostType> allowedPostTypes;
+
+
+    public boolean isAllowedPostType(PostType postType) {
+        return this.allowedPostTypes.contains(postType);
+    }
+
 }

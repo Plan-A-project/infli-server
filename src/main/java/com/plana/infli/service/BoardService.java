@@ -317,27 +317,7 @@ public class BoardService {
                 && popularBoard.isEnabled();
     }
 
-    public boolean checkHasWritePermissionOnThisBoard(Long boardId, String email,
-            PostType postType) {
 
-        checkIsLoggedIn(email);
-
-        // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = findMemberWithUniversityJoined(email);
-
-        // 게시판이 존재하지 않거나, 삭제된 경우 예외 발생
-        Board board = findBoardWithUniversityJoined(boardId);
-
-        if (member.getUniversity().equals(board.getUniversity()) == false) {
-            throw new AuthorizationFailedException();
-        }
-
-        if (board.hasWritePermission(member.getRole()) == false) {
-            throw new AuthorizationFailedException();
-        }
-
-        return true;
-    }
 
     private Board findBoardWithUniversityJoined(Long boardId) {
         return boardRepository.findActiveBoardWithUniversityBy(boardId)

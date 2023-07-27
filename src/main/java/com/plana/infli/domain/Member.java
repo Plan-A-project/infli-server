@@ -82,12 +82,6 @@ public class Member extends BaseEntity {
     this.role = Role.UNCERTIFIED;
   }
 
-  public static void checkIsLoggedIn(String email) {
-    if (email == null) {
-      throw new AuthenticationFailedException();
-    }
-  }
-
   public static Boolean isAdmin(Member member) {
     return member.role.equals(ADMIN);
   }

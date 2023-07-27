@@ -7,8 +7,10 @@ import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class LoadPostsByBoardRequest {
 
     @NotNull(message = "글 종류를 선택해주세요")

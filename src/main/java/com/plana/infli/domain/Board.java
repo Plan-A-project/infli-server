@@ -56,10 +56,6 @@ public class Board extends BaseEntity {
         return new Board(boardType, university);
     }
 
-    public boolean hasWritePermission(Role role) {
-        return this.boardType.getRoles().contains(role);
-    }
-
     public static boolean isAnonymousBoard(Board board) {
         return board.getBoardType().equals(ANONYMOUS);
     }

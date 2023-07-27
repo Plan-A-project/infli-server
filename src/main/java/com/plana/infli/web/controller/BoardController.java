@@ -43,9 +43,9 @@ public class BoardController {
     @ApiResponse(responseCode = "200", description = "True : 인기 게시판 기본 설정값 존재함, False : 기본 설정값 존재하지 않음" )
     @ApiResponse(responseCode = "404", description = "사용자를 찾을수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<Boolean> isPopularBoardCreated(@AuthenticationPrincipal String email) {
+    public boolean isPopularBoardCreated(@AuthenticationPrincipal String email) {
 
-        return ResponseEntity.ok(boardService.popularBoardExistsBy(email));
+        return boardService.popularBoardExistsBy(email);
     }
 
 
@@ -66,20 +66,8 @@ public class BoardController {
     @ApiResponse(responseCode = "404", description = "사용자를 찾을수 없음")
     @ApiResponse(responseCode = "409", description = "인기 게시판이 이미 설정 되어 있음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<Void> createDefaultPopularBoards(@AuthenticationPrincipal String email) {
+    public void createDefaultPopularBoards(@AuthenticationPrincipal String email) {
         boardService.createDefaultPopularBoards(email);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/boards/permissions/{boardId}")
-    @Operation(description = "특정 게시판에 대한 글 작성 권한 여부 확인")
-    @ApiResponse(responseCode = "200", description = "해당 게시판에 글 작성 권한 있음")
-    @ApiResponse(responseCode = "403", description = "해당 게시판에 글 작성 권한 없음")
-    @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<Boolean> checkHasWritePermissionOnThisBoard(@PathVariable Long boardId,
-            @AuthenticationPrincipal String email, @RequestParam PostType postType) {
-
-        return ok(boardService.checkHasWritePermissionOnThisBoard(boardId, email, postType));
     }
 
     /**
@@ -92,10 +80,10 @@ public class BoardController {
             content = @Content(schema = @Schema(implementation = PopularBoardsSettingsResponse.class)))
     @ApiResponse(responseCode = "404", description = "사용자를 찾을수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<PopularBoardsSettingsResponse> loadEnabledPopularBoardsForSetting(
+    public PopularBoardsSettingsResponse loadEnabledPopularBoardsForSetting(
             @AuthenticationPrincipal String email) {
 
-        return ok(boardService.loadEnabledPopularBoardsForSettingBy(email));
+        return boardService.loadEnabledPopularBoardsForSettingBy(email);
     }
 
     @PatchMapping("/settings/boards/popular")
@@ -117,9 +105,9 @@ public class BoardController {
     @ApiResponse(responseCode = "200", description = "모든 게시판 조회 완료")
     @ApiResponse(responseCode = "404", description = "사용자를 찾을수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<BoardListResponse> listAllBoards(@AuthenticationPrincipal String email) {
-        BoardListResponse response = boardService.loadAllBoard(email);
-        return ok(response);
+    public BoardListResponse listAllBoards(@AuthenticationPrincipal String email) {
+
+        return boardService.loadAllBoard(email);
     }
 
     @PostMapping("/settings/boards/popular")
@@ -128,12 +116,10 @@ public class BoardController {
     @ApiResponse(responseCode = "404", description = "사용자를 찾을수 없음")
     @ApiResponse(responseCode = "400", description = "보고싶다고 설정한 인기 게시판의 ID 번호 정보가 잘못됨")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<Void> changeBoardVisibility(
+    public void changeBoardVisibility(
             @RequestBody @Validated ChangePopularBoardVisibilityRequest request,
             @AuthenticationPrincipal String email) {
 
         boardService.changeBoardVisibility(request.toServiceRequest(), email);
-
-        return ok().build();
     }
 }
