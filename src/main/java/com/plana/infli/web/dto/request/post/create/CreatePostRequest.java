@@ -3,6 +3,7 @@ package com.plana.infli.web.dto.request.post.create;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.CreateRecruitmentServiceRequest;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Getter
 @NoArgsConstructor
@@ -29,6 +31,7 @@ public class CreatePostRequest {
     private String content;
 
     @Nullable
+    @Valid
     private CreateRecruitmentRequest recruitment;
 
     @Builder
@@ -52,14 +55,15 @@ public class CreatePostRequest {
                 .postType(postType)
                 .title(title)
                 .content(content)
-                .recruitment(recruitment.toServiceRequest())
+                .recruitment(recruitment != null ? recruitment.toServiceRequest() : null)
                 .build();
     }
 
     @Getter
+    @NoArgsConstructor
     public static class CreateRecruitmentRequest {
 
-        @NotNull(message = "회사명을 입력해주세요")
+        @NotEmpty(message = "회사명을 입력해주세요")
         private String companyName;
 
         @NotNull(message = "모집 시작일을 입력해주세요")

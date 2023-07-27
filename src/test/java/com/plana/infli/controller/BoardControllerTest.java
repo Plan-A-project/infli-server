@@ -222,43 +222,6 @@ public class BoardControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("특정 게시판에 글 작성권한 여부 확인 - 권한 있는 경우")
-    @WithMockMember
-    @Test
-    void checkWritePermission() throws Exception {
-        //given
-        University university = universityRepository.findByName("푸단대학교").get();
-
-        Board anonymousBoard = boardFactory.createAnonymousBoard(university);
-
-        //when
-        ResultActions resultActions = mvc
-                .perform(get("/api/boards/permissions/{boardId}?postType=NORMAL", anonymousBoard.getId()));
-
-        //then
-        resultActions.andExpect(status().isOk())
-                .andExpect(content().string("true"))
-                .andDo(print());
-    }
-
-    @DisplayName("특정 게시판에 글 작성권한 여부 확인 - 권한 없는 경우")
-    @WithMockMember
-    @Test
-    void checkWritePermission2() throws Exception {
-        //given
-        University university = universityRepository.findByName("푸단대학교").get();
-
-        Board employmentBoard = boardFactory.createEmploymentBoard(university);
-
-        //when
-        ResultActions resultActions = mvc
-                .perform(get("/api/boards/permissions/{boardId}?postType=ANNOUNCEMENT", employmentBoard.getId()));
-
-        //then
-        resultActions.andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.message").value("해당 권한이 없습니다"))
-                .andDo(print());
-    }
 
     /**
      * 홈설정 기능

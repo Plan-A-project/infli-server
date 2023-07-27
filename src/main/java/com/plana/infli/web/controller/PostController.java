@@ -2,6 +2,7 @@ package com.plana.infli.web.controller;
 
 import static org.springframework.http.HttpStatus.*;
 
+import com.plana.infli.domain.PostType;
 import com.plana.infli.service.PostService;
 import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardRequest;
 import com.plana.infli.web.dto.request.post.create.CreatePostRequest;
@@ -37,6 +38,15 @@ public class PostController {
         postService.confirmWritePolicyAgreement(email);
     }
 
+    @GetMapping("/boards/{boardId}/permissions")
+    @Operation(summary = "특정 게시판에 글 작성 권한이 있는지 여부 확인")
+    public boolean isValidWriteRequest(@AuthenticatedPrincipal String email,
+            @PathVariable Long boardId, PostType postType) {
+
+        return postService.isValidWriteRequest(boardId, email, postType);
+    }
+
+
     @ResponseStatus(CREATED)
     @PostMapping("/posts")
     @Operation(summary = "글 단건 생성")
@@ -49,7 +59,7 @@ public class PostController {
     @Operation(summary = "내가 작성한 글 단건 수정")
     public void edit(@Validated @RequestBody EditPostRequest request,
             @AuthenticatedPrincipal String email) {
-        postService.editPost(request.toServiceRequest(email));
+        postService.edit(request.toServiceRequest(email));
     }
 
     @DeleteMapping("/posts/{postId}")
@@ -58,6 +68,8 @@ public class PostController {
             @AuthenticatedPrincipal String email) {
         postService.deletePost(postId, email);
     }
+
+
 
     @GetMapping("/posts/{postId}")
     @Operation(summary = "글 단건 조회")

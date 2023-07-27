@@ -3,6 +3,7 @@ package com.plana.infli.web.dto.request.post.edit;
 
 import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest.EditRecruitmentServiceRequest;
 import jakarta.annotation.Nullable;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class EditPostRequest {
 
     @NotNull(message = "글 Id 번호를 입력해주세요")
@@ -26,6 +28,7 @@ public class EditPostRequest {
     private String thumbnailUrl;
 
     @Nullable
+    @Valid
     private EditRecruitmentRequest recruitment;
 
 
@@ -47,12 +50,13 @@ public class EditPostRequest {
                 .title(title)
                 .content(content)
                 .thumbnailUrl(thumbnailUrl)
-                .recruitment(recruitment.toServiceRequest())
+                .recruitment(recruitment != null ? recruitment.toServiceRequest() : null)
                 .build();
     }
 
 
     @Getter
+    @NoArgsConstructor
     public static class EditRecruitmentRequest {
 
         @NotNull(message = "회사명을 입력해주세요")
