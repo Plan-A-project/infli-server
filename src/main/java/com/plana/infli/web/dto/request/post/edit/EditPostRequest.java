@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class EditPostRequest {
 
     @NotNull(message = "글 Id 번호를 입력해주세요")
@@ -54,7 +53,6 @@ public class EditPostRequest {
 
 
     @Getter
-    @NoArgsConstructor
     public static class EditRecruitmentRequest {
 
         @NotNull(message = "회사명을 입력해주세요")

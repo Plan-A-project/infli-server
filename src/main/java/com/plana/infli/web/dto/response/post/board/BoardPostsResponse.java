@@ -15,9 +15,10 @@ public class BoardPostsResponse extends DefaultPostsResponse {
     private final String boardName;
 
     @Builder
-    public BoardPostsResponse(Long boardId, String boardName, int sizeRequest, int actualSize,
-            int currentPage, List<BoardPost> posts) {
-        super(sizeRequest, actualSize, currentPage, posts);
+    public BoardPostsResponse(Long boardId, String boardName, int sizeRequest,
+            int actualSize, int currentPage, List<BoardPost> posts) {
+
+        super(sizeRequest, currentPage, actualSize, posts);
         this.boardId = boardId;
         this.boardName = boardName;
     }
@@ -29,9 +30,10 @@ public class BoardPostsResponse extends DefaultPostsResponse {
                 .boardId(request.getBoard().getId())
                 .boardName(request.getBoard().getBoardName())
                 .sizeRequest(request.getSize())
-                .actualSize(posts.size())
                 .currentPage(request.getPage())
+                .actualSize(posts != null ? posts.size() : 0)
                 .posts(posts)
                 .build();
     }
+
 }

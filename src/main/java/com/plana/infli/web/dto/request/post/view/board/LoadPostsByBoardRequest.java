@@ -1,18 +1,14 @@
 package com.plana.infli.web.dto.request.post.view.board;
 
 
-import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
 
 import com.plana.infli.domain.PostType;
-import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class LoadPostsByBoardRequest {
 
     @NotNull(message = "글 종류를 선택해주세요")

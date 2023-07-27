@@ -13,7 +13,6 @@ import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class CreatePostRequest {
 
@@ -58,7 +57,6 @@ public class CreatePostRequest {
     }
 
     @Getter
-    @NoArgsConstructor
     public static class CreateRecruitmentRequest {
 
         @NotNull(message = "회사명을 입력해주세요")
