@@ -114,8 +114,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                     .where(post.eq(request.getPost()))
                     .fetchOne();
 
-        } catch (NullPointerException e) {
-            throw new BadRequestException("널포인터 예외 발생");
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
