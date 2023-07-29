@@ -113,7 +113,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                     post.title,
                                     post.content,
                                     post.createdAt,
-                                    post.member.id.eq(request.getMember().getId()),
+                                    isMyPost(request.getMember()),
                                     isAdmin(request.getMember()),
                                     post.viewCount,
                                     post.likes.size(),
@@ -129,6 +129,15 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
+    }
+
+    private BooleanExpression isMyPost(Member member) {
+        return post.in(myPosts(member));
+    }
+
+    private JPQLQuery<Post> myPosts(Member findMember) {
+        return selectFrom(post)
+                .where(post.member.eq(findMember));
     }
 
 
