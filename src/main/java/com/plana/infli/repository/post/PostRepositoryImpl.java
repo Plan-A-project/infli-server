@@ -104,7 +104,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         try {
             return jpaQueryFactory.select(new QSinglePostResponse(
-                            post.board.boardName, post.board.id, post.postType.stringValue(),
+                            post.board.boardName,
+                            post.board.id,
+                            post.postType.stringValue(),
                             nicknameEq(),
                             post.id,
                             post.title,
@@ -112,7 +114,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                             post.createdAt,
                             postWriterEqual(request.getMember()),
                             isAdmin(request.getMember()),
-                            post.viewCount,
+                            nullExpression(),
+//                            post.viewCount,
                             nullExpression(),
 //                            post.likes.size(),
                             nullExpression(),
