@@ -222,8 +222,7 @@ public class PostService {
 
         PostQueryRequest request = singlePost(post, member);
 
-//        return postRepository.loadSinglePostResponse(request);
-        return null;
+        return postRepository.loadSinglePostResponse(request);
     }
 
 

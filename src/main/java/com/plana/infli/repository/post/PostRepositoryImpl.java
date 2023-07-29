@@ -19,6 +19,7 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
+import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import com.plana.infli.web.dto.response.post.QCommentCount;
@@ -101,16 +102,21 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     @Override
     public SinglePostResponse loadSinglePostResponse(PostQueryRequest request) {
 
-        return jpaQueryFactory.select(new QSinglePostResponse(
-                        post.board.boardName, post.board.id, post.postType.stringValue(),
-                        nicknameEq(), post.id, post.title, post.content,
-                        post.createdAt, postWriterEqual(request.getMember()),
-                        isAdmin(request.getMember()), post.viewCount, post.likes.size(),
-                        pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
-                        companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
-                .from(post)
-                .where(post.eq(request.getPost()))
-                .fetchOne();
+        try {
+            return jpaQueryFactory.select(new QSinglePostResponse(
+                            post.board.boardName, post.board.id, post.postType.stringValue(),
+                            nicknameEq(), post.id, post.title, post.content,
+                            post.createdAt, postWriterEqual(request.getMember()),
+                            isAdmin(request.getMember()), post.viewCount, post.likes.size(),
+                            pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
+                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
+                    .from(post)
+                    .where(post.eq(request.getPost()))
+                    .fetchOne();
+
+        } catch (NullPointerException e) {
+            throw new BadRequestException("널포인터 예외 발생");
+        }
     }
 
 
