@@ -47,11 +47,11 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                         profileImageUrlEq(isAnonymous),
                         comment.isDeleted, comment.identifierNumber,
                         comment.createdAt, comment.content,
-                        comment.member.eq(findMember),
+                        isMyComment(findMember),
                         comment.commentLikes.size(),
                         comment.id.in(myCommentLikesInThisPost(findPost, findMember)),
                         comment.parentComment.isNull(), comment.isEdited,
-                        comment.member.eq(findPost.getMember())))
+                        isMyComment(findPost.getMember())))
                 .from(comment)
                 .innerJoin(comment.member, member)
                 .innerJoin(comment.post, post)
@@ -62,6 +62,15 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .offset((long) (pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
                 .limit(pageRequest.getPageSize())
                 .fetch();
+    }
+
+    private  BooleanExpression isMyComment(Member findMember) {
+        return comment.in(myComments(findMember));
+    }
+
+    private JPQLQuery<Comment> myComments(Member findMember) {
+        return selectFrom(comment)
+                .where(comment.member.eq(findMember));
     }
 
     private JPQLQuery<Long> myCommentLikesInThisPost(Post findPost, Member findMember) {
