@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:mysql://${HOST_NAME:localhost}:${DATABASE_PORT:3306}/${DATABASE_NAME:test}
+    username: ${DATABASE_USER_NAME:sa}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
