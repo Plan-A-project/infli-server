@@ -102,24 +102,23 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     @Override
     public SinglePostResponse loadSinglePostResponse(PostQueryRequest request) {
 
-        return null;
-//        try {
-//            return jpaQueryFactory.select(new QSinglePostResponse(
-//                            post.board.boardName, post.board.id, post.postType.stringValue(),
-//                            nicknameEq(), post.id, post.title, post.content,
-//                            post.createdAt, postWriterEqual(request.getMember()),
-//                            isAdmin(request.getMember()), post.viewCount, nullExpression(),
-////                            post.likes.size(),
-//                            pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
-//                            nullExpression(), nullExpression(), nullExpression()))
-////                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
-//                    .from(post)
-//                    .where(post.eq(request.getPost()))
-//                    .fetchOne();
-//
-//        } catch (Exception e) {
-//            throw new BadRequestException(e.getMessage());
-//        }
+        try {
+            return jpaQueryFactory.select(new QSinglePostResponse(
+                            post.board.boardName, post.board.id, post.postType.stringValue(),
+                            nicknameEq(), post.id, post.title, post.content,
+                            post.createdAt, postWriterEqual(request.getMember()),
+                            isAdmin(request.getMember()), post.viewCount, nullExpression(),
+//                            post.likes.size(),
+                            pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
+                            nullExpression(), nullExpression(), nullExpression()))
+//                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
+                    .from(post)
+                    .where(post.eq(request.getPost()))
+                    .fetchOne();
+
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 
 
