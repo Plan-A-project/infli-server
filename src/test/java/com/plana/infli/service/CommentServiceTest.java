@@ -130,10 +130,8 @@ class CommentServiceTest {
         Comment findComment = commentRepository.findById(response.getCommentId()).get();
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(1);
         assertThat(response)
-                .extracting("commentId", "content", "writerId",
-                        "postId", "isParentComment")
-                .contains(findComment.getId(), findComment.getContent(), member.getId(),
-                        post.getId(), true);
+                .extracting("commentId", "identifierNumber")
+                .contains(findComment.getId(), findComment.getIdentifierNumber());
         assertThat(findComment.isEdited()).isFalse();
     }
 
@@ -161,28 +159,7 @@ class CommentServiceTest {
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
     }
 
-    @DisplayName("로그인 하지 않은 상태로 댓글을 작성할 수 없다")
-    @Test
-    void writeCommentWithoutLogIn() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postmember", university), board);
 
-        CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .email(null)
-                .postId(post.getId())
-                .content("댓글입니다")
-                .parentCommentId(null)
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.createComment(request))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-        assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
-    }
 
 
     @DisplayName("탈퇴한 회원은 댓글을 작성할 수 없다")
@@ -511,10 +488,9 @@ class CommentServiceTest {
         Comment findComment = commentRepository.findById(response.getCommentId()).get();
 
         assertThat(response)
-                .extracting("commentId", "content", "writerId",
-                        "postId", "isParentComment")
-                .contains(findComment.getId(), findComment.getContent(), member.getId(),
-                        post.getId(), false);
+                .extracting("commentId", "identifierNumber")
+                .contains(findComment.getId(), findComment.getIdentifierNumber());
+
     }
 
     @DisplayName("존재하지 않는 회원은 대댓글을 작성할수 없다")
@@ -542,30 +518,7 @@ class CommentServiceTest {
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
 
-    @DisplayName("로그인 하지 않은 상태로 대댓글을 작성할 수 없다")
-    @Test
-    void writeChildCommentWithoutLogIn() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
 
-        Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
-
-        CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .email(null)
-                .postId(post.getId())
-                .content("댓글입니다")
-                .parentCommentId(parentComment.getId())
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.createComment(request))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
 
     @DisplayName("최대 허용 대댓글 길이는 500자 이다")
     @Test
@@ -592,7 +545,8 @@ class CommentServiceTest {
         CreateCommentResponse response = commentService.createComment(request);
 
         //then
-        assertThat(response.getContent().length()).isEqualTo(500);
+        Comment comment = commentRepository.findById(response.getCommentId()).get();
+        assertThat(comment.getContent().length()).isEqualTo(500);
     }
 
     @DisplayName("최대 허용 대댓글 길이는 500자 이다 2")
@@ -673,8 +627,8 @@ class CommentServiceTest {
 
         //when //then
         assertThatThrownBy(() -> commentService.createComment(request))
-                .isInstanceOf(BadRequestException.class)
-                .message().isEqualTo("존재하지 않는 댓글에 대댓글을 작성할수 없습니다");
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
     }
 
@@ -826,13 +780,14 @@ class CommentServiceTest {
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request);
+        commentService.editContent(request);
 
         //then
-        assertThat(response).extracting("commentId", "content", "writerId", "postId",
-                        "identifierNumber", "isParentComment", "isEdited")
-                .contains(comment.getId(), request.getContent(), member.getId(), post.getId(),
-                        comment.getIdentifierNumber(), comment.isParentComment(), true);
+        Comment findComment = commentRepository.findWithPostById(comment.getId()).get();
+        assertThat(findComment.getId()).isEqualTo(comment.getId());
+        assertThat(findComment.getContent()).isEqualTo("수정된 댓글입니다");
+        assertThat(findComment.isEdited()).isTrue();
+
     }
 
     @DisplayName("댓글을 수정하더라도 부여받은 식별자 번호는 변하지 않는다")
@@ -874,9 +829,11 @@ class CommentServiceTest {
                                     .build();
 
                             //when
-                            EditCommentResponse response = commentService.editContent(request);
+                            commentService.editContent(request);
 
-                            assertThat(response.getIdentifierNumber()).isEqualTo(
+                            //then
+                            Comment findComment = commentRepository.findById(comment.getId()).get();
+                            assertThat(findComment.getIdentifierNumber()).isEqualTo(
                                     comment.getIdentifierNumber());
                         })
         );
@@ -903,10 +860,11 @@ class CommentServiceTest {
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request);
+        commentService.editContent(request);
 
         //then
-        assertThat(response.getContent()).isEqualTo("하".repeat(500));
+        Comment findComment = commentRepository.findById(comment.getId()).get();
+        assertThat(findComment.getContent()).isEqualTo("하".repeat(500));
     }
 
     @DisplayName("수정한 댓글의 길이는 500자 이하여야 한다")
@@ -962,31 +920,6 @@ class CommentServiceTest {
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
 
-    @DisplayName("로그인 하지 않은 상태로 댓글을 수정할수 없다")
-    @Test
-    void editCommentWithoutLogin() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
-
-        Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
-
-        EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .email(null)
-                .postId(post.getId())
-                .commentId(comment.getId())
-                .content("수정된 댓글입니다")
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.editContent(request))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-
-    }
 
     @DisplayName("탈퇴한 회원은 자신이 작성한 댓글을 수정할수 없다")
     @Test
@@ -1238,13 +1171,15 @@ class CommentServiceTest {
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request);
+        commentService.editContent(request);
 
         //then
-        assertThat(response).extracting("commentId", "content", "writerId", "postId",
-                        "identifierNumber", "isParentComment", "isEdited")
-                .contains(childComment.getId(), request.getContent(), member.getId(), post.getId(),
-                        childComment.getIdentifierNumber(), childComment.isParentComment(), true);
+        Comment findComment = commentRepository.findActiveCommentWithMemberAndPostBy(childComment.getId()).get();
+
+        assertThat(findComment.getId()).isEqualTo(childComment.getId());
+        assertThat(findComment.getContent()).isEqualTo("수정된 댓글입니다");
+        assertThat(findComment.isEdited()).isTrue();
+
     }
 
     @DisplayName("존재하지 않는 회원은 대댓글을 수정할수 없다")
@@ -1300,10 +1235,11 @@ class CommentServiceTest {
                 .build();
 
         //when
-        EditCommentResponse response = commentService.editContent(request);
+        commentService.editContent(request);
 
         //then
-        assertThat(response.getContent()).isEqualTo("하".repeat(500));
+        Comment findComment = commentRepository.findById(childComment.getId()).get();
+        assertThat(findComment.getContent()).isEqualTo("하".repeat(500));
     }
 
     @DisplayName("수정후 대댓글의 길이는 500자 이하여야 한다 2")
@@ -1557,29 +1493,6 @@ class CommentServiceTest {
 
     }
 
-    @DisplayName("로그인 하지 않은 상태로 댓글을 삭제할수 없다")
-    @Test
-    void deleteCommentWithoutLogin() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
-
-        Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
-
-        DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
-                .email(null)
-                .ids(List.of(comment.getId()))
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.delete(request))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-
-    }
 
     @DisplayName("존재하지 않는 댓글을 삭제할수 없다")
     @Test
@@ -1742,29 +1655,7 @@ class CommentServiceTest {
 
     }
 
-    @DisplayName("로그인 하지 않은 상태로 댓글을 삭제할수 없다")
-    @Test
-    void deleteChildCommentWithoutLogin() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
 
-        Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
-
-        DeleteCommentServiceRequest request = DeleteCommentServiceRequest.builder()
-                .email(null)
-                .ids(List.of(comment.getId()))
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.delete(request))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-
-    }
 
     @DisplayName("이미 삭제된 대댓글을 삭제할수 없다")
     @Test
@@ -2992,17 +2883,6 @@ class CommentServiceTest {
         assertThat(response.getComments()).isEmpty();
     }
 
-    @DisplayName("로그인 하지 않은 상태로 자신이 작성한 댓글 목록을 조회할수 없다")
-    @Test
-    void listCommentsWroteByMeWithoutLogin() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-
-        //when //then
-        assertThatThrownBy(() -> commentService.loadMyComments(1, null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
 
     @DisplayName("내가 작성한 댓글 목록 조회시, 삭제된 댓글은 조회되지 않는다")
     @Test
@@ -3128,14 +3008,7 @@ class CommentServiceTest {
         assertThat(commentCount).isEqualTo(0);
     }
 
-    @DisplayName("로그인 하지 않은 상태로 내가 작성한 총 댓글 갯수를 조회할수 없다")
-    @Test
-    void countingMyCommentsNumberWithoutLogin() {
-        //when //then
-        assertThatThrownBy(() -> commentService.findCommentsCountByMember(null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
+
 
     @DisplayName("탈퇴한 상태로 내가 작성한 총 댓글 갯수를 조회할수 없다")
     @Test

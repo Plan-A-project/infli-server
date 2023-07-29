@@ -62,10 +62,10 @@ public class CommentController {
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "403", description = "타인의 댓글 수정할 수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public EditCommentResponse edit(@Validated @RequestBody EditCommentRequest request,
+    public void edit(@Validated @RequestBody EditCommentRequest request,
             @AuthenticationPrincipal String email) {
 
-        return commentService.editContent(request.toServiceRequest(email));
+        commentService.editContent(request.toServiceRequest(email));
     }
 
     @DeleteMapping("/comments")
@@ -102,10 +102,7 @@ public class CommentController {
     public BestCommentResponse loadBestCommentInPost(@PathVariable Long postId,
             @AuthenticationPrincipal String email) {
 
-        @Nullable BestCommentResponse response = commentService.loadBestCommentInPost(postId,
-                email);
-
-        return response;
+        return commentService.loadBestCommentInPost(postId, email);
     }
 
     @GetMapping("/posts/{postId}/comments/count")
@@ -113,8 +110,8 @@ public class CommentController {
     @ApiResponse(responseCode = "200", description = "정상적으로 조회 완료")
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
-    public ResponseEntity<Long> findCommentCountInPost(@PathVariable Long postId) {
-        return ok(commentService.findActiveCommentsCountInPost(postId));
+    public Long findCommentCountInPost(@PathVariable Long postId) {
+        return commentService.findActiveCommentsCountInPost(postId);
     }
 
     @GetMapping("/members/comments")
@@ -122,9 +119,9 @@ public class CommentController {
     @ApiResponse(responseCode = "200", description = "정상적으로 조회 완료")
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
-    public ResponseEntity<MyCommentsResponse> loadMyComments(Integer page,
+    public MyCommentsResponse loadMyComments(Integer page,
             @AuthenticationPrincipal String email) {
-        return ok(commentService.loadMyComments(page, email));
+        return commentService.loadMyComments(page, email);
     }
 
     @GetMapping("/members/comments/count")
@@ -133,9 +130,9 @@ public class CommentController {
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public ResponseEntity<Long> loadMyCommentsCount(
+    public Long loadMyCommentsCount(
             @AuthenticationPrincipal String email) {
 
-        return ok(commentService.findCommentsCountByMember(email));
+        return commentService.findCommentsCountByMember(email);
     }
 }

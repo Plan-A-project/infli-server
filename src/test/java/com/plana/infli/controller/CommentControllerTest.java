@@ -128,10 +128,9 @@ public class CommentControllerTest {
         Comment comment = commentRepository.findAll().get(0);
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.commentId").value(comment.getId()))
-                .andExpect(jsonPath("$.content").value("댓글입니다"))
-                .andExpect(jsonPath("$.postId").value(post.getId()))
-                .andExpect(jsonPath("$.parentComment").value(true))
+                .andExpect(jsonPath("$.identifierNumber").value(1))
                 .andDo(print());
+
     }
 
     @DisplayName("대댓글 작성")
@@ -160,13 +159,10 @@ public class CommentControllerTest {
                 .with(csrf()));
 
         //then
-        Comment comment = commentRepository.findAll().get(1);
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.commentId").value(comment.getId()))
-                .andExpect(jsonPath("$.content").value("대댓글입니다"))
-                .andExpect(jsonPath("$.postId").value(post.getId()))
-                .andExpect(jsonPath("$.parentComment").value(false))
                 .andDo(print());
+        Comment comment = commentRepository.findAll().get(1);
+        assertThat(comment).isNotNull();
     }
 
     @DisplayName("로그인 하지 않은 상태로 댓글을 작성할수 없다")
@@ -424,15 +420,10 @@ public class CommentControllerTest {
                 .with(csrf()));
 
         //then
-        Comment findComment = commentRepository.findById(comment.getId()).get();
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.commentId").value(findComment.getId()))
-                .andExpect(jsonPath("$.content").value("수정된 댓글입니다"))
-                .andExpect(jsonPath("writerId").value(member.getId()))
-                .andExpect(jsonPath("$.postId").value(post.getId()))
-                .andExpect(jsonPath("$.parentComment").value(true))
-                .andExpect(jsonPath("$.edited").value(true))
                 .andDo(print());
+        Comment findComment = commentRepository.findById(comment.getId()).get();
+        assertThat(findComment.getContent()).isEqualTo("수정된 댓글입니다");
     }
 
     @DisplayName("대댓글 내용 수정시 DB에 값이 변경된다")
@@ -465,15 +456,11 @@ public class CommentControllerTest {
                 .with(csrf()));
 
         //then
-        Comment findComment = commentRepository.findById(comment.getId()).get();
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.commentId").value(findComment.getId()))
-                .andExpect(jsonPath("$.content").value("수정된 대댓글입니다"))
-                .andExpect(jsonPath("writerId").value(member.getId()))
-                .andExpect(jsonPath("$.postId").value(post.getId()))
-                .andExpect(jsonPath("$.parentComment").value(false))
-                .andExpect(jsonPath("$.edited").value(true))
                 .andDo(print());
+        Comment findComment = commentRepository.findById(comment.getId()).get();
+        assertThat(findComment.getContent()).isEqualTo("수정된 대댓글입니다");
+        assertThat(findComment.isEdited()).isTrue();
     }
 
     @DisplayName("댓글 내용 수정시 수정할 댓글 Id 번호는 필수다")

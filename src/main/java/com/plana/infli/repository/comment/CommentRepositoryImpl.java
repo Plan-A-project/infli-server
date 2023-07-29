@@ -22,7 +22,6 @@ import com.plana.infli.web.dto.response.comment.view.post.PostComment;
 import com.plana.infli.web.dto.response.comment.view.post.QPostComment;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -40,12 +39,12 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     public List<PostComment> findCommentsInPost(Post findPost, Member findMember,
             PageRequest pageRequest) {
 
-        boolean isAnonymousBoard = isAnonymousBoard(findPost.getBoard());
+        boolean isAnonymous = isAnonymous(findPost.getBoard());
 
         return jpaQueryFactory
                 .select(new QPostComment(comment.id,
-                        nicknameEq(isAnonymousBoard),
-                        profileImageUrlEq(isAnonymousBoard),
+                        nicknameEq(isAnonymous),
+                        profileImageUrlEq(isAnonymous),
                         comment.isDeleted, comment.identifierNumber,
                         comment.createdAt, comment.content,
                         comment.member.eq(findMember),
@@ -85,13 +84,13 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     @Override
     public BestCommentResponse findBestCommentIn(Post findPost) {
 
-        boolean isAnonymousBoard = isAnonymousBoard(findPost.getBoard());
+        boolean isAnonymous = isAnonymous(findPost.getBoard());
 
         return jpaQueryFactory
                 .select(new QBestCommentResponse(comment.id, comment.post.id,
-                        constant(isAnonymousBoard),
-                        nicknameEq(isAnonymousBoard),
-                        profileImageUrlEq(isAnonymousBoard),
+                        constant(isAnonymous),
+                        nicknameEq(isAnonymous),
+                        profileImageUrlEq(isAnonymous),
                         comment.identifierNumber, comment.createdAt,
                         comment.content, comment.commentLikes.size()))
                 .from(comment)
@@ -137,12 +136,12 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetch();
     }
 
-    private Expression<String> profileImageUrlEq(boolean isAnonymousBoard) {
-        return isAnonymousBoard ? nullExpression() : comment.member.profileImageUrl;
+    private Expression<String> profileImageUrlEq(boolean isAnonymous) {
+        return isAnonymous ? nullExpression() : comment.member.profileImageUrl;
     }
 
-    private  Expression<String> nicknameEq(boolean isAnonymousBoard) {
-        return isAnonymousBoard ? nullExpression() : comment.member.nickname;
+    private Expression<String> nicknameEq(boolean isAnonymous) {
+        return isAnonymous ? nullExpression() : comment.member.nickname;
     }
 
 
@@ -191,16 +190,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .from(comment)
                 .where(comment.post.eq(findPost))
                 .where(comment.member.eq(findMember))
-                .fetchFirst();
-    }
-
-    @Override
-    public Integer findLatestIdentifierNumberBy(Post findPost) {
-        return jpaQueryFactory.select(comment.identifierNumber)
-                .from(comment)
-                .innerJoin(comment.post, post)
-                .where(comment.post.eq(findPost))
-                .orderBy(comment.identifierNumber.desc())
                 .fetchFirst();
     }
 

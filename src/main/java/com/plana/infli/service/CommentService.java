@@ -1,6 +1,6 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.Board.isAnonymousBoard;
+import static com.plana.infli.domain.Board.isAnonymous;
 import static com.plana.infli.domain.Comment.*;
 import static com.plana.infli.domain.Member.isAdmin;
 import static com.plana.infli.domain.Role.*;
@@ -8,7 +8,6 @@ import static com.plana.infli.domain.editor.comment.CommentContentEditor.editCom
 import static com.plana.infli.exception.custom.BadRequestException.CHILD_COMMENTS_NOT_ALLOWED;
 import static com.plana.infli.exception.custom.BadRequestException.MAX_COMMENT_SIZE_EXCEEDED;
 import static com.plana.infli.exception.custom.BadRequestException.PARENT_COMMENT_IS_DELETED;
-import static com.plana.infli.exception.custom.BadRequestException.PARENT_COMMENT_IS_NOT_FOUND;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse.loadMyCommentsResponse;
 import static com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse.loadPostCommentsResponse;
@@ -18,7 +17,6 @@ import static org.springframework.data.domain.PageRequest.of;
 import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
-import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -31,7 +29,6 @@ import com.plana.infli.web.dto.request.comment.delete.service.DeleteCommentServi
 import com.plana.infli.web.dto.request.comment.edit.service.EditCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.view.post.service.LoadCommentsInPostServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
-import com.plana.infli.web.dto.response.comment.edit.EditCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyComment;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
@@ -66,46 +63,32 @@ public class CommentService {
     @Transactional
     public CreateCommentResponse createComment(CreateCommentServiceRequest request) {
 
-        // 최대 허용 댓글 길이는 500자 이다
         validateContentLength(request.getContent());
 
-        checkIsLoggedIn(request.getEmail());
-
-        // 댓글을 작성할 회원이 존재하지 않거나, 삭제된 경우 예외 발생
         Member member = findMemberBy(request.getEmail());
 
-        //TODO 이거 굳이 넣어야 되나 확인
-        throwExceptionIfMemberIsUncertified(member);
+        checkWritePermission(member);
 
-        // 댓글이 작성될 글이 존재하지 않거나, 삭제된 경우 예외 발생
         //TODO 코드 리펙토링 필요
         Post post = postRepository.findPessimisticLockActivePostWithBoardAndMemberBy(
                         request.getPostId())
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
 
-        // 회원은 소속된 대학이 아닌 다른 대학에서 작성된 글에 댓글을 달 수 없다.
-        // 따라서 회원과 글이 동일한 대학에 존재하는지 검증 진행
         checkPostAndMemberInSameUniversity(member, post);
 
-        // 회원이 작성하려는 댓글이 대댓글인 경우, 부모 댓글에 대한 검증 진행
-        // 대댓글이 아닌 일반 댓글인 경우 부모 댓글의 값은 null 이다
-        @Nullable Comment parentComment = validateParentCommentIfExists(
-                request.getParentCommentId(), post);
+        @Nullable Comment parentComment = findParentCommentIfExists(request.getParentCommentId());
 
-        // 식별자 번호 조회, 없는 경우 새로운 번호를 생성한다
-        Integer identifierNumber = loadIdentifierNumber(post, member);
+        validateParentComment(parentComment, post);
 
-        Comment savedComment = commentRepository.save(create(post, request.getContent(), member,
-                parentComment, identifierNumber));
+        Integer identifierNumber = createIdentifierNumber(post, member);
 
-        return CreateCommentResponse.of(savedComment, post, member);
+        Comment comment = create(post, request.getContent(), member, parentComment,
+                identifierNumber);
+
+        return CreateCommentResponse.of(commentRepository.save(comment));
     }
 
-    private void checkIsLoggedIn(String email) {
-        if (email == null) {
-            throw new AuthenticationFailedException();
-        }
-    }
+
 
     private void validateContentLength(String content) {
         if (content.length() > 500) {
@@ -114,7 +97,7 @@ public class CommentService {
     }
 
 
-    private void throwExceptionIfMemberIsUncertified(Member member) {
+    private void checkWritePermission(Member member) {
         if (member.getRole().equals(UNCERTIFIED)) {
             throw new AuthorizationFailedException();
         }
@@ -122,23 +105,21 @@ public class CommentService {
 
 
     private void checkPostAndMemberInSameUniversity(Member member, Post post) {
-        if (post.getBoard().isDeleted()) {
-            throw new NotFoundException(POST_NOT_FOUND);
-        }
-
-        if (!universityRepository.isMemberAndPostInSameUniversity(member, post)) {
+        if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
             throw new AuthorizationFailedException();
         }
     }
 
-    private Comment validateParentCommentIfExists(Long commentId, Post post) {
+    private Comment findParentCommentIfExists(Long commentId) {
+        return commentId != null ? findCommentWithPostBy(commentId) : null;
+    }
 
-        if (commentId == null) {
-            return null;
+    //TODO
+    private void validateParentComment(Comment parentComment, Post post) {
+
+        if (parentComment == null) {
+            return;
         }
-
-        // 존재하지 않는 댓글에 대댓글을 작성할 수 없다
-        Comment parentComment = findCommentWithPostBy(commentId);
 
         // 삭제된 댓글에 대댓글을 작성할 수 없다
         if (parentComment.isDeleted()) {
@@ -146,7 +127,7 @@ public class CommentService {
         }
 
         // 대댓글을 작성할 글의 번호와, 부모 댓글의 글 번호가 서로 다른 경우
-        if (parentComment.getPost().getId().equals(post.getId()) == false) {
+        if (parentComment.getPost().equals(post) == false) {
             throw new NotFoundException(COMMENT_NOT_FOUND);
         }
 
@@ -154,20 +135,17 @@ public class CommentService {
         if (parentComment.getParentComment() != null) {
             throw new BadRequestException(CHILD_COMMENTS_NOT_ALLOWED);
         }
-
-        return parentComment;
     }
 
     private Comment findCommentWithPostBy(Long commentId) {
         return commentRepository.findWithPostById(commentId)
-                .orElseThrow(() -> new BadRequestException(PARENT_COMMENT_IS_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
     }
 
-    private Integer loadIdentifierNumber(Post post, Member member) {
+    private Integer createIdentifierNumber(Post post, Member member) {
 
         // 글 작성자가 자신의 글에 댓글을 작성하려는 경우
-        if (post.getMember().getId().equals(member.getId())) {
-
+        if (post.getMember().equals(member)) {
             // 식별자 0번을 부여한다
             return 0;
         }
@@ -179,7 +157,6 @@ public class CommentService {
         if (identifierNumber == null) {
 
             // 새로운 식별자 번호를 생성한후 부여한다
-
             // 이 글에 작성된 댓글들에게 부여된 가장 최근 식별자 번호
             return post.increaseCount();
         }
@@ -190,10 +167,7 @@ public class CommentService {
 
 
     @Transactional
-    public EditCommentResponse editContent(EditCommentServiceRequest request) {
-
-        // 인증하려는 객체가 없는 경우 401 에러를 발생한다
-        checkIsLoggedIn(request.getEmail());
+    public void editContent(EditCommentServiceRequest request) {
 
         // 최대 허용 댓글 길이는 500자 이다
         validateContentLength(request.getContent());
@@ -201,28 +175,24 @@ public class CommentService {
         // 댓글 수정할 회원이 존재하지 않거나, 삭제된 경우 예외 발생
         Member member = findMemberBy(request.getEmail());
 
-        //TODO 설명 맘에 안듬
-        // 수정하고 싶은 댓글이 작성된 글이 존재하지 않거나, 삭제된 경우 예외 발생
-        Post post = findPostWithBoardBy(request.getPostId());
+        Post post = findPostBy(request.getPostId());
 
         // 수정할 댓글이 존재하지 않거나, 삭제된 경우 예외 발생
-        Comment comment = commentRepository.findActiveCommentWithMemberAndPostBy(
-                        request.getCommentId())
-                .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
+        Comment comment = findCommentWithMemberAndPostBy(request.getCommentId());
 
         // 댓글 수정 요청에 대한 검증 진행
         validateEditRequest(comment, member, post);
 
         // 댓글 수정 진행
-        Comment editedComment = editComment(comment, request.getContent());
+        editComment(comment, request.getContent());
 
-        return EditCommentResponse.of(editedComment, comment.getPost(), member);
     }
 
-    private Post findPostWithBoardBy(Long postId) {
-        return postRepository.findActivePostWithBoardBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    private Comment findCommentWithMemberAndPostBy(Long commentId) {
+        return commentRepository.findActiveCommentWithMemberAndPostBy(commentId)
+                .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
     }
+
 
     private Member findMemberBy(String email) {
         return memberRepository.findActiveMemberBy(email)
@@ -231,28 +201,19 @@ public class CommentService {
 
     private void validateEditRequest(Comment comment, Member member, Post post) {
 
-        // 삭제된 게시판에 댓글을 작성할 수 없다
-        if (post.getBoard().isDeleted()) {
-            throw new NotFoundException(BOARD_NOT_FOUND);
-        }
-
-
         // 클라이언트에서 전송한 글 ID 번호와, 수정할 댓글이 작성된 글의 번호는 동일해야 한다
-        if (comment.getPost().getId().equals(post.getId()) == false) {
+        if (comment.getPost().equals(post) == false) {
             throw new NotFoundException(COMMENT_NOT_FOUND);
         }
 
         // 댓글 작성자만 해당 댓글을 수정 할 수 있다
-        if (comment.getMember().getId().equals(member.getId()) == false) {
+        if (comment.getMember().equals(member) == false) {
             throw new AuthorizationFailedException();
         }
     }
 
     @Transactional
     public void delete(DeleteCommentServiceRequest request) {
-
-        // 인증하려는 객체가 없는 경우 401 에러를 발생한다
-        checkIsLoggedIn(request.getEmail());
 
         // 댓글 삭제 요청을 한 회원이 존재하지 않거나, 삭제된 경우 예외 발생
         Member member = findMemberBy(request.getEmail());
@@ -270,15 +231,14 @@ public class CommentService {
     private void validateDeleteRequest(Member member, List<Long> ids) {
 
         // 삭제되지 않은 댓글들 DB 에서 조회
-        List<Comment> activeComments = commentRepository.findActiveCommentWithMemberByIdsIn(ids);
+        List<Comment> comments = commentRepository.findActiveCommentWithMemberByIdsIn(ids);
 
         // Ex) 5개 댓글에 대한 조회 요청을 했으나, 실제 DB 에서 4개만 조회된 경우
-        if (ids.size() != activeComments.size()) {
+        if (ids.size() != comments.size()) {
             throw new NotFoundException(COMMENT_NOT_FOUND);
         }
 
-
-        activeComments.forEach(comment -> {
+        comments.forEach(comment -> {
 
             // 관리자는 어떤 댓글도 삭제할수 있다
             if (isAdmin(member)) {
@@ -306,7 +266,7 @@ public class CommentService {
         List<PostComment> comments = commentRepository.findCommentsInPost(post, member,
                 pageRequest);
 
-        return loadPostCommentsResponse(post.getId(), isAnonymousBoard(post.getBoard()),
+        return loadPostCommentsResponse(post.getId(), isAnonymous(post.getBoard()),
                 pageRequest, isAdmin(member), comments);
     }
 
@@ -329,8 +289,6 @@ public class CommentService {
     }
 
     public MyCommentsResponse loadMyComments(Integer page, String email) {
-
-        checkIsLoggedIn(email);
 
         // 자신이 작성한 댓글 목록을 보고싶은 회원
         Member member = findMemberBy(email);
@@ -372,8 +330,6 @@ public class CommentService {
     }
 
     public Long findCommentsCountByMember(String email) {
-
-        checkIsLoggedIn(email);
 
         // 자신이 작성한 총 댓글 갯수를 보고싶은 회원
         Member member = findMemberBy(email);
