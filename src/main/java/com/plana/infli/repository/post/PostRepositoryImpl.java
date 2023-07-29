@@ -115,7 +115,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                     post.content,
                                     post.createdAt,
                                     post.member.eq(request.getMember()),
-                                    isAdmin(request.getMember()),
+                                    nullExpression(),
                                     post.viewCount,
                                     post.likes.size(),
                                     nullExpression(),
