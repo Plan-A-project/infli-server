@@ -56,7 +56,7 @@ public class Board extends BaseEntity {
         return new Board(boardType, university);
     }
 
-    public static boolean isAnonymousBoard(Board board) {
+    public static boolean isAnonymous(Board board) {
         return board.getBoardType().equals(ANONYMOUS);
     }
 }

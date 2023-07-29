@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"local", "dev"})
+@Profile({"dev", "local"})
 @Order(1)
 @Transactional
 @Getter

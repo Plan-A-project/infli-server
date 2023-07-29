@@ -24,9 +24,6 @@ public interface CommentRepositoryCustom {
 
     Integer findIdentifierNumberBy(Post post, Member member);
 
-    Integer findLatestIdentifierNumberBy(Post post);
-
-
     List<PostComment> findCommentsInPost(Post post, Member member,
             PageRequest pageRequest);
 

@@ -100,14 +100,14 @@ public class PostService {
 
         checkMemberAndBoardIsInSameUniversity(member, board);
 
-        PostType postType = request.getPostType();
-
-        if (hasWritePermission(member.getRole(), postType) &&
-                isAllowedPostType(board.getBoardType(), postType)) {
-            return;
-        }
-
-        throw new AuthorizationFailedException();
+//        PostType postType = request.getPostType();
+//
+//        if (hasWritePermission(member.getRole(), postType) &&
+//                isAllowedPostType(board.getBoardType(), postType)) {
+//            return;
+//        }
+//
+//        throw new AuthorizationFailedException();
     }
 
 

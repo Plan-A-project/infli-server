@@ -14,8 +14,8 @@ public class CommentContentEditor {
         this.content = content;
     }
 
-    public static Comment editComment(Comment comment, String newContent) {
-        return comment.edit(comment.toEditor()
+    public static void editComment(Comment comment, String newContent) {
+        comment.edit(comment.toEditor()
                 .content(newContent)
                 .build());
     }
