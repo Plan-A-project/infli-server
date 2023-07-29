@@ -107,16 +107,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                             new QSinglePostResponse(
                                     post.board.boardName,
                                     post.board.id,
-                                    nullExpression(),
-                                    nullExpression(),
+                                    post.postType.stringValue(),
+                                    nicknameEq(request.getPost()),
                                     post.id,
                                     post.title,
                                     post.content,
                                     post.createdAt,
-                                    nullExpression(),
-                                    nullExpression(),
-                                    nullExpression(),
-                                    nullExpression(),
+                                    post.member.eq(request.getMember()),
+                                    isAdmin(request.getMember()),
+                                    post.viewCount,
+                                    post.likes.size(),
                                     nullExpression(),
                                     nullExpression(),
                                     nullExpression(),
@@ -132,11 +132,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
 
-    private StringExpression nicknameEq() {
-        return new CaseBuilder()
-                .when(post.board.boardType.eq(ACTIVITY)).then(post.member.nickname)
-                .when(post.board.boardType.eq(ANONYMOUS)).then(nullExpression())
-                .otherwise(post.member.nickname);
+    private Expression<String> nicknameEq(Post findPost) {
+        return findPost.getBoard().getBoardType() == ANONYMOUS ?
+                nullExpression() : post.member.nickname;
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {
