@@ -76,7 +76,7 @@ public class PostController {
     public SinglePostResponse loadSinglePost(@PathVariable Long postId,
             @AuthenticatedPrincipal String email) {
 
-        return null;
+        return postService.loadSinglePost(postId, email);
     }
 
     @GetMapping("/members/posts")

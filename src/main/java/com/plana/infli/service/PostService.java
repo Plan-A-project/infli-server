@@ -222,8 +222,10 @@ public class PostService {
 
         PostQueryRequest request = singlePost(post, member);
 
-        return postRepository.loadSinglePostResponse(request);
+//        return postRepository.loadSinglePostResponse(request);
+        return null;
     }
+
 
     private Post findPostWithBoardBy(Long postId) {
         return postRepository.findActivePostWithBoardBy(postId)
