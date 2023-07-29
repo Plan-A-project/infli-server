@@ -9,7 +9,6 @@ import com.plana.infli.web.dto.request.comment.delete.controller.DeleteCommentRe
 import com.plana.infli.web.dto.request.comment.edit.controller.EditCommentRequest;
 import com.plana.infli.web.dto.request.comment.view.post.controller.LoadCommentsInPostRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
-import com.plana.infli.web.dto.response.comment.edit.EditCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
 import com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse;
