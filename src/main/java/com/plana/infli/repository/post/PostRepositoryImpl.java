@@ -109,7 +109,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                             post.createdAt, postWriterEqual(request.getMember()),
                             isAdmin(request.getMember()), post.viewCount, post.likes.size(),
                             pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
-                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
+                            nullExpression(), nullExpression(), nullExpression()))
+//                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
                     .from(post)
                     .where(post.eq(request.getPost()))
                     .fetchOne();
@@ -195,7 +196,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 recruitmentStartDateEqual(),
                                 recruitmentEndDateEqual()))
                 .from(post)
-                .where(idsEqual(ids))
+                .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
     }
@@ -244,12 +245,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return board.getBoardType().equals(ANONYMOUS) ? nullExpression()
                 : post.member.role.stringValue();
     }
-
-
-    private BooleanExpression idsEqual(List<Long> ids) {
-        return post.id.in(ids);
-    }
-
 
 
     private BooleanExpression viewOrderEqual(PostViewOrder viewOrder) {
@@ -315,7 +310,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         post.id, post.title, post.likes.size(), pressedLikeOnThisPost(member),
                         post.viewCount, post.createdAt, post.thumbnailUrl, post.content))
                 .from(post)
-                .where(idsEqual(ids))
+                .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
     }
