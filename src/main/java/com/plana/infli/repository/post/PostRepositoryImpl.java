@@ -122,9 +122,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private StringExpression nicknameEq() {
         return new CaseBuilder()
-                .when(post.board.boardType.in(List.of(ACTIVITY, CLUB, CAMPUS_LIFE, EMPLOYMENT)))
-                .then(post.member.nickname)
-                .otherwise(nullExpression());
+                .when(post.board.boardType.eq(ACTIVITY)).then(post.member.nickname)
+                .when(post.board.boardType.eq(ANONYMOUS)).then(nullExpression())
+                .otherwise(post.member.nickname);
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {
