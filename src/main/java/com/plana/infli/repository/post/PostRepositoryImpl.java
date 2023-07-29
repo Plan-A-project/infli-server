@@ -118,7 +118,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                     isAdmin(request.getMember()),
                                     post.viewCount,
                                     post.likes.size(),
-                                    nullExpression(),
+                                    pressedLikeOnThisPost(request.getMember()),
                                     post.thumbnailUrl,
                                     companyNameEqual(),
                                     recruitmentStartDateEqual(),
