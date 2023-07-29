@@ -107,7 +107,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                             post.board.boardName, post.board.id, post.postType.stringValue(),
                             nicknameEq(), post.id, post.title, post.content,
                             post.createdAt, postWriterEqual(request.getMember()),
-                            isAdmin(request.getMember()), post.viewCount, post.likes.size(),
+                            isAdmin(request.getMember()), post.viewCount, nullExpression(),
+//                            post.likes.size(),
                             pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
                             nullExpression(), nullExpression(), nullExpression()))
 //                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
