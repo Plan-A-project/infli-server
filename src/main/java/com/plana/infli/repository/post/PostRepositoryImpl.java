@@ -114,7 +114,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                     post.title,
                                     post.content,
                                     post.createdAt,
-                                    post.member.eq(request.getMember()),
+                                    nullExpression(),
                                     nullExpression(),
                                     nullExpression(),
                                     nullExpression(),
