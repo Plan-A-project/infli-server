@@ -115,14 +115,14 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                     post.content,
                                     post.createdAt,
                                     nullExpression(),
+                                    isAdmin(request.getMember()),
+                                    post.viewCount,
+                                    post.likes.size(),
                                     nullExpression(),
-                                    nullExpression(),
-                                    nullExpression(),
-                                    nullExpression(),
-                                    nullExpression(),
-                                    nullExpression(),
-                                    nullExpression(),
-                                    nullExpression()))
+                                    post.thumbnailUrl,
+                                    companyNameEqual(),
+                                    recruitmentStartDateEqual(),
+                                    recruitmentEndDateEqual()))
                     .from(post)
                     .where(post.eq(request.getPost()))
                     .fetchOne();
