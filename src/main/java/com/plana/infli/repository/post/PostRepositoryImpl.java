@@ -19,6 +19,7 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
+import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import com.plana.infli.web.dto.response.post.QCommentCount;
@@ -101,24 +102,48 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     @Override
     public SinglePostResponse loadSinglePostResponse(PostQueryRequest request) {
 
-        return jpaQueryFactory.select(new QSinglePostResponse(
-                        post.board.boardName, post.board.id, post.postType.stringValue(),
-                        nicknameEq(), post.id, post.title, post.content,
-                        post.createdAt, postWriterEqual(request.getMember()),
-                        isAdmin(request.getMember()), post.viewCount, post.likes.size(),
-                        pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
-                        companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
-                .from(post)
-                .where(post.eq(request.getPost()))
-                .fetchOne();
+        try {
+            return jpaQueryFactory.select(
+                            new QSinglePostResponse(
+                                    post.board.boardName,
+                                    post.board.id,
+                                    post.postType.stringValue(),
+                                    nicknameEq(request.getPost()),
+                                    post.id,
+                                    post.title,
+                                    post.content,
+                                    post.createdAt,
+                                    isMyPost(request.getMember()),
+                                    isAdmin(request.getMember()),
+                                    post.viewCount,
+                                    post.likes.size(),
+                                    pressedLikeOnThisPost(request.getMember()),
+                                    post.thumbnailUrl,
+                                    companyNameEqual(),
+                                    recruitmentStartDateEqual(),
+                                    recruitmentEndDateEqual()))
+                    .from(post)
+                    .where(post.eq(request.getPost()))
+                    .fetchOne();
+
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    private BooleanExpression isMyPost(Member member) {
+        return post.in(myPosts(member));
+    }
+
+    private JPQLQuery<Post> myPosts(Member findMember) {
+        return selectFrom(post)
+                .where(post.member.eq(findMember));
     }
 
 
-    private StringExpression nicknameEq() {
-        return new CaseBuilder()
-                .when(post.board.boardType.in(List.of(ACTIVITY, CLUB, CAMPUS_LIFE, EMPLOYMENT)))
-                .then(post.member.nickname)
-                .otherwise(nullExpression());
+    private Expression<String> nicknameEq(Post findPost) {
+        return findPost.getBoard().getBoardType() == ANONYMOUS ?
+                nullExpression() : post.member.nickname;
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {
@@ -189,7 +214,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 recruitmentStartDateEqual(),
                                 recruitmentEndDateEqual()))
                 .from(post)
-                .where(idsEqual(ids))
+                .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
     }
@@ -238,12 +263,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return board.getBoardType().equals(ANONYMOUS) ? nullExpression()
                 : post.member.role.stringValue();
     }
-
-
-    private BooleanExpression idsEqual(List<Long> ids) {
-        return post.id.in(ids);
-    }
-
 
 
     private BooleanExpression viewOrderEqual(PostViewOrder viewOrder) {
@@ -309,7 +328,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         post.id, post.title, post.likes.size(), pressedLikeOnThisPost(member),
                         post.viewCount, post.createdAt, post.thumbnailUrl, post.content))
                 .from(post)
-                .where(idsEqual(ids))
+                .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
     }

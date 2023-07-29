@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"dev"})
+@Profile({"dev", "local"})
 @Order(2)
 public class PostInitializer implements CommandLineRunner {
 

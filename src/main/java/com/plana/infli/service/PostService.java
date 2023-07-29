@@ -225,6 +225,7 @@ public class PostService {
         return postRepository.loadSinglePostResponse(request);
     }
 
+
     private Post findPostWithBoardBy(Long postId) {
         return postRepository.findActivePostWithBoardBy(postId)
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
