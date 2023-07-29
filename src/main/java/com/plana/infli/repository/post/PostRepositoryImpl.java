@@ -105,12 +105,22 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         try {
             return jpaQueryFactory.select(new QSinglePostResponse(
                             post.board.boardName, post.board.id, post.postType.stringValue(),
-                            nicknameEq(), post.id, post.title, post.content,
-                            post.createdAt, postWriterEqual(request.getMember()),
-                            isAdmin(request.getMember()), post.viewCount, nullExpression(),
+                            nicknameEq(),
+                            post.id,
+                            post.title,
+                            post.content,
+                            post.createdAt,
+                            postWriterEqual(request.getMember()),
+                            isAdmin(request.getMember()),
+                            post.viewCount,
+                            nullExpression(),
 //                            post.likes.size(),
-                            pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
-                            nullExpression(), nullExpression(), nullExpression()))
+                            nullExpression(),
+//                            pressedLikeOnThisPost(request.getMember()),
+                            post.thumbnailUrl,
+                            nullExpression(),
+                            nullExpression(),
+                            nullExpression()))
 //                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
                     .from(post)
                     .where(post.eq(request.getPost()))
