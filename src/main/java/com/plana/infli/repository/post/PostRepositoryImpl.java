@@ -103,27 +103,36 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     public SinglePostResponse loadSinglePostResponse(PostQueryRequest request) {
 
         try {
-            return jpaQueryFactory.select(new QSinglePostResponse(
-                            post.board.boardName,
-                            post.board.id,
-                            post.postType.stringValue(),
-                            nicknameEq(),
-                            post.id,
-                            post.title,
-                            post.content,
-                            post.createdAt,
-                            postWriterEqual(request.getMember()),
-                            nullExpression(),
-                            nullExpression(),
+            return jpaQueryFactory.select(
+                            new QSinglePostResponse(
+                                    nullExpression(),
+                                    nullExpression(),
+                                    nullExpression(),
+                                    nullExpression(),
+                                    nullExpression(),
+
+                                    nullExpression(),
+
+                                    nullExpression(),
+
+                                    nullExpression(),
+
+                                    nullExpression(),
+
+                                    nullExpression(),
+
+                                    nullExpression(),
+
+                                    nullExpression(),
+                                    nullExpression(),
 //                            post.viewCount,
-                            nullExpression(),
+                                    nullExpression(),
 //                            post.likes.size(),
-                            nullExpression(),
+                                    nullExpression(),
+                                    nullExpression(),
+
 //                            pressedLikeOnThisPost(request.getMember()),
-                            post.thumbnailUrl,
-                            nullExpression(),
-                            nullExpression(),
-                            nullExpression()))
+                                    nullExpression()))
 //                            companyNameEqual(), recruitmentStartDateEqual(), recruitmentEndDateEqual()))
                     .from(post)
                     .where(post.eq(request.getPost()))
