@@ -11,6 +11,7 @@ import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostVie
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
 import static com.querydsl.jpa.JPAExpressions.*;
+import static jakarta.persistence.LockModeType.*;
 import static java.util.Collections.*;
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.groupingBy;
@@ -80,14 +81,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetchOne());
     }
 
-    @Override
-    public Optional<Post> findPessimisticLockActivePostWithBoardAndMemberBy(Long id) {
-        return ofNullable(jpaQueryFactory.selectFrom(post)
-                .innerJoin(post.board, board).fetchJoin()
-                .where(postIsActiveAndIdEqual(id))
-                .setLockMode(LockModeType.PESSIMISTIC_WRITE)
-                .fetchOne());
-    }
 
 
     @Override
@@ -230,6 +223,15 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         setCommentCount(ids, posts);
 
         return posts;
+    }
+
+    @Override
+    public Optional<Post> findActivePostWithOptimisticLock(Long postId) {
+        return Optional.ofNullable(jpaQueryFactory.selectFrom(post)
+                .where(post.id.eq(postId))
+                .where(postIsActive())
+                .setLockMode(OPTIMISTIC)
+                .fetchOne());
     }
 
     private List<Long> findPostIdsByBoard(PostQueryRequest request) {

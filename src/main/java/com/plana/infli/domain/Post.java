@@ -7,6 +7,7 @@ import static lombok.AccessLevel.*;
 
 import com.plana.infli.domain.editor.post.PostEditor;
 import com.plana.infli.domain.embeddable.Recruitment;
+import com.plana.infli.service.PostService;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -55,6 +56,9 @@ public class Post extends BaseEntity {
 
     private boolean isDeleted = false;
 
+    @Version
+    private Long version;
+
     @Embedded
     @Nullable
     private Recruitment recruitment;
@@ -63,8 +67,8 @@ public class Post extends BaseEntity {
     private List<PostLike> likes = new ArrayList<>();
 
     @Builder
-    private Post(Board board, PostType postType, Member member, String title, String content,
-            Recruitment recruitment) {
+    private Post(Board board, PostType postType, Member member,
+            String title, String content, @Nullable Recruitment recruitment) {
         this.board = board;
         this.postType = postType;
         this.member = member;
@@ -94,8 +98,11 @@ public class Post extends BaseEntity {
         return commentMemberCount;
     }
 
-    public int plusViewCount() {
-        viewCount++;
-        return viewCount;
+    public static void plusViewCount(Post post) {
+        post.viewCount++;
+    }
+
+    public static void delete(Post post) {
+        post.isDeleted = true;
     }
 }

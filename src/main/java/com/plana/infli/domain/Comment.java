@@ -117,7 +117,7 @@ public class Comment extends BaseEntity {
                 .content(content);
     }
 
-    public boolean isParentComment() {
-        return parentComment == null;
+    public static void delete(Comment comment) {
+        comment.isDeleted = true;
     }
 }
