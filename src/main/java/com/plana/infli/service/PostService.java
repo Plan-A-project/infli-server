@@ -1,10 +1,11 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.Member.isAdmin;
+import static com.plana.infli.domain.Post.*;
 import static com.plana.infli.domain.PostType.*;
 import static com.plana.infli.domain.editor.post.PostEditor.*;
-import static com.plana.infli.domain.embeddable.Recruitment.*;
 import static com.plana.infli.exception.custom.NotFoundException.*;
+import static com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.CreateRecruitmentServiceRequest.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
 import static com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.*;
 import static com.plana.infli.web.dto.response.post.my.MyPostsResponse.loadMyPostsResponse;
@@ -23,6 +24,7 @@ import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
+import com.plana.infli.service.aop.Retry;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.CreateRecruitmentServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest.EditRecruitmentServiceRequest;
@@ -61,8 +63,13 @@ public class PostService {
     private final UniversityRepository universityRepository;
 
     public boolean checkMemberAgreedOnWritePolicy(String email) {
-        Member member = findMemberBy(email);
-        return postRepository.existsByMember(member);
+        return findMemberBy(email).isAgreedOnPostPolicy();
+    }
+
+
+    @Transactional
+    public void confirmWritePolicyAgreement(String email) {
+        findMemberBy(email).agreedOnPostWritePolicy();
     }
 
     private Member findMemberBy(String email) {
@@ -70,12 +77,6 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-
-    @Transactional
-    public void confirmWritePolicyAgreement(String email) {
-        Member member = findMemberBy(email);
-        member.agreedOnPostWritePolicy();
-    }
 
     @Transactional
     public Long createPost(CreatePostServiceRequest request) {
@@ -94,22 +95,21 @@ public class PostService {
     }
 
 
-
     private void validateCreatePostRequest(Member member, Board board,
             CreatePostServiceRequest request) {
 
         checkMemberAndBoardIsInSameUniversity(member, board);
 
-//        PostType postType = request.getPostType();
-//
-//        if (hasWritePermission(member.getRole(), postType) &&
-//                isAllowedPostType(board.getBoardType(), postType)) {
-//            return;
-//        }
-//
-//        throw new AuthorizationFailedException();
-    }
+        PostType postType = request.getPostType();
 
+        if (hasWritePermission(member.getRole(), postType) == false) {
+            throw new AuthorizationFailedException();
+        }
+
+        if (isAllowedPostType(board.getBoardType(), postType) == false) {
+            throw new NotFoundException(BOARD_NOT_FOUND);
+        }
+    }
 
 
     private Member findMemberWithUniversityBy(String email) {
@@ -128,13 +128,9 @@ public class PostService {
         }
     }
 
-    private Recruitment loadRecruitmentIfExists(CreateRecruitmentServiceRequest recruitmentRequest) {
+    private Recruitment loadRecruitmentIfExists(CreateRecruitmentServiceRequest request) {
 
-        return recruitmentRequest != null ?
-                create(recruitmentRequest.getCompanyName(),
-                        recruitmentRequest.getStartDate(),
-                        recruitmentRequest.getEndDate())
-                : null;
+        return request != null ? createRecruitment(request) : null;
     }
 
 
@@ -148,7 +144,6 @@ public class PostService {
         validateEditRequest(request, post, member);
 
         editPost(request, post);
-
     }
 
     private Post findPostBy(Long postId) {
@@ -156,7 +151,6 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
-    //TODO
     private void validateEditRequest(EditPostServiceRequest request, Post post, Member member) {
 
         checkThisMemberIsPostWriter(member, post);
@@ -191,7 +185,7 @@ public class PostService {
 
         validateDeleteRequest(member, post);
 
-        postRepository.delete(post);
+        delete(post);
     }
 
     private Post findPostWithMemberBy(Long postId) {
@@ -209,26 +203,21 @@ public class PostService {
     }
 
     @Transactional
+    @Retry
     public SinglePostResponse loadSinglePost(Long postId, String email) {
 
         Member member = findMemberBy(email);
 
-        Post post = findPostWithBoardBy(postId);
+        Post post = postRepository.findActivePostWithOptimisticLock(postId)
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
 
         checkMemberAndPostIsInSameUniversity(member, post);
 
-        //TODO 동시성 고려 필요
-        post.plusViewCount();
+        plusViewCount(post);
 
         PostQueryRequest request = singlePost(post, member);
 
         return postRepository.loadSinglePostResponse(request);
-    }
-
-
-    private Post findPostWithBoardBy(Long postId) {
-        return postRepository.findActivePostWithBoardBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
     private void checkMemberAndPostIsInSameUniversity(Member member, Post post) {

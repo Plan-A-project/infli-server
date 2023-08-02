@@ -24,6 +24,7 @@ import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
+import com.plana.infli.service.aop.Retry;
 import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.delete.service.DeleteCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.edit.service.EditCommentServiceRequest;
@@ -61,6 +62,7 @@ public class CommentService {
     private static final Integer COMMENT_SIZE_PER_PAGE = 100;
 
     @Transactional
+    @Retry
     public CreateCommentResponse createComment(CreateCommentServiceRequest request) {
 
         validateContentLength(request.getContent());
@@ -69,10 +71,7 @@ public class CommentService {
 
         checkWritePermission(member);
 
-        //TODO 코드 리펙토링 필요
-        Post post = postRepository.findPessimisticLockActivePostWithBoardAndMemberBy(
-                        request.getPostId())
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+        Post post = findPostWithLockBy(request.getPostId());
 
         checkPostAndMemberInSameUniversity(member, post);
 
@@ -88,6 +87,10 @@ public class CommentService {
         return CreateCommentResponse.of(commentRepository.save(comment));
     }
 
+    private Post findPostWithLockBy(Long postId) {
+        return postRepository.findActivePostWithOptimisticLock(postId)
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    }
 
 
     private void validateContentLength(String content) {

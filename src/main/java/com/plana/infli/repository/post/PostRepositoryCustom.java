@@ -15,8 +15,6 @@ public interface PostRepositoryCustom {
 
     Optional<Post> findActivePostWithBoardBy(Long id);
 
-    Optional<Post> findPessimisticLockActivePostWithBoardAndMemberBy(Long id);
-
     List<SearchedPost> searchPostByKeyWord(PostQueryRequest request);
 
     Optional<Post> findActivePostWithMemberBy(Long id);
@@ -27,4 +25,5 @@ public interface PostRepositoryCustom {
 
     List<BoardPost> loadPostsByBoard(PostQueryRequest request);
 
+    Optional<Post> findActivePostWithOptimisticLock(Long postId);
 }

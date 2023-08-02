@@ -1,5 +1,6 @@
 package com.plana.infli.domain;
 
+import static com.plana.infli.domain.Role.*;
 import static com.plana.infli.domain.Role.ADMIN;
 import static jakarta.persistence.FetchType.LAZY;
 import static lombok.AccessLevel.PROTECTED;
@@ -58,9 +59,8 @@ public class Member extends BaseEntity {
   private boolean agreedOnPostPolicy = false;
 
   public Member(String email, String password, String name, String nickname,
-      University university,
-      PasswordEncoder passwordEncoder) {
-    this(email, password, name, nickname, Role.UNCERTIFIED, university, passwordEncoder);
+          University university, PasswordEncoder passwordEncoder) {
+    this(email, password, name, nickname, UNCERTIFIED, university, passwordEncoder);
   }
 
   @Builder
@@ -79,15 +79,15 @@ public class Member extends BaseEntity {
     this.email = email;
     this.nickname = companyName;
     this.password = passwordEncoder.encode(password);
-    this.role = Role.UNCERTIFIED;
+    this.role = UNCERTIFIED;
   }
 
   public static Boolean isAdmin(Member member) {
-    return member.role.equals(ADMIN);
+    return member.role == ADMIN;
   }
 
   public void authenticateStudent() {
-    role = Role.STUDENT;
+    role = STUDENT;
   }
 
   public void authenticate() {
@@ -95,7 +95,7 @@ public class Member extends BaseEntity {
   }
 
   public void authenticateCompany() {
-    role = Role.COMPANY;
+    role = COMPANY;
   }
 
   public void agreedOnPostWritePolicy() {

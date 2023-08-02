@@ -30,12 +30,16 @@ import com.plana.infli.web.dto.request.comment.delete.service.DeleteCommentServi
 import com.plana.infli.web.dto.request.comment.edit.service.EditCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.view.post.service.LoadCommentsInPostServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
-import com.plana.infli.web.dto.response.comment.edit.EditCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
 import com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -90,6 +94,12 @@ class CommentServiceTest {
 
     @Autowired
     private CommentLikeFactory commentLikeFactory;
+
+    @Autowired
+    private PostService postService;
+
+    @Autowired
+    private EntityManager em;
 
     @AfterEach
     void tearDown() {
@@ -268,11 +278,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postmember", university), board);
+        Member postmember = memberFactory.createStudentMember("postmember", university);
+        Post post = postFactory.createPost(postmember, board);
 
-        postRepository.delete(post);
-
+        postService.deletePost(post.getId(), postmember.getEmail());
         Member member = memberFactory.createStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
@@ -454,6 +463,49 @@ class CommentServiceTest {
         );
     }
 
+    @DisplayName("식별자 번호 동시성 테스트")
+    @Test
+    void identifierConcurrency() throws InterruptedException {
+        //given
+        University university = universityFactory.createUniversity("서울대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createPost(
+                memberFactory.createStudentMember("postMember", university), board);
+
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+
+            int finalI = i;
+            executorService.submit(() -> {
+
+                try {
+                    Member member = memberFactory.createStudentMember("" + finalI,
+                            university);
+
+                    commentService.createComment(CreateCommentServiceRequest.builder()
+                            .email(member.getEmail())
+                            .content("댓글")
+                            .parentCommentId(null)
+                            .postId(post.getId())
+                            .build());
+
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        Post findPost = postRepository.findPostById(post.getId()).get();
+        assertThat(commentRepository.count()).isEqualTo(100);
+        assertThat(findPost.getCommentMemberCount()).isEqualTo(100);
+    }
+
 
     /**
      * 대댓글 작성
@@ -584,13 +636,13 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
@@ -1121,14 +1173,14 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .email(member.getEmail())
@@ -1412,8 +1464,8 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -1422,7 +1474,7 @@ class CommentServiceTest {
 
         Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .email(member.getEmail())
@@ -2218,10 +2270,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
@@ -2237,6 +2289,7 @@ class CommentServiceTest {
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
 
     }
+
 
     @DisplayName("페이지 요청값이 0인 경우 1페이지가 조회된다")
     @Test
@@ -2753,12 +2806,12 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
         Member member = memberFactory.createStudentMember("member", university);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         //when //then
         assertThatThrownBy(
@@ -2912,14 +2965,14 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         //when
         MyCommentsResponse response = commentService.loadMyComments(1, member.getEmail());
@@ -3122,10 +3175,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         //when //then
         assertThatThrownBy(() -> commentService.findActiveCommentsCountInPost(post.getId()))

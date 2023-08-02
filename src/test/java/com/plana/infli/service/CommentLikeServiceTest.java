@@ -46,9 +46,11 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class CommentLikeServiceTest {
 
-
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private PostService postService;
 
     @Autowired
     private PostRepository postRepository;
@@ -64,12 +66,6 @@ public class CommentLikeServiceTest {
 
     @Autowired
     private CommentLikeRepository commentLikeRepository;
-
-    @Autowired
-    private PopularBoardRepository popularBoardRepository;
-
-    @Autowired
-    private BoardService boardService;
 
     @Autowired
     private UniversityFactory universityFactory;
@@ -88,9 +84,6 @@ public class CommentLikeServiceTest {
 
     @Autowired
     private CommentLikeFactory commentLikeFactory;
-
-    @Autowired
-    private PopularBoardFactory popularBoardFactory;
 
     @Autowired
     private CommentLikeService commentLikeService;
@@ -258,14 +251,15 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
         Member member = memberFactory.createStudentMember("member", university);
-        postRepository.delete(post);
+
+        postService.deletePost(post.getId(), postMember.getEmail());
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
                 .commentId(comment.getId())
                 .postId(post.getId())
@@ -448,8 +442,8 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
-                memberFactory.createStudentMember("postMember", university), board);
+        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Post post = postFactory.createPost(postMember, board);
 
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -457,7 +451,7 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
         commentLikeFactory.createCommentLike(member, comment);
 
-        postRepository.delete(post);
+        postService.deletePost(post.getId(), postMember.getEmail());
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
