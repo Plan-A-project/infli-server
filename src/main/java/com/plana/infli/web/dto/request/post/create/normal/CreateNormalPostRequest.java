@@ -36,7 +36,7 @@ public class CreatePostRequest {
 
     @Builder
     public CreatePostRequest(Long boardId, PostType postType, String title, String content,
-            CreateRecruitmentRequest recruitment) {
+            @Nullable CreateRecruitmentRequest recruitment) {
 
         this.boardId = boardId;
         this.postType = postType;
@@ -83,6 +83,16 @@ public class CreatePostRequest {
 
         public CreateRecruitmentServiceRequest toServiceRequest() {
             return CreateRecruitmentServiceRequest.builder()
+                    .companyName(companyName)
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .build();
+        }
+
+        public static CreateRecruitmentRequest create(String companyName,
+                LocalDateTime startDate, LocalDateTime endDate) {
+
+            return CreateRecruitmentRequest.builder()
                     .companyName(companyName)
                     .startDate(startDate)
                     .endDate(endDate)

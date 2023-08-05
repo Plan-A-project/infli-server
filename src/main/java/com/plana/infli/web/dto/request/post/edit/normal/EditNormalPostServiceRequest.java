@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.post.edit;
+package com.plana.infli.web.dto.request.post.edit.normal;
 
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
