@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.board.popular.edit.service;
+package com.plana.infli.web.dto.request.board.popular.edit;
 
 import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;

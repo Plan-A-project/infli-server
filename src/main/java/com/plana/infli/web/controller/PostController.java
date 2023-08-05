@@ -4,9 +4,11 @@ import static org.springframework.http.HttpStatus.*;
 
 import com.plana.infli.domain.PostType;
 import com.plana.infli.service.PostService;
+import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostRequest;
+import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostRequest;
 import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardRequest;
-import com.plana.infli.web.dto.request.post.create.CreatePostRequest;
-import com.plana.infli.web.dto.request.post.edit.EditPostRequest;
+import com.plana.infli.web.dto.request.post.create.normal.CreateNormalPostRequest;
+import com.plana.infli.web.dto.request.post.edit.normal.EditNormalPostRequest;
 import com.plana.infli.web.dto.request.post.view.search.SearchPostsByKeywordRequest;
 import com.plana.infli.web.dto.response.post.board.BoardPostsResponse;
 import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
@@ -40,26 +42,41 @@ public class PostController {
 
     @GetMapping("/boards/{boardId}/permissions")
     @Operation(summary = "특정 게시판에 글 작성 권한이 있는지 여부 확인")
-    public boolean isValidWriteRequest(@AuthenticatedPrincipal String email,
+    public void isValidWriteRequest(@AuthenticatedPrincipal String email,
             @PathVariable Long boardId, PostType postType) {
 
-        return postService.isValidWriteRequest(boardId, email, postType);
+        postService.validateWriteRequest(boardId, email, postType);
     }
 
 
     @ResponseStatus(CREATED)
-    @PostMapping("/posts")
-    @Operation(summary = "글 단건 생성")
-    public Long write(@Validated @RequestBody CreatePostRequest request,
+    @PostMapping("/posts/normal")
+    @Operation(summary = "일반글 작성")
+    public Long writeNormalPost(@Validated @RequestBody CreateNormalPostRequest request,
             @AuthenticatedPrincipal String email) {
-        return postService.createPost(request.toServiceRequest(email));
+        return postService.createNormalPost(request.toServiceRequest(email));
     }
 
-    @PatchMapping("/posts")
-    @Operation(summary = "내가 작성한 글 단건 수정")
-    public void edit(@Validated @RequestBody EditPostRequest request,
+    @ResponseStatus(CREATED)
+    @PostMapping("/posts/recruitment")
+    @Operation(summary = "모집글 작성")
+    public Long writeRecruitmentPost(@Validated @RequestBody CreateRecruitmentPostRequest request,
             @AuthenticatedPrincipal String email) {
-        postService.edit(request.toServiceRequest(email));
+        return postService.createRecruitmentPost(request.toServiceRequest(email));
+    }
+
+    @PatchMapping("/posts/normal")
+    @Operation(summary = "내가 작성한 일반글 단건 수정")
+    public void editNormalPost(@Validated @RequestBody EditNormalPostRequest request,
+            @AuthenticatedPrincipal String email) {
+        postService.editNormalPost(request.toServiceRequest(email));
+    }
+
+    @PatchMapping("/posts/recruitment")
+    @Operation(summary = "내가 작성한 모집글 단건 수정")
+    public void editRecruitmentPost(@Validated @RequestBody EditRecruitmentPostRequest request,
+            @AuthenticatedPrincipal String email) {
+        postService.editRecruitmentPost(request.toServiceRequest(email));
     }
 
     @DeleteMapping("/posts/{postId}")
@@ -68,7 +85,6 @@ public class PostController {
             @AuthenticatedPrincipal String email) {
         postService.deletePost(postId, email);
     }
-
 
 
     @GetMapping("/posts/{postId}")

@@ -1,7 +1,9 @@
 package com.plana.infli.annotation;
 
+import static com.plana.infli.domain.Role.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
+import com.plana.infli.domain.Role;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import org.springframework.core.annotation.AliasFor;
@@ -15,6 +17,8 @@ public @interface WithMockMember {
     String nickname() default "youngjin";
 
     String email() default "youngjin@gmail.com";
+
+    Role role() default STUDENT;
 
     @AliasFor(annotation = WithSecurityContext.class)
     TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_EXECUTION;

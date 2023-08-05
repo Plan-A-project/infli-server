@@ -42,26 +42,14 @@ public class S3Uploader {
 
         File file = convertToFile(multipartFile, storeFileName);
 
-        PutObjectRequest request = generatePutObjectRequest(fullPathName, file);
-
         amazonS3Client.putObject(
                 new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
-
 
         file.delete();
 
         return amazonS3Client.getUrl(bucket, fullPathName).toString();
     }
 
-    private PutObjectRequest generatePutObjectRequest(String fullPath, File file) {
-        PutObjectRequest request = new PutObjectRequest(bucket, fullPath, file);
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.length());
-        request.setMetadata(metadata);
-        return request;
-    }
-
-    //TODO
     private File convertToFile(MultipartFile multipartFile, String fullPathName) {
 
         File file = new File(fullPathName);
@@ -91,32 +79,6 @@ public class S3Uploader {
     }
 
     private String generateFullPath(String directoryName, String fileName) {
-        return directoryName + fileName;
+        return directoryName + "/" + fileName;
     }
-
-//    private String upload(File uploadFile, String dirName) {
-//        String fileName = dirName + "/" + getUploadFileName(uploadFile.getName());
-//        String uploadImageUrl = putS3(uploadFile, fileName);
-//        removeNewFile(uploadFile);
-//        return uploadImageUrl;
-//    }
-//
-//    private String getUploadFileName(String fileFullName) {
-//        return fileFullName.substring(0, fileFullName.lastIndexOf("."))
-//                + "_" + System.currentTimeMillis()
-//                + fileFullName.substring(fileFullName.lastIndexOf("."));
-//    }
-//
-//    private String putS3(File uploadFile, String fileName) {
-//        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));
-//    }
-//
-//    private void removeNewFile(File targetFile) {
-//        if (targetFile.delete()) {
-//            log.info("파일이 삭제되었습니다.");
-//        } else {
-//            log.info("파일이 삭제되지 못했습니다.");
-//        }
-//    }
-
 }

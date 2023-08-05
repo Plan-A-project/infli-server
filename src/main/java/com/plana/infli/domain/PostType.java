@@ -11,20 +11,13 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum PostType {
 
-    NORMAL("일반", of(STUDENT, COMPANY, STUDENT_COUNCIL, ADMIN)),
+    NORMAL("일반"),
 
-    RECRUITMENT("모집", of(ADMIN, COMPANY)),
+    RECRUITMENT("모집"),
 
-    ANNOUNCEMENT("공지", of(ADMIN, STUDENT_COUNCIL)),
+    ANNOUNCEMENT("공지"),
     ;
 
     private final String name;
-
-    private final List<Role> allowedRoll;
-
-
-    public boolean hasWritePermission(Role role) {
-        return allowedRoll.contains(role);
-    }
 
 }

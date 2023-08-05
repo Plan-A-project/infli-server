@@ -1,7 +1,6 @@
-package com.plana.infli.web.dto.request.comment.create.controller;
+package com.plana.infli.web.dto.request.comment.create;
 
 
-import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

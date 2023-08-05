@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.board.popular.enable.service;
+package com.plana.infli.web.dto.request.board.popular.enable;
 
 import java.util.ArrayList;
 import java.util.List;

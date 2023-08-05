@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.comment.delete.service;
+package com.plana.infli.web.dto.request.comment.delete;
 
 import java.util.List;
 import lombok.Builder;

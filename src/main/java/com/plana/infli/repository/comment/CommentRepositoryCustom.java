@@ -30,12 +30,11 @@ public interface CommentRepositoryCustom {
     // 테스트 케이스용 method
     Long findAllActiveCommentCount();
 
-
     BestCommentResponse findBestCommentIn(Post post);
 
     List<MyComment> findMyComments(Member member, PageRequest pageRequest);
 
     Long findActiveCommentsCountBy(Member member);
 
-    List<Comment> findAllOrderByIdAsc();
+    Optional<Comment> findActiveCommentWithPostBy(Long commentId);
 }

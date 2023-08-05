@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.commentlike.create.service;
+package com.plana.infli.web.dto.request.commentlike.create;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -6,12 +6,15 @@ import lombok.Getter;
 @Getter
 public class CreateCommentLikeServiceRequest {
 
-    private Long postId;
+    private final String email;
 
-    private Long commentId;
+    private final Long postId;
+
+    private final Long commentId;
 
     @Builder
-    public CreateCommentLikeServiceRequest(Long postId, Long commentId) {
+    public CreateCommentLikeServiceRequest(String email, Long postId, Long commentId) {
+        this.email = email;
         this.postId = postId;
         this.commentId = commentId;
     }

@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.comment.view.post.service;
+package com.plana.infli.web.dto.request.comment.view.post;
 
 import lombok.Builder;
 import lombok.Getter;

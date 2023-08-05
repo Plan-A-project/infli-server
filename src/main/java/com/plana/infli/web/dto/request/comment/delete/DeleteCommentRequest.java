@@ -1,9 +1,6 @@
-package com.plana.infli.web.dto.request.comment.delete.controller;
+package com.plana.infli.web.dto.request.comment.delete;
 
-import com.plana.infli.web.dto.request.comment.delete.service.DeleteCommentServiceRequest;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;

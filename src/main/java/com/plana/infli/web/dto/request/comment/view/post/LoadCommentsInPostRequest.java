@@ -1,10 +1,8 @@
-package com.plana.infli.web.dto.request.comment.view.post.controller;
+package com.plana.infli.web.dto.request.comment.view.post;
 
-import com.plana.infli.web.dto.request.comment.view.post.service.LoadCommentsInPostServiceRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public class LoadCommentsInPostRequest {

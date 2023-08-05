@@ -1,6 +1,5 @@
-package com.plana.infli.web.dto.request.commentlike.cancel.controller;
+package com.plana.infli.web.dto.request.commentlike.cancel;
 
-import com.plana.infli.web.dto.request.commentlike.cancel.service.CancelCommentLikeServiceRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,8 +23,9 @@ public class CancelCommentLikeRequest {
     }
 
 
-    public CancelCommentLikeServiceRequest toServiceRequest() {
+    public CancelCommentLikeServiceRequest toServiceRequest(String email) {
         return CancelCommentLikeServiceRequest.builder()
+                .email(email)
                 .postId(postId)
                 .commentId(commentId).build();
     }

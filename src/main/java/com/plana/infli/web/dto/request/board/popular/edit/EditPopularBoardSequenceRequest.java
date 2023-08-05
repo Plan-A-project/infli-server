@@ -1,6 +1,5 @@
-package com.plana.infli.web.dto.request.board.popular.edit.controller;
+package com.plana.infli.web.dto.request.board.popular.edit;
 
-import com.plana.infli.web.dto.request.board.popular.edit.service.EditPopularBoardSequenceServiceRequest;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;
