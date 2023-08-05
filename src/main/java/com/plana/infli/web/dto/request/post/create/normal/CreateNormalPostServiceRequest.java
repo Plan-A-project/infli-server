@@ -1,7 +1,5 @@
 package com.plana.infli.web.dto.request.post.create;
 
-import static com.plana.infli.domain.embeddable.Recruitment.*;
-
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
@@ -56,9 +54,18 @@ public class CreatePostServiceRequest {
             this.endDate = endDate;
         }
 
+        public static CreateRecruitmentServiceRequest create(String companyName,
+                LocalDateTime startDate, LocalDateTime endDate) {
 
-        public static Recruitment createRecruitment(CreateRecruitmentServiceRequest request) {
-            return create(request.companyName, request.startDate, request.endDate);
+            return CreateRecruitmentServiceRequest.builder()
+                    .companyName(companyName)
+                    .startDate(startDate)
+                    .endDate(endDate).build();
+        }
+
+
+        public static Recruitment of(CreateRecruitmentServiceRequest request) {
+            return Recruitment.create(request.companyName, request.startDate, request.endDate);
         }
     }
 
