@@ -1,85 +1,46 @@
-package com.plana.infli.web.dto.request.post.create;
+package com.plana.infli.web.dto.request.post.create.normal;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
-import com.plana.infli.domain.embeddable.Recruitment;
-import jakarta.annotation.Nullable;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class CreatePostServiceRequest {
+public class CreateNormalPostServiceRequest {
 
     private final String email;
 
     private final Long boardId;
 
-    private final PostType postType;
-
     private final String title;
 
     private final String content;
 
-    @Nullable
-    private final CreateRecruitmentServiceRequest recruitment;
+    private final PostType postType;
 
     @Builder
-    public CreatePostServiceRequest(String email, Long boardId, PostType postType, String title,
-            String content, CreateRecruitmentServiceRequest recruitment) {
+    public CreateNormalPostServiceRequest(String email, Long boardId,
+            String title, String content, PostType postType) {
+
         this.email = email;
         this.boardId = boardId;
-        this.postType = postType;
         this.title = title;
         this.content = content;
-        this.recruitment = recruitment;
-    }
-
-    @Getter
-    public static class CreateRecruitmentServiceRequest {
-
-        private final String companyName;
-
-        private final LocalDateTime startDate;
-
-        private final LocalDateTime endDate;
-
-        @Builder
-        public CreateRecruitmentServiceRequest(String companyName, LocalDateTime startDate,
-                LocalDateTime endDate) {
-            this.companyName = companyName;
-            this.startDate = startDate;
-            this.endDate = endDate;
-        }
-
-        public static CreateRecruitmentServiceRequest create(String companyName,
-                LocalDateTime startDate, LocalDateTime endDate) {
-
-            return CreateRecruitmentServiceRequest.builder()
-                    .companyName(companyName)
-                    .startDate(startDate)
-                    .endDate(endDate).build();
-        }
-
-
-        public static Recruitment of(CreateRecruitmentServiceRequest request) {
-            return Recruitment.create(request.companyName, request.startDate, request.endDate);
-        }
+        this.postType = postType;
     }
 
 
-    public static Post of(Member member, Board board, CreatePostServiceRequest request,
-            @Nullable Recruitment recruitment) {
+    public static Post toNormalPost(Member member, Board board,
+            CreateNormalPostServiceRequest request) {
 
         return Post.builder()
                 .board(board)
                 .member(member)
-                .postType(request.getPostType())
+                .postType(request.postType)
                 .title(request.getTitle())
                 .content(request.getContent())
-                .recruitment(recruitment)
                 .build();
     }
 
