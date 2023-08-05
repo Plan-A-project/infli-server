@@ -1,5 +1,7 @@
 package com.plana.infli.factory;
 
+import static com.plana.infli.domain.Role.*;
+
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
@@ -15,6 +17,7 @@ public class MemberFactory {
     @Autowired
     private MemberRepository memberRepository;
 
+
     public Member createStudentMember(String nickname, University university) {
         Member member = Member.builder()
                 .nickname(nickname)
@@ -22,7 +25,7 @@ public class MemberFactory {
                 .email(nickname + "@gmail.com")
                 .password("1234")
                 .university(university)
-                .role(Role.STUDENT)
+                .role(STUDENT)
                 .passwordEncoder(new BCryptPasswordEncoder())
                 .build();
 
@@ -36,7 +39,35 @@ public class MemberFactory {
                 .email(nickname + "@gmail.com")
                 .password("1234")
                 .university(university)
-                .role(Role.UNCERTIFIED)
+                .role(UNCERTIFIED)
+                .passwordEncoder(new BCryptPasswordEncoder())
+                .build();
+
+        return memberRepository.save(member);
+    }
+
+    public Member createCompanyMember(String nickname, University university) {
+        Member member = Member.builder()
+                .nickname(nickname)
+                .name(nickname)
+                .email(nickname + "@gmail.com")
+                .password("1234")
+                .university(university)
+                .role(COMPANY)
+                .passwordEncoder(new BCryptPasswordEncoder())
+                .build();
+
+        return memberRepository.save(member);
+    }
+
+    public Member createStudentCouncilMember(String nickname, University university) {
+        Member member = Member.builder()
+                .nickname(nickname)
+                .name(nickname)
+                .email(nickname + "@gmail.com")
+                .password("1234")
+                .university(university)
+                .role(STUDENT_COUNCIL)
                 .passwordEncoder(new BCryptPasswordEncoder())
                 .build();
 
@@ -50,7 +81,21 @@ public class MemberFactory {
                 .email(nickname + "@gmail.com")
                 .password("1234")
                 .university(university)
-                .role(Role.ADMIN)
+                .role(ADMIN)
+                .passwordEncoder(new BCryptPasswordEncoder())
+                .build();
+
+        return memberRepository.save(member);
+    }
+
+    public Member createMember(String nickname, University university, Role role) {
+        Member member = Member.builder()
+                .nickname(nickname)
+                .name(nickname)
+                .email(nickname + "@gmail.com")
+                .password("1234")
+                .university(university)
+                .role(role)
                 .passwordEncoder(new BCryptPasswordEncoder())
                 .build();
 

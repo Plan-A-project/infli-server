@@ -38,13 +38,15 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
                 .name("푸단대학교")
                 .build());
 
+
+
         Member member = Member.builder()
                 .email(withMockMember.email())
                 .passwordEncoder(passwordEncoder)
                 .password("Test1234!")
                 .name(withMockMember.nickname())
                 .nickname(withMockMember.nickname())
-                .role(STUDENT)
+                .role(withMockMember.role())
                 .university(university)
                 .build();
 

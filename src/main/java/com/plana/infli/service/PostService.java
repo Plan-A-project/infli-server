@@ -1,13 +1,17 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.domain.BoardType.*;
+import static com.plana.infli.domain.BoardType.SubBoardType.*;
 import static com.plana.infli.domain.Member.isAdmin;
 import static com.plana.infli.domain.Post.*;
 import static com.plana.infli.domain.PostType.*;
-import static com.plana.infli.domain.editor.post.PostEditor.*;
+import static com.plana.infli.domain.editor.post.PostEditor.edit;
+import static com.plana.infli.domain.embeddable.Recruitment.*;
+import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.NotFoundException.*;
-import static com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.CreateRecruitmentServiceRequest.*;
+import static com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
-import static com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.*;
+import static com.plana.infli.web.dto.request.post.create.normal.CreateNormalPostServiceRequest.*;
 import static com.plana.infli.web.dto.response.post.my.MyPostsResponse.loadMyPostsResponse;
 
 import com.plana.infli.domain.Board;
@@ -25,12 +29,12 @@ import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.aop.Retry;
+import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest;
+import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
-import com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest.CreateRecruitmentServiceRequest;
-import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest.EditRecruitmentServiceRequest;
 import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardServiceRequest;
-import com.plana.infli.web.dto.request.post.create.CreatePostServiceRequest;
-import com.plana.infli.web.dto.request.post.edit.EditPostServiceRequest;
+import com.plana.infli.web.dto.request.post.create.normal.CreateNormalPostServiceRequest;
+import com.plana.infli.web.dto.request.post.edit.normal.EditNormalPostServiceRequest;
 import com.plana.infli.web.dto.request.post.view.search.SearchPostsByKeywordServiceRequest;
 import com.plana.infli.web.dto.response.post.board.BoardPost;
 import com.plana.infli.web.dto.response.post.board.BoardPostsResponse;
@@ -38,7 +42,6 @@ import com.plana.infli.web.dto.response.post.my.MyPost;
 import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
-import jakarta.annotation.Nullable;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +69,6 @@ public class PostService {
         return findMemberBy(email).isAgreedOnPostPolicy();
     }
 
-
     @Transactional
     public void confirmWritePolicyAgreement(String email) {
         findMemberBy(email).agreedOnPostWritePolicy();
@@ -77,40 +79,17 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-
     @Transactional
-    public Long createPost(CreatePostServiceRequest request) {
+    public Long createNormalPost(CreateNormalPostServiceRequest request) {
 
         Member member = findMemberWithUniversityBy(request.getEmail());
 
         Board board = findBoardWithUniversityBy(request.getBoardId());
 
-        validateCreatePostRequest(member, board, request);
+        validateCreateNormalPostRequest(member, board, request.getPostType());
 
-        @Nullable Recruitment recruitment = loadRecruitmentIfExists(request.getRecruitment());
-
-        Post post = of(member, board, request, recruitment);
-
-        return postRepository.save(post).getId();
+        return postRepository.save(toNormalPost(member, board, request)).getId();
     }
-
-
-    private void validateCreatePostRequest(Member member, Board board,
-            CreatePostServiceRequest request) {
-
-        checkMemberAndBoardIsInSameUniversity(member, board);
-
-        PostType postType = request.getPostType();
-
-        if (hasWritePermission(member.getRole(), postType) == false) {
-            throw new AuthorizationFailedException();
-        }
-
-        if (isAllowedPostType(board.getBoardType(), postType) == false) {
-            throw new NotFoundException(BOARD_NOT_FOUND);
-        }
-    }
-
 
     private Member findMemberWithUniversityBy(String email) {
         return memberRepository.findActiveMemberWithUniversityBy(email)
@@ -122,48 +101,100 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
     }
 
-    private void checkMemberAndBoardIsInSameUniversity(Member member, Board board) {
+    //TODO
+    private void validateCreateNormalPostRequest(Member member, Board board, PostType postType) {
+
+        checkIsInSameUniversity(member, board);
+
+        BoardType boardType = board.getBoardType();
+
+        if (postType == RECRUITMENT) {
+            throw new BadRequestException(POST_TYPE_NOT_ALLOWED);
+        }
+
+        validateWriteRequest(member.getRole(), postType, boardType);
+    }
+
+    private void validateWriteRequest(Role role, PostType postType, BoardType boardType) {
+        SubBoardType subBoardType = of(boardType, postType);
+
+        if (subBoardType == null) {
+            throw new BadRequestException(INVALID_BOARD_TYPE);
+        }
+
+        if (subBoardType.hasWritePermission(role) == false) {
+            throw new AuthorizationFailedException();
+        }
+    }
+
+    private void checkIsInSameUniversity(Member member, Board board) {
         if (member.getUniversity().equals(board.getUniversity()) == false) {
             throw new AuthorizationFailedException();
         }
     }
 
-    private Recruitment loadRecruitmentIfExists(CreateRecruitmentServiceRequest request) {
+    @Transactional
+    public Long createRecruitmentPost(CreateRecruitmentPostServiceRequest request) {
 
-        return request != null ? createRecruitment(request) : null;
+        Member member = findMemberWithUniversityBy(request.getEmail());
+
+        Board board = findBoardWithUniversityBy(request.getBoardId());
+
+        validateCreateRecruitmentPostRequest(member, board, request);
+
+        Recruitment recruitment = loadRecruitment(request);
+
+        return postRepository.save(toRecruitmentPost(member, board, request, recruitment)).getId();
     }
 
+    //TODO
+    private void validateCreateRecruitmentPostRequest(Member member, Board board,
+            CreateRecruitmentPostServiceRequest request) {
+
+        if (request.getRecruitmentStartDate().isAfter(request.getRecruitmentEndDate())) {
+            throw new BadRequestException(INVALID_RECRUITMENT_DATE);
+        }
+
+        checkIsInSameUniversity(member, board);
+
+        if (isRecruitmentBoard(board) == false) {
+            throw new BadRequestException(BOARD_TYPE_IS_NOT_RECRUITMENT);
+        }
+
+        validateWriteRequest(member.getRole(), RECRUITMENT, board.getBoardType());
+    }
+
+    private boolean isRecruitmentBoard(Board board) {
+        return board.getBoardType() == EMPLOYMENT || board.getBoardType() == ACTIVITY;
+    }
+
+    private Recruitment loadRecruitment(CreateRecruitmentPostServiceRequest request) {
+        return create(request.getRecruitmentCompanyName(),
+                request.getRecruitmentStartDate(),
+                request.getRecruitmentEndDate());
+    }
 
     @Transactional
-    public void edit(EditPostServiceRequest request) {
+    public void editNormalPost(EditNormalPostServiceRequest request) {
 
         Member member = findMemberBy(request.getEmail());
 
-        Post post = findPostBy(request.getPostId());
+        Post post = findPostWithMemberBy(request.getPostId());
 
-        validateEditRequest(request, post, member);
+        validateEditNormalPostRequest(post, member);
 
-        editPost(request, post);
+        edit(request, post);
+
     }
 
-    private Post findPostBy(Long postId) {
-        return postRepository.findActivePostBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
-    }
+    //TODO
+    private void validateEditNormalPostRequest(Post post, Member member) {
 
-    private void validateEditRequest(EditPostServiceRequest request, Post post, Member member) {
-
-        checkThisMemberIsPostWriter(member, post);
-
-        EditRecruitmentServiceRequest recruitment = request.getRecruitment();
-
-        if (recruitment == null) {
-            return;
-        }
-
-        if (postTypeIsNotRecruitment(post)) {
+        if (isRecruitmentPost(post)) {
             throw new BadRequestException("");
         }
+
+        checkThisMemberIsPostWriter(member, post);
     }
 
     private void checkThisMemberIsPostWriter(Member member, Post post) {
@@ -172,9 +203,32 @@ public class PostService {
         }
     }
 
-    private boolean postTypeIsNotRecruitment(Post post) {
-        return post.getPostType() != RECRUITMENT;
+    private boolean isRecruitmentPost(Post post) {
+        return post.getPostType() == RECRUITMENT;
     }
+
+
+    @Transactional
+    public void editRecruitmentPost(EditRecruitmentPostServiceRequest request) {
+
+        Member member = findMemberBy(request.getEmail());
+
+        Post post = findPostWithMemberBy(request.getPostId());
+
+        validateEditRecruitmentPostRequest(post, member);
+
+        edit(request, post);
+    }
+
+    private void validateEditRecruitmentPostRequest(Post post, Member member) {
+
+        if (isRecruitmentPost(post) == false) {
+            throw new BadRequestException("");
+        }
+
+        checkThisMemberIsPostWriter(member, post);
+    }
+
 
     @Transactional
     public void deletePost(Long postId, String email) {
@@ -266,7 +320,7 @@ public class PostService {
 
         Board board = findBoardBy(request.getBoardId());
 
-        checkMemberAndBoardIsInSameUniversity(member, board);
+        checkIsInSameUniversity(member, board);
 
         validateTypes(request.getType(), board.getBoardType());
 
@@ -277,36 +331,23 @@ public class PostService {
         return BoardPostsResponse.loadResponse(posts, queryRequest);
     }
 
-    //TODO
     private void validateTypes(PostType postType, BoardType boardType) {
+        SubBoardType subBoardType = of(boardType, postType);
 
-        if (boardType.isAllowedPostType(postType) == false) {
-            throw new BadRequestException("");
+        if (subBoardType == null) {
+            throw new BadRequestException(INVALID_BOARD_TYPE);
         }
     }
 
-
-    public boolean isValidWriteRequest(Long boardId, String email,
+    public void validateWriteRequest(Long boardId, String email,
             PostType postType) {
 
-        // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
         Member member = findMemberWithUniversityBy(email);
 
-        // 게시판이 존재하지 않거나, 삭제된 경우 예외 발생
         Board board = findBoardWithUniversityBy(boardId);
 
-        checkMemberAndBoardIsInSameUniversity(member, board);
+        checkIsInSameUniversity(member, board);
 
-        return hasWritePermission(member.getRole(), postType) &&
-                isAllowedPostType(board.getBoardType(), postType);
+        validateWriteRequest(member.getRole(), postType, board.getBoardType());
     }
-
-    private boolean hasWritePermission(Role role, PostType postType) {
-        return postType.hasWritePermission(role);
-    }
-
-    private boolean isAllowedPostType(BoardType boardType, PostType postType) {
-        return boardType.isAllowedPostType(postType);
-    }
-
 }

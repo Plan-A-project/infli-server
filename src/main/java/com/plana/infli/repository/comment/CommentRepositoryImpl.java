@@ -139,10 +139,12 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     @Override
-    public List<Comment> findAllOrderByIdAsc() {
-        return jpaQueryFactory.selectFrom(comment)
-                .orderBy(comment.id.asc())
-                .fetch();
+    public Optional<Comment> findActiveCommentWithPostBy(Long commentId) {
+        return ofNullable(jpaQueryFactory.selectFrom(comment)
+                .where(comment.id.eq(commentId))
+                .where(comment.isDeleted.isFalse())
+                .innerJoin(comment.post, post).fetchJoin()
+                .fetchOne());
     }
 
     private Expression<String> profileImageUrlEq(boolean isAnonymous) {

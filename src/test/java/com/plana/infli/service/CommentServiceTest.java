@@ -9,7 +9,6 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.University;
-import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -25,16 +24,15 @@ import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.delete.service.DeleteCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.edit.service.EditCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.view.post.service.LoadCommentsInPostServiceRequest;
+import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
+import com.plana.infli.web.dto.request.comment.delete.DeleteCommentServiceRequest;
+import com.plana.infli.web.dto.request.comment.edit.EditCommentServiceRequest;
+import com.plana.infli.web.dto.request.comment.view.post.LoadCommentsInPostServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
 import com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -709,8 +707,8 @@ class CommentServiceTest {
 
         //when //then
         assertThatThrownBy(() -> commentService.createComment(request))
-                .isInstanceOf(BadRequestException.class)
-                .message().isEqualTo("삭제된 댓글에 대댓글을 작성할수 없습니다");
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
     }
 
@@ -835,7 +833,7 @@ class CommentServiceTest {
         commentService.editContent(request);
 
         //then
-        Comment findComment = commentRepository.findWithPostById(comment.getId()).get();
+        Comment findComment = commentRepository.findActiveCommentWithPostBy(comment.getId()).get();
         assertThat(findComment.getId()).isEqualTo(comment.getId());
         assertThat(findComment.getContent()).isEqualTo("수정된 댓글입니다");
         assertThat(findComment.isEdited()).isTrue();

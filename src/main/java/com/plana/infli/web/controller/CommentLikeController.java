@@ -3,8 +3,8 @@ package com.plana.infli.web.controller;
 import static org.springframework.http.ResponseEntity.*;
 
 import com.plana.infli.service.CommentLikeService;
-import com.plana.infli.web.dto.request.commentlike.cancel.controller.CancelCommentLikeRequest;
-import com.plana.infli.web.dto.request.commentlike.create.controller.CreateCommentLikeRequest;
+import com.plana.infli.web.dto.request.commentlike.cancel.CancelCommentLikeRequest;
+import com.plana.infli.web.dto.request.commentlike.create.CreateCommentLikeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class CommentLikeController {
     public ResponseEntity<Long> createCommentLike(@RequestBody @Validated CreateCommentLikeRequest request,
             @AuthenticationPrincipal String email) {
 
-        return ok(commentLikeService.createCommentLike(request.toServiceRequest(), email));
+        return ok(commentLikeService.createCommentLike(request.toServiceRequest(email)));
     }
 
     @DeleteMapping("/comments/likes")
@@ -46,6 +46,7 @@ public class CommentLikeController {
     public void cancelCommentLike(@RequestBody @Validated CancelCommentLikeRequest request,
             @AuthenticationPrincipal String email) {
 
-        commentLikeService.cancelCommentLike(request.toServiceRequest(), email);
+        commentLikeService.cancelCommentLike(request.toServiceRequest(email));
+
     }
 }

@@ -24,9 +24,15 @@ public class BadRequestException extends DefaultException{
 
     public static final String PASSWORD_NOT_MATCH = "비밀번호가 일치하지 않습니다.";
 
-    public static final String MAX_IMAGE_UPLOAD_SIZE_EXCEEDED = "최대 사진 업로드 갯수를 초과하였습니다";
-
     public static final String IMAGE_NOT_PROVIDED = "업로드할 사진이 선택되지 않았습니다 ";
+
+    public static final String BOARD_TYPE_IS_NOT_RECRUITMENT = "채용글을 작성할수 있는 게시판이 아닙니다";
+
+    public static final String POST_TYPE_NOT_ALLOWED = "해당 글 종류는 허용되지 않습니다";
+
+    public static final String INVALID_BOARD_TYPE = "게시판 정보가 옳바르지 않습니다";
+
+    public static final String INVALID_RECRUITMENT_DATE = "모집 종료일이 시작일보다 빠를수 없습니다";
 
     public BadRequestException(String message) {
         super(message);

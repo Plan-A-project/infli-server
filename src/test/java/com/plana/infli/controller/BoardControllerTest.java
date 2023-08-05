@@ -35,8 +35,8 @@ import com.plana.infli.repository.popularboard.PopularBoardRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.BoardService;
-import com.plana.infli.web.dto.request.board.popular.edit.controller.EditPopularBoardSequenceRequest;
-import com.plana.infli.web.dto.request.board.popular.enable.controller.ChangePopularBoardVisibilityRequest;
+import com.plana.infli.web.dto.request.board.popular.edit.EditPopularBoardSequenceRequest;
+import com.plana.infli.web.dto.request.board.popular.enable.ChangePopularBoardVisibilityRequest;
 import com.plana.infli.web.dto.response.board.view.SinglePopularBoard;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -44,7 +44,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
