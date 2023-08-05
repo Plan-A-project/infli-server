@@ -1,6 +1,5 @@
-package com.plana.infli.web.dto.request.commentlike.create.controller;
+package com.plana.infli.web.dto.request.commentlike.create;
 
-import com.plana.infli.web.dto.request.commentlike.create.service.CreateCommentLikeServiceRequest;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,8 +21,9 @@ public class CreateCommentLikeRequest {
         this.commentId = commentId;
     }
 
-    public CreateCommentLikeServiceRequest toServiceRequest() {
+    public CreateCommentLikeServiceRequest toServiceRequest(String email) {
         return CreateCommentLikeServiceRequest.builder()
+                .email(email)
                 .postId(postId)
                 .commentId(commentId)
                 .build();

@@ -37,4 +37,9 @@ public class BoardFactory {
     }
 
 
+    public Board createBoard(University university, BoardType boardType) {
+        return boardRepository.save(Board.create(boardType, university));
+    }
+
+
 }

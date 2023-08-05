@@ -25,10 +25,10 @@ import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.aop.Retry;
-import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.delete.service.DeleteCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.edit.service.EditCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.view.post.service.LoadCommentsInPostServiceRequest;
+import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
+import com.plana.infli.web.dto.request.comment.delete.DeleteCommentServiceRequest;
+import com.plana.infli.web.dto.request.comment.edit.EditCommentServiceRequest;
+import com.plana.infli.web.dto.request.comment.view.post.LoadCommentsInPostServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyComment;
@@ -124,11 +124,6 @@ public class CommentService {
             return;
         }
 
-        // 삭제된 댓글에 대댓글을 작성할 수 없다
-        if (parentComment.isDeleted()) {
-            throw new BadRequestException(PARENT_COMMENT_IS_DELETED);
-        }
-
         // 대댓글을 작성할 글의 번호와, 부모 댓글의 글 번호가 서로 다른 경우
         if (parentComment.getPost().equals(post) == false) {
             throw new NotFoundException(COMMENT_NOT_FOUND);
@@ -141,7 +136,7 @@ public class CommentService {
     }
 
     private Comment findCommentWithPostBy(Long commentId) {
-        return commentRepository.findWithPostById(commentId)
+        return commentRepository.findActiveCommentWithPostBy(commentId)
                 .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
     }
 

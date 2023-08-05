@@ -98,22 +98,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         try {
             return jpaQueryFactory.select(
                             new QSinglePostResponse(
-                                    post.board.boardName,
-                                    post.board.id,
-                                    post.postType.stringValue(),
-                                    nicknameEq(request.getPost()),
-                                    post.id,
-                                    post.title,
-                                    post.content,
-                                    post.createdAt,
-                                    isMyPost(request.getMember()),
-                                    isAdmin(request.getMember()),
-                                    post.viewCount,
-                                    post.likes.size(),
-                                    pressedLikeOnThisPost(request.getMember()),
-                                    post.thumbnailUrl,
-                                    companyNameEqual(),
-                                    recruitmentStartDateEqual(),
+                                    post.board.boardName, post.board.id,
+                                    post.postType.stringValue(), nicknameEq(request.getPost()),
+                                    post.id, post.title, post.content, post.createdAt,
+                                    isMyPost(request.getMember()), isAdmin(request.getMember()),
+                                    post.viewCount, post.likes.size(),
+                                    pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
+                                    companyNameEqual(), recruitmentStartDateEqual(),
                                     recruitmentEndDateEqual()))
                     .from(post)
                     .where(post.eq(request.getPost()))
@@ -231,6 +222,15 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(post.id.eq(postId))
                 .where(postIsActive())
                 .setLockMode(OPTIMISTIC)
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<Post> findActivePostWithBoardAndMemberBy(Long id) {
+        return ofNullable(jpaQueryFactory.selectFrom(post)
+                .where(postIsActiveAndIdEqual(id))
+                .innerJoin(post.board, board).fetchJoin()
+                .innerJoin(post.member, member).fetchJoin()
                 .fetchOne());
     }
 

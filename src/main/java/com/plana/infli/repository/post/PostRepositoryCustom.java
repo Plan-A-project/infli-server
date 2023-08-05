@@ -26,4 +26,8 @@ public interface PostRepositoryCustom {
     List<BoardPost> loadPostsByBoard(PostQueryRequest request);
 
     Optional<Post> findActivePostWithOptimisticLock(Long postId);
+
+    //테스트 케이스용
+    Optional<Post> findActivePostWithBoardAndMemberBy(Long id);
+
 }

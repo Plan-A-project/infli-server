@@ -11,6 +11,8 @@ import com.plana.infli.repository.member.MemberRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.coobird.thumbnailator.Thumbnailator;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;

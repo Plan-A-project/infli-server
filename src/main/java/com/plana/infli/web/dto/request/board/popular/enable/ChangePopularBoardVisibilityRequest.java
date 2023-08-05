@@ -1,6 +1,5 @@
-package com.plana.infli.web.dto.request.board.popular.enable.controller;
+package com.plana.infli.web.dto.request.board.popular.enable;
 
-import com.plana.infli.web.dto.request.board.popular.enable.service.ChangePopularBoardVisibilityServiceRequest;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.List;

@@ -5,9 +5,8 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.service.CommentService;
-import com.plana.infli.web.dto.request.comment.create.service.CreateCommentServiceRequest;
+import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

@@ -6,6 +6,7 @@ import static jakarta.persistence.FetchType.LAZY;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.plana.infli.exception.custom.AuthenticationFailedException;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,8 +43,8 @@ public class Member extends BaseEntity {
 
   private String nickname;
 
-  @Column(nullable = false)
   @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
   private Role role;
 
   @ManyToOne(fetch = LAZY)

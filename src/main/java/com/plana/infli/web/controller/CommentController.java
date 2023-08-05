@@ -1,13 +1,11 @@
 package com.plana.infli.web.controller;
 
-import static org.springframework.http.ResponseEntity.*;
-
 import com.plana.infli.domain.Comment;
 import com.plana.infli.service.CommentService;
-import com.plana.infli.web.dto.request.comment.create.controller.CreateCommentRequest;
-import com.plana.infli.web.dto.request.comment.delete.controller.DeleteCommentRequest;
-import com.plana.infli.web.dto.request.comment.edit.controller.EditCommentRequest;
-import com.plana.infli.web.dto.request.comment.view.post.controller.LoadCommentsInPostRequest;
+import com.plana.infli.web.dto.request.comment.create.CreateCommentRequest;
+import com.plana.infli.web.dto.request.comment.delete.DeleteCommentRequest;
+import com.plana.infli.web.dto.request.comment.edit.EditCommentRequest;
+import com.plana.infli.web.dto.request.comment.view.post.LoadCommentsInPostRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
@@ -16,11 +14,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +24,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
