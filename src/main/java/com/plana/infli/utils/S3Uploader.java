@@ -1,17 +1,17 @@
 package com.plana.infli.utils;
 
 import static com.amazonaws.services.s3.model.CannedAccessControlList.*;
-import static com.plana.infli.exception.custom.InternalServerErrorException.*;
+import static com.plana.infli.exception.custom.BadRequestException.IMAGE_IS_EMPTY;
+import static org.springframework.util.StringUtils.*;
 
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.plana.infli.exception.custom.InternalServerErrorException;
+import com.plana.infli.exception.custom.BadRequestException;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,48 +34,87 @@ public class S3Uploader {
 
 
     @Transactional
-    public String upload(MultipartFile multipartFile, String directoryPath) {
+    public String uploadAsOriginalImage(MultipartFile multipartFile, String directoryPath) {
+
+        validateUploadedFile(multipartFile);
 
         String storeFileName = generateStoreFileName(multipartFile.getOriginalFilename());
 
+        File file = generateFile(multipartFile, storeFileName);
+
         String fullPathName = generateFullPath(directoryPath, storeFileName);
 
-        File file = convertToFile(multipartFile, storeFileName);
-
-        amazonS3Client.putObject(
-                new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
+        uploadToS3(file, fullPathName);
 
         file.delete();
 
         return amazonS3Client.getUrl(bucket, fullPathName).toString();
     }
 
-    private File convertToFile(MultipartFile multipartFile, String fullPathName) {
+    private void uploadToS3(File file, String fullPathName) {
+        amazonS3Client.putObject(
+                new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
+    }
+
+    @SneakyThrows
+    @Transactional
+    public String uploadAsThumbnailImage(MultipartFile multipartFile, String directoryPath) {
+
+        validateUploadedFile(multipartFile);
+
+        String storeFileName = generateStoreFileName(cleanPath(multipartFile.getOriginalFilename()));
+
+        File originalFile = generateFile(multipartFile, storeFileName);
+
+        String fullPathName = generateFullPath(directoryPath, storeFileName);
+
+        File thumbnailFile = generateThumbnailFile(storeFileName, originalFile);
+
+        uploadToS3(thumbnailFile, fullPathName);
+
+        originalFile.delete();
+        thumbnailFile.delete();
+
+        return amazonS3Client.getUrl(bucket, fullPathName).toString();
+    }
+
+    private void validateUploadedFile(MultipartFile multipartFile) {
+        if (multipartFile == null || multipartFile.isEmpty()
+                || multipartFile.getOriginalFilename() == null) {
+            throw new BadRequestException(IMAGE_IS_EMPTY);
+        }
+    }
+
+    @SneakyThrows(IOException.class)
+    private File generateThumbnailFile(String storeFileName, File uploadedFile) {
+        File thumbnailFile = new File(storeFileName);
+
+        Thumbnails.of(uploadedFile)
+                .size(64, 64)
+                .outputFormat("jpeg")
+                .toFile(thumbnailFile);
+        return thumbnailFile;
+    }
+
+
+    @SneakyThrows(IOException.class)
+    private File generateFile(MultipartFile multipartFile, String fullPathName) {
 
         File file = new File(fullPathName);
 
-        try {
-            file.createNewFile();
+        file.createNewFile();
 
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                fos.write(multipartFile.getBytes());
-            }
-        } catch (IOException e) {
-            throw new InternalServerErrorException(IMAGE_UPLOAD_FAILED, e);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(multipartFile.getBytes());
         }
 
         return file;
     }
 
     private String generateStoreFileName(String originalFilename) {
-        String ext = extractExt(originalFilename);
+        String fileExtension = getFilenameExtension(originalFilename);
         String uuid = UUID.randomUUID().toString();
-        return uuid + "." + ext;
-    }
-
-    private String extractExt(String originalFilename) {
-        int pos = originalFilename.lastIndexOf(".");
-        return originalFilename.substring(pos + 1);
+        return uuid + "." + fileExtension;
     }
 
     private String generateFullPath(String directoryName, String fileName) {
