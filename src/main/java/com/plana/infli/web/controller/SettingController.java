@@ -64,7 +64,7 @@ public class SettingController {
     public void authenticatePassword(@AuthenticatedPrincipal String email,
             @RequestBody @Validated AuthenticatePasswordRequest request) {
 
-        settingService.authenticatePassword(request.toServiceRequest(email))
+        settingService.authenticatePassword(request.toServiceRequest(email));
     }
 
     /**
