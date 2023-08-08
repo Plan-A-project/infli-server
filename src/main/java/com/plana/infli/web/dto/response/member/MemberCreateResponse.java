@@ -26,8 +26,8 @@ public class MemberCreateResponse {
 		this.isAuthenticated = isAuthenticated;
 	}
 
-	public static MemberCreateResponse from(Member member) {
-		return new MemberCreateResponse(member.getEmail(), member.getName(), member.getNickname(), member.getRole(),
-			member.isAuthenticated());
-	}
+//	public static MemberCreateResponse from(Member member) {
+//		return new MemberCreateResponse(member.getEmail(), member.getName(), member.getNickname(), member.getRole(),
+//			member.isAuthenticated());
+//	}
 }

@@ -3,7 +3,6 @@ package com.plana.infli.web.controller;
 import com.plana.infli.domain.Comment;
 import com.plana.infli.service.CommentService;
 import com.plana.infli.web.dto.request.comment.create.CreateCommentRequest;
-import com.plana.infli.web.dto.request.comment.delete.DeleteCommentRequest;
 import com.plana.infli.web.dto.request.comment.edit.EditCommentRequest;
 import com.plana.infli.web.dto.request.comment.view.post.LoadCommentsInPostRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
@@ -57,21 +56,18 @@ public class CommentController {
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
     public void edit(@Validated @RequestBody EditCommentRequest request,
             @AuthenticationPrincipal String email) {
-
-        commentService.editContent(request.toServiceRequest(email));
+        commentService.editCommentContent(request.toServiceRequest(email));
     }
 
-    @DeleteMapping("/comments")
+    @DeleteMapping("/comments/{commentId}")
     @Operation(summary = "댓글 또는 대댓글 삭제")
     @ApiResponse(responseCode = "200", description = "댓글 삭제 완료")
     @ApiResponse(responseCode = "400", description = "요청값이 잘못된 상태")
     @ApiResponse(responseCode = "404", description = "사용자 또는 댓글과 글을 찾을수 없음")
     @ApiResponse(responseCode = "403", description = "타인의 댓글 삭제할 수 없음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
-    public void delete(@Validated @RequestBody DeleteCommentRequest request,
-            @AuthenticationPrincipal String email) {
-
-        commentService.delete(request.toServiceRequest(email));
+    public void delete(@AuthenticationPrincipal String email, @PathVariable Long commentId) {
+        commentService.deleteComment(email, commentId);
     }
 
     @GetMapping("/posts/comments")

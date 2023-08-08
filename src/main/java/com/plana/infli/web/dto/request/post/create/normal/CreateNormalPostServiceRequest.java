@@ -38,10 +38,9 @@ public class CreateNormalPostServiceRequest {
         return Post.builder()
                 .board(board)
                 .member(member)
-                .postType(request.postType)
+                .postType(request.getPostType())
                 .title(request.getTitle())
                 .content(request.getContent())
                 .build();
     }
-
 }

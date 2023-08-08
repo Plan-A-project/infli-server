@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.request.member;
+package com.plana.infli.web.dto.request.member.signup;
 
 import lombok.AccessLevel;
 import lombok.Getter;

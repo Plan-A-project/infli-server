@@ -1,11 +1,10 @@
 package com.plana.infli.domain;
 
-import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
-import com.plana.infli.domain.editor.comment.CommentContentEditor;
+import com.plana.infli.domain.editor.comment.CommentEditor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +19,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.springframework.lang.Nullable;
 
 @Entity
 @Getter
@@ -103,21 +101,20 @@ public class Comment extends BaseEntity {
         }
     }
 
+    public CommentEditor.CommentEditorBuilder toEditor() {
+        return CommentEditor.builder()
+                .content(content)
+                .isEdited(isEdited)
+                .isDeleted(isDeleted);
+    }
+
     /**
      * 여기서만 댓글 수정 가능
      */
-    public Comment edit(CommentContentEditor commentContentEditor) {
-        this.content = commentContentEditor.getContent();
-        this.isEdited = true;
-        return this;
+    public void edit(CommentEditor commentEditor) {
+        this.content = commentEditor.getContent();
+        this.isEdited = commentEditor.isEdited();
+        this.isDeleted = commentEditor.isDeleted();
     }
 
-    public CommentContentEditor.CommentContentEditorBuilder toEditor() {
-        return CommentContentEditor.builder()
-                .content(content);
-    }
-
-    public static void delete(Comment comment) {
-        comment.isDeleted = true;
-    }
 }

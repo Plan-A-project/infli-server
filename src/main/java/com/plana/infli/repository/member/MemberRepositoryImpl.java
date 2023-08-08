@@ -19,7 +19,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     @Override
     public Optional<Member> findActiveMemberBy(String email) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
-                .where(member.isDeleted.isFalse())
+                .where(member.memberStatus.isDeleted.isFalse())
                 .where(member.email.eq(email))
                 .fetchOne());
     }
@@ -28,7 +28,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     public Optional<Member> findActiveMemberWithUniversityBy(String email) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
                 .leftJoin(member.university, university).fetchJoin()
-                .where(member.isDeleted.isFalse())
+                .where(member.memberStatus.isDeleted.isFalse())
                 .where(member.email.eq(email))
                 .fetchOne());
     }

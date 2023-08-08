@@ -37,4 +37,7 @@ public interface CommentRepositoryCustom {
     Long findActiveCommentsCountBy(Member member);
 
     Optional<Comment> findActiveCommentWithPostBy(Long commentId);
+
+    Optional<Comment> findActiveCommentWithMemberBy(Long commentId);
+
 }
