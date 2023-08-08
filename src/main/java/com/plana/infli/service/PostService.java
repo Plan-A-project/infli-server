@@ -5,6 +5,7 @@ import static com.plana.infli.domain.BoardType.SubBoardType.*;
 import static com.plana.infli.domain.Member.isAdmin;
 import static com.plana.infli.domain.Post.*;
 import static com.plana.infli.domain.PostType.*;
+import static com.plana.infli.domain.editor.member.MemberEditor.*;
 import static com.plana.infli.domain.editor.post.PostEditor.edit;
 import static com.plana.infli.domain.embeddable.Recruitment.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
@@ -20,6 +21,7 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.domain.Role;
+import com.plana.infli.domain.embeddable.MemberStatus;
 import com.plana.infli.domain.embeddable.Recruitment;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
@@ -66,12 +68,16 @@ public class PostService {
     private final UniversityRepository universityRepository;
 
     public boolean checkMemberAgreedOnWritePolicy(String email) {
-        return findMemberBy(email).isAgreedOnPostPolicy();
+        MemberStatus memberStatus = findMemberBy(email).getMemberStatus();
+
+        return memberStatus.isPolicyAccepted();
     }
 
     @Transactional
     public void confirmWritePolicyAgreement(String email) {
-        findMemberBy(email).agreedOnPostWritePolicy();
+        Member member = findMemberBy(email);
+
+        acceptPolicy(member);
     }
 
     private Member findMemberBy(String email) {

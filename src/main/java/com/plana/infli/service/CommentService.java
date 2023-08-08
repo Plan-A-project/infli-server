@@ -4,10 +4,9 @@ import static com.plana.infli.domain.Board.isAnonymous;
 import static com.plana.infli.domain.Comment.*;
 import static com.plana.infli.domain.Member.isAdmin;
 import static com.plana.infli.domain.Role.*;
-import static com.plana.infli.domain.editor.comment.CommentContentEditor.editComment;
+import static com.plana.infli.domain.editor.comment.CommentEditor.*;
 import static com.plana.infli.exception.custom.BadRequestException.CHILD_COMMENTS_NOT_ALLOWED;
 import static com.plana.infli.exception.custom.BadRequestException.MAX_COMMENT_SIZE_EXCEEDED;
-import static com.plana.infli.exception.custom.BadRequestException.PARENT_COMMENT_IS_DELETED;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse.loadMyCommentsResponse;
 import static com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse.loadPostCommentsResponse;
@@ -17,6 +16,7 @@ import static org.springframework.data.domain.PageRequest.of;
 import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
+import com.plana.infli.domain.editor.comment.CommentEditor;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -26,7 +26,6 @@ import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.aop.Retry;
 import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.delete.DeleteCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.edit.EditCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.view.post.LoadCommentsInPostServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
@@ -165,7 +164,7 @@ public class CommentService {
 
 
     @Transactional
-    public void editContent(EditCommentServiceRequest request) {
+    public void editCommentContent(EditCommentServiceRequest request) {
 
         // 최대 허용 댓글 길이는 500자 이다
         validateContentLength(request.getContent());
@@ -182,7 +181,7 @@ public class CommentService {
         validateEditRequest(comment, member, post);
 
         // 댓글 수정 진행
-        editComment(comment, request.getContent());
+        editContent(comment, request.getContent());
 
     }
 
@@ -211,43 +210,35 @@ public class CommentService {
     }
 
     @Transactional
-    public void delete(DeleteCommentServiceRequest request) {
+    public void deleteComment(String email, Long commentId) {
 
         // 댓글 삭제 요청을 한 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(email);
 
-        // 삭제할 댓글 ID 목록
-        List<Long> ids = request.getIds();
+        Comment comment = findCommentWithMemberBy(commentId);
 
         // 삭제할 댓글에 대한 검증 진행
-        validateDeleteRequest(member, ids);
-        commentRepository.deleteAllByIdsInBatch(ids);
+        validateDeleteRequest(member, comment);
 
-        em.clear();
+        delete(comment);
     }
 
-    private void validateDeleteRequest(Member member, List<Long> ids) {
+    private Comment findCommentWithMemberBy(Long commentId) {
+        return commentRepository.findActiveCommentWithMemberBy(commentId)
+                .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
+    }
 
-        // 삭제되지 않은 댓글들 DB 에서 조회
-        List<Comment> comments = commentRepository.findActiveCommentWithMemberByIdsIn(ids);
+    private void validateDeleteRequest(Member member, Comment comment) {
 
-        // Ex) 5개 댓글에 대한 조회 요청을 했으나, 실제 DB 에서 4개만 조회된 경우
-        if (ids.size() != comments.size()) {
-            throw new NotFoundException(COMMENT_NOT_FOUND);
+        // 관리자는 어떤 댓글도 삭제할수 있다
+        if (isAdmin(member)) {
+            return;
         }
 
-        comments.forEach(comment -> {
-
-            // 관리자는 어떤 댓글도 삭제할수 있다
-            if (isAdmin(member)) {
-                return;
-            }
-
-            // 댓글 작성자 본인과 관리자만 해당 댓글을 삭제할 수 있다
-            if (comment.getMember().equals(member) == false) {
-                throw new AuthorizationFailedException();
-            }
-        });
+        // 댓글 작성자 본인과 관리자만 해당 댓글을 삭제할 수 있다
+        if (comment.getMember().equals(member) == false) {
+            throw new AuthorizationFailedException();
+        }
     }
 
     public PostCommentsResponse loadCommentsInPost(LoadCommentsInPostServiceRequest request) {

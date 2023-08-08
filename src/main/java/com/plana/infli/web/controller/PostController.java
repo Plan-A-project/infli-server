@@ -48,7 +48,6 @@ public class PostController {
         postService.validateWriteRequest(boardId, email, postType);
     }
 
-
     @ResponseStatus(CREATED)
     @PostMapping("/posts/normal")
     @Operation(summary = "일반글 작성")

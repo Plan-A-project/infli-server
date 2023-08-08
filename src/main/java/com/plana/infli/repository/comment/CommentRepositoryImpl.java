@@ -147,8 +147,17 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetchOne());
     }
 
+    @Override
+    public Optional<Comment> findActiveCommentWithMemberBy(Long commentId) {
+        return ofNullable(jpaQueryFactory.selectFrom(comment)
+                .where(commentIsNotDeleted())
+                .where(comment.id.eq(commentId))
+                .innerJoin(comment.member, member).fetchJoin()
+                .fetchOne());
+    }
+
     private Expression<String> profileImageUrlEq(boolean isAnonymous) {
-        return isAnonymous ? nullExpression() : comment.member.profileImageUrl;
+        return isAnonymous ? nullExpression() : comment.member.profileImage.thumbnailUrl;
     }
 
     private Expression<String> nicknameEq(boolean isAnonymous) {

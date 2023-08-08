@@ -10,6 +10,7 @@ public class ConflictException extends DefaultException {
 
     public static final String DEFAULT_POPULAR_BOARD_EXISTS = "인기 게시판 기본값이 이미 생성되었습니다";
 
+
     public ConflictException(String message) {
         super(message);
     }

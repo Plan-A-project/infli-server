@@ -34,6 +34,13 @@ public class BadRequestException extends DefaultException{
 
     public static final String INVALID_RECRUITMENT_DATE = "모집 종료일이 시작일보다 빠를수 없습니다";
 
+    public static final String NOT_MATCHES_NEW_PASSWORD_CONFIRM = "새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.";
+
+    public static final String INVALID_MEMBER_INFO = "회원정보가 일치하지 않습니다";
+
+    public static final String IMAGE_IS_EMPTY = "업로드할 파일이 비어있습니다";
+
+
     public BadRequestException(String message) {
         super(message);
     }

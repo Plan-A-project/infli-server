@@ -1,13 +1,15 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.exception.custom.ConflictException.*;
+
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.web.dto.request.member.CompanyMemberCreateRequest;
-import com.plana.infli.web.dto.request.member.MemberCreateRequest;
+import com.plana.infli.web.dto.request.member.signup.CompanyMemberCreateRequest;
+import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,11 +21,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final MemberRepository memberRepository;
+
   private final PasswordEncoder passwordEncoder;
+
   private final UniversityRepository universityRepository;
 
   @Transactional
-  public void signupMember(MemberCreateRequest request) {
+  public void signupMember(CreateStudentMemberRequest request) {
     checkEmailDuplicated(request.getEmail());
     checkNicknameDuplicated(request.getNickname());
 
@@ -38,13 +42,13 @@ public class MemberService {
 
   public void checkEmailDuplicated(String email) {
     if (memberRepository.existsByEmail(email)) {
-      throw new ConflictException(ConflictException.DUPLICATED_EMAIL);
+      throw new ConflictException(DUPLICATED_EMAIL);
     }
   }
 
   public void checkNicknameDuplicated(String email) {
     if (memberRepository.existsByNickname(email)) {
-      throw new ConflictException(ConflictException.DUPLICATED_NICKNAME);
+      throw new ConflictException(DUPLICATED_NICKNAME);
     }
   }
 

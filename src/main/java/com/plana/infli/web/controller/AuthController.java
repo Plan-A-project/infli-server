@@ -2,8 +2,8 @@ package com.plana.infli.web.controller;
 
 import com.plana.infli.service.AuthService;
 import com.plana.infli.service.MemberService;
-import com.plana.infli.web.dto.request.member.CompanyMemberCreateRequest;
-import com.plana.infli.web.dto.request.member.MemberCreateRequest;
+import com.plana.infli.web.dto.request.member.signup.CompanyMemberCreateRequest;
+import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberRequest;
 import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +26,7 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/signup/student")
-  public ResponseEntity<Void> signupStudent(@RequestBody @Validated MemberCreateRequest request) {
+  public ResponseEntity<Void> signupStudent(@RequestBody @Validated CreateStudentMemberRequest request) {
     memberService.signupMember(request);
     return ResponseEntity.ok().build();
   }
