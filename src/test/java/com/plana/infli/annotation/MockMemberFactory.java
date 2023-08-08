@@ -1,16 +1,9 @@
 package com.plana.infli.annotation;
 
-import static com.plana.infli.domain.Role.*;
-
-import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.service.MemberService;
-import com.plana.infli.web.dto.request.member.MemberCreateRequest;
-import com.plana.infli.web.dto.response.member.MemberCreateResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

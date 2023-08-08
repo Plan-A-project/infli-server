@@ -1,6 +1,7 @@
 package com.plana.infli.controller;
 
 
+import static java.lang.String.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -33,7 +34,6 @@ import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.comment.create.CreateCommentRequest;
-import com.plana.infli.web.dto.request.comment.delete.DeleteCommentRequest;
 import com.plana.infli.web.dto.request.comment.edit.EditCommentRequest;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -730,17 +730,13 @@ public class CommentControllerTest {
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = findContextMember();
+
         Comment comment = commentFactory.createComment(member, post);
 
-        String request = om.writeValueAsString(DeleteCommentRequest.builder()
-                .ids(List.of(comment.getId()))
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                delete("/api/comments/{commentId}", comment.getId())
+                        .with(csrf()));
 
         //then
         Comment findComment = commentRepository.findById(comment.getId()).get();
@@ -763,15 +759,10 @@ public class CommentControllerTest {
         Member member = findContextMember();
         Comment comment = commentFactory.createChildComment(member, post, parentComment);
 
-        String request = om.writeValueAsString(DeleteCommentRequest.builder()
-                .ids(List.of(comment.getId()))
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                delete("/api/comments/{commentId}", comment.getId())
+                        .with(csrf()));
 
         //then
         Comment findComment = commentRepository.findById(comment.getId()).get();
@@ -791,19 +782,15 @@ public class CommentControllerTest {
         Member member = findContextMember();
         Comment comment = commentFactory.createComment(member, post);
 
-        String request = om.writeValueAsString(DeleteCommentRequest.builder()
-                .ids(List.of())
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(request)
+        ResultActions resultActions = mvc.perform(delete("/api/comments/{commentId}", " ")
                 .with(csrf()));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.ids").value("삭제할 댓글 ID가 입력되지 않았습니다"));
+                .andExpect(jsonPath("$.message").value("Path Variable 값이 입력되지 않았습니다"))
+                .andExpect(jsonPath("$.validation.commentId").value("Long"))
+                .andDo(print());
     }
 
     @DisplayName("로그인하지 않은 상태로 댓글을 삭제할 수 없다")
@@ -818,15 +805,10 @@ public class CommentControllerTest {
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        String request = om.writeValueAsString(DeleteCommentRequest.builder()
-                .ids(List.of(comment.getId()))
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                delete("/api/comments/{commentId}", comment.getId())
+                        .with(csrf()));
 
         //then
         resultActions.andExpect(status().isUnauthorized())

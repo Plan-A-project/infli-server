@@ -2,12 +2,16 @@ package com.plana.infli.domain;
 
 import static com.plana.infli.domain.Role.*;
 import static com.plana.infli.domain.Role.ADMIN;
+import static com.plana.infli.domain.embeddable.MemberProfileImage.*;
+import static com.plana.infli.domain.embeddable.MemberStatus.*;
 import static jakarta.persistence.FetchType.LAZY;
 import static lombok.AccessLevel.PROTECTED;
 
-import com.plana.infli.exception.custom.AuthenticationFailedException;
-import jakarta.annotation.Nullable;
+import com.plana.infli.domain.editor.member.MemberEditor;
+import com.plana.infli.domain.embeddable.MemberProfileImage;
+import com.plana.infli.domain.embeddable.MemberStatus;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -51,13 +55,11 @@ public class Member extends BaseEntity {
   @JoinColumn(name = "university_id")
   private University university;
 
-  private String profileImageUrl;
+  @Embedded
+  private MemberProfileImage profileImage;
 
-  private boolean isDeleted = false;
-
-  private boolean isAuthenticated = false;
-
-  private boolean agreedOnPostPolicy = false;
+  @Embedded
+  private MemberStatus memberStatus;
 
   public Member(String email, String password, String name, String nickname,
           University university, PasswordEncoder passwordEncoder) {
@@ -73,6 +75,8 @@ public class Member extends BaseEntity {
     this.nickname = nickname;
     this.role = role;
     this.university = university;
+    this.memberStatus = defaultMemberStatus();
+    this.profileImage = defaultProfileImage();
   }
 
   public Member(String email, String password, String companyName,
@@ -91,32 +95,24 @@ public class Member extends BaseEntity {
     role = STUDENT;
   }
 
-  public void authenticate() {
-    isAuthenticated = true;
-  }
-
   public void authenticateCompany() {
     role = COMPANY;
   }
 
-  public void agreedOnPostWritePolicy() {
-    this.agreedOnPostPolicy = true;
+
+  public MemberEditor.MemberEditorBuilder toEditor() {
+    return MemberEditor.builder()
+            .nickname(nickname)
+            .password(password)
+            .status(memberStatus)
+            .profileImage(profileImage);
   }
 
-  public void changeNickname(String nickname) {
-    this.nickname = nickname;
-  }
-
-  public void changePassword(String password) {
-    this.password = password;
-  }
-
-  public void changeProfileImage(String profileImageUrl) {
-    this.profileImageUrl = profileImageUrl;
-  }
-
-  public void deleteMember() {
-    this.isDeleted = true;
+  public void edit(MemberEditor memberEditor) {
+    this.password = memberEditor.getPassword();
+    this.nickname = memberEditor.getNickname();
+    this.memberStatus = memberEditor.getStatus();
+    this.profileImage = memberEditor.getProfileImage();
   }
 }
 

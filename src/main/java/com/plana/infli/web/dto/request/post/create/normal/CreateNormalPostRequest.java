@@ -42,6 +42,7 @@ public class CreateNormalPostRequest {
                 .boardId(boardId)
                 .title(title)
                 .content(content)
+                .postType(postType)
                 .build();
     }
 
