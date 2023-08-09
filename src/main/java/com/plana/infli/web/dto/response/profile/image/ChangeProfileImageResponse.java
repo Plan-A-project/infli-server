@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.response.profile.image;
 
-import com.plana.infli.domain.embeddable.MemberProfileImage;
+import com.plana.infli.domain.embedded.member.MemberProfileImage;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -118,7 +118,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postmember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -139,7 +139,7 @@ class CommentServiceTest {
         assertThat(response)
                 .extracting("commentId", "identifierNumber")
                 .contains(findComment.getId(), findComment.getIdentifierNumber());
-        assertThat(findComment.isEdited()).isFalse();
+        assertThat(findComment.getStatus().isEdited()).isFalse();
     }
 
     @DisplayName("존재하지 않는 회원은 댓글을 작성할수 없다")
@@ -148,7 +148,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postmember", university), board);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
@@ -175,7 +175,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postmember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -202,7 +202,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postmember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -227,7 +227,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postmember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -276,7 +276,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postmember = memberFactory.createStudentMember("postmember", university);
-        Post post = postFactory.createPost(postmember, board);
+        Post post = postFactory.createNormalPost(postmember, board);
 
         postService.deletePost(post.getId(), postmember.getEmail());
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -302,10 +302,10 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
 
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createUncertifiedMember("nickname", university);
+        Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .email(member.getEmail())
@@ -326,7 +326,7 @@ class CommentServiceTest {
         //given
         University otherUniversity = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(otherUniversity);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", otherUniversity), board);
 
         University myUniversity = universityFactory.createUniversity("서울대학교");
@@ -353,7 +353,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Member member1 = memberFactory.createStudentMember("nickname1", university);
         Member member2 = memberFactory.createStudentMember("nickname2", university);
@@ -466,7 +466,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("서울대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         int threadCount = 100;
@@ -514,7 +514,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -548,7 +548,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -575,7 +575,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -604,7 +604,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -634,7 +634,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -662,7 +662,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -687,7 +687,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -717,7 +717,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -749,7 +749,7 @@ class CommentServiceTest {
         //given
         University otherUniversity = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(otherUniversity);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", otherUniversity), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -780,13 +780,13 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createUncertifiedMember("nickname", university);
+        Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .email(member.getEmail())
@@ -814,7 +814,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -835,7 +835,7 @@ class CommentServiceTest {
         Comment findComment = commentRepository.findActiveCommentWithPostBy(comment.getId()).get();
         assertThat(findComment.getId()).isEqualTo(comment.getId());
         assertThat(findComment.getContent()).isEqualTo("수정된 댓글입니다");
-        assertThat(findComment.isEdited()).isTrue();
+        assertThat(findComment.getStatus().isEdited()).isTrue();
 
     }
 
@@ -845,7 +845,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -894,7 +894,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -922,7 +922,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -950,7 +950,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -976,7 +976,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1005,7 +1005,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member commentMember = memberFactory.createStudentMember("commentMember", university);
@@ -1034,7 +1034,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1059,7 +1059,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1088,7 +1088,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member commentMember = memberFactory.createStudentMember("commentMember", university);
@@ -1116,10 +1116,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post anotherPost = postFactory.createPost(
+        Post anotherPost = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember1", university), board);
 
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember2", university), board);
         Member member = memberFactory.createStudentMember("nickname", university);
         Comment comment = commentFactory.createComment(member, post);
@@ -1143,7 +1143,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1171,7 +1171,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
@@ -1202,7 +1202,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1227,7 +1227,7 @@ class CommentServiceTest {
 
         assertThat(findComment.getId()).isEqualTo(childComment.getId());
         assertThat(findComment.getContent()).isEqualTo("수정된 댓글입니다");
-        assertThat(findComment.isEdited()).isTrue();
+        assertThat(findComment.getStatus().isEdited()).isTrue();
 
     }
 
@@ -1237,7 +1237,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1266,7 +1266,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1297,7 +1297,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1328,7 +1328,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1361,7 +1361,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1393,7 +1393,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1426,7 +1426,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1462,7 +1462,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -1496,7 +1496,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1510,7 +1510,7 @@ class CommentServiceTest {
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
 
         Comment deletedComment = commentRepository.findById(comment.getId()).get();
-        assertThat(deletedComment.isDeleted()).isTrue();
+        assertThat(deletedComment.getStatus().isDeleted()).isTrue();
     }
 
     @DisplayName("존재하지 않는 회원은 댓글 삭제를 할 수 없다")
@@ -1519,7 +1519,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -1557,7 +1557,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1580,7 +1580,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -1601,13 +1601,13 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member admin = memberFactory.createAdminMember("admin", university);
+        Member admin = memberFactory.createAdminMember(university);
 
 
         //when
@@ -1626,7 +1626,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1643,7 +1643,7 @@ class CommentServiceTest {
 
         //then
         Comment deletedComment = commentRepository.findById(childComment.getId()).get();
-        assertThat(deletedComment.isDeleted()).isTrue();
+        assertThat(deletedComment.getStatus().isDeleted()).isTrue();
     }
 
     @DisplayName("존재하지 않는 회원은 대댓글 삭제를 할 수 없다")
@@ -1652,7 +1652,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1678,7 +1678,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1704,7 +1704,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1730,7 +1730,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -1740,14 +1740,14 @@ class CommentServiceTest {
                 memberFactory.createStudentMember("childCommentMember", university), post,
                 parentComment);
 
-        Member admin = memberFactory.createAdminMember("admin", university);
+        Member admin = memberFactory.createAdminMember(university);
 
         //when
         commentService.deleteComment(admin.getEmail(), childComment.getId());
 
         // then
         Comment findComment = commentRepository.findById(childComment.getId()).get();
-        assertThat(findComment.isDeleted()).isTrue();
+        assertThat(findComment.getStatus().isDeleted()).isTrue();
     }
 
 
@@ -1760,7 +1760,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member1 = memberFactory.createStudentMember("nickname1", university);
@@ -1842,7 +1842,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1866,7 +1866,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createClubBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member1 = memberFactory.createStudentMember("nickname1", university);
@@ -1887,8 +1887,10 @@ class CommentServiceTest {
         //then
         assertThat(response.getComments()).hasSize(2)
                 .extracting("nickname", "profileImageUrl").containsExactlyInAnyOrder(
-                        tuple(member1.getNickname(), member1.getProfileImage().getThumbnailUrl()),
-                        tuple(member2.getNickname(),  member2.getProfileImage().getThumbnailUrl())
+                        tuple(member1.getName().getNickname(),
+                                member1.getProfileImage().getThumbnailUrl()),
+                        tuple(member2.getName().getNickname(),
+                                member2.getProfileImage().getThumbnailUrl())
                 );
     }
 
@@ -1898,7 +1900,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1928,7 +1930,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -1955,7 +1957,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -1983,7 +1985,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -2013,7 +2015,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -2041,7 +2043,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member commentMember = memberFactory.createStudentMember("commentMember", university);
@@ -2090,7 +2092,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -2119,7 +2121,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Comment comment = commentFactory.createComment(postMember, post);
 
@@ -2145,7 +2147,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -2172,13 +2174,13 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
 
-        Member admin = memberFactory.createAdminMember("admin", university);
+        Member admin = memberFactory.createAdminMember(university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
                 .email(admin.getEmail())
@@ -2221,7 +2223,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         postService.deletePost(post.getId(), postMember.getEmail());
 
@@ -2247,7 +2249,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -2274,7 +2276,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -2301,7 +2303,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -2328,7 +2330,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -2357,7 +2359,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -2439,7 +2441,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -2472,7 +2474,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -2533,6 +2535,8 @@ class CommentServiceTest {
      * 특정 글에 작성된 베스트 댓글 조회
      */
 
+    //TODO 기업 회원이 댓글 작성한 경우, 회원 이름 어떻게 조회되는지 테스트 필요함
+
     @DisplayName("특정글의 베스트 댓글은 좋아요가 10개 이상인 댓글들 중 가장 좋아요가 많은 댓글이 선정된다")
     @Test
     void findBestComment() {
@@ -2540,7 +2544,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createClubBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -2558,7 +2562,8 @@ class CommentServiceTest {
         //then
         assertThat(response).extracting("commentId", "postId", "isAnonymousBoard", "nickname",
                         "profileImageUrl", "content", "likesCount")
-                .contains(comment.getId(), post.getId(), false, member.getNickname(),
+                .contains(comment.getId(), post.getId(), false,
+                        member.getName().getNickname(),
                         member.getProfileImage().getThumbnailUrl(), comment.getContent(), 10);
 
     }
@@ -2569,7 +2574,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("commentMember", university);
@@ -2596,7 +2601,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -2624,7 +2629,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment1 = commentFactory.createComment(
@@ -2668,7 +2673,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment1 = commentFactory.createComment(
@@ -2713,7 +2718,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -2758,7 +2763,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Member member = memberFactory.createStudentMember("member", university);
 
@@ -2782,7 +2787,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
 
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -2809,11 +2814,11 @@ class CommentServiceTest {
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
-        Post post1 = postFactory.createPost(
+        Post post1 = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember1", university),
                 boardFactory.createAnonymousBoard(university));
 
-        Post post2 = postFactory.createPost(
+        Post post2 = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember2", university),
                 boardFactory.createClubBoard(university));
 
@@ -2845,10 +2850,10 @@ class CommentServiceTest {
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
-        Post post1 = postFactory.createPost(
+        Post post1 = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember1", university), board);
 
-        Post post2 = postFactory.createPost(
+        Post post2 = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember2", university), board);
 
         Comment comment1 = commentFactory.createComment(member, post1);
@@ -2894,7 +2899,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -2917,7 +2922,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
 
@@ -2943,7 +2948,7 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 30).forEach(i -> {
-            Post post = postFactory.createPost(
+            Post post = postFactory.createNormalPost(
                     memberFactory.createStudentMember("postMember" + i, university), board);
 
             Comment parentComment = commentFactory.createComment(member, post);
@@ -2977,7 +2982,7 @@ class CommentServiceTest {
         Member member = memberFactory.createStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 30).forEach(i -> {
-            Post post = postFactory.createPost(
+            Post post = postFactory.createNormalPost(
                     memberFactory.createStudentMember("postMember" + i, university), board);
 
             Comment comment = commentFactory.createComment(member, post);
@@ -2996,7 +3001,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("nickname", university);
@@ -3049,7 +3054,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment1 = commentFactory.createComment(
@@ -3079,7 +3084,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         //when
@@ -3095,7 +3100,7 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -3127,7 +3132,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         postService.deletePost(post.getId(), postMember.getEmail());
 

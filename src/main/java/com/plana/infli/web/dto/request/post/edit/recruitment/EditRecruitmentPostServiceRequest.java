@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.request.post.edit.recruitment;
 
-import com.plana.infli.domain.embeddable.Recruitment;
+import com.plana.infli.domain.embedded.post.Recruitment;
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
 import lombok.Builder;

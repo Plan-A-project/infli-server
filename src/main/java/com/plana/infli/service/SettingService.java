@@ -1,15 +1,13 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.editor.member.MemberEditor.*;
+import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.ConflictException.DUPLICATED_NICKNAME;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.response.profile.MyProfileResponse.*;
 
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.editor.member.MemberEditor;
-import com.plana.infli.domain.embeddable.MemberProfileImage;
-import com.plana.infli.domain.embeddable.MemberStatus;
+import com.plana.infli.domain.embedded.member.MemberProfileImage;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -131,6 +129,7 @@ public class SettingService {
         String path = "member/member_" + member.getId();
 
         String originalUrl = s3Uploader.uploadAsOriginalImage(multipartFile, path);
+
         String thumbnailUrl = s3Uploader.uploadAsThumbnailImage(multipartFile, path);
 
         MemberProfileImage newProfileImage = MemberProfileImage.of(originalUrl, thumbnailUrl);
@@ -158,8 +157,9 @@ public class SettingService {
         }
     }
 
+    //TODO 회원탈퇴시 기업회원과 일반 회원 구분해야됨
     private boolean emailAndNameMatches(Member member, UnregisterMemberServiceRequest request) {
-        return member.getName().equals(request.getName()) &&
+        return member.getName().getRealName().equals(request.getName()) &&
                 member.getEmail().equals(request.getEmail());
     }
 

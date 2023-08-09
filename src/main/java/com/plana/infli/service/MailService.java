@@ -1,12 +1,11 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.editor.member.MemberEditor.*;
+import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.exception.custom.NotFoundException.AUTHENTICATION_NOT_FOUND;
 import static com.plana.infli.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
 
 import com.plana.infli.domain.EmailAuthentication;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.editor.member.MemberEditor;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.email_authentication.EmailAuthenticationRepository;
 import com.plana.infli.repository.member.MemberRepository;
@@ -56,13 +55,13 @@ public class MailService {
 
   @Transactional
   public void authenticateMemberEmail(String secret) {
-    EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
-            secret)
-        .orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
-
-    Member member = emailAuthentication.getMember();
-
-    authenticate(member);
+//    EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
+//            secret)
+//        .orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
+//
+//    Member member = emailAuthentication.getMember();
+//
+//    authenticate(member);
   }
 
   @Transactional

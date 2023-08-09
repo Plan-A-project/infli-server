@@ -3,24 +3,23 @@ package com.plana.infli.config.initializer;
 import static com.plana.infli.domain.BoardType.*;
 import static com.plana.infli.domain.PostType.*;
 import static com.plana.infli.domain.Role.*;
-import static com.plana.infli.domain.University.create;
 import static java.util.stream.IntStream.*;
 
 import com.plana.infli.domain.Board;
-import com.plana.infli.domain.BoardType;
+import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.embeddable.Recruitment;
+import com.plana.infli.domain.embedded.member.MemberName;
+import com.plana.infli.domain.embedded.post.Recruitment;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -60,7 +59,7 @@ public class PostInitializer implements CommandLineRunner {
         Board campusLife = boards.get(4);
 
         createPost(employment, NORMAL, STUDENT);
-        createPost(employment, RECRUITMENT, COMPANY);
+        createRecruitmentPost(employment, RECRUITMENT, COMPANY);
 
         createPost(activity, NORMAL, STUDENT);
         createPost(activity, RECRUITMENT, ADMIN);
@@ -71,6 +70,22 @@ public class PostInitializer implements CommandLineRunner {
 
         createPost(campusLife, NORMAL, STUDENT);
         createPost(campusLife, ANNOUNCEMENT, STUDENT_COUNCIL);
+    }
+
+    private void createRecruitmentPost(Board board, PostType postType, Role role) {
+        rangeClosed(1, 30).forEach(i -> {
+            Member member = createCompanyMember(board, role, i);
+
+            postRepository.save(Post.builder()
+                    .board(board)
+                    .postType(postType)
+                    .member(member)
+                    .title("제목 " + i)
+                    .content("내용 " + i)
+                    .recruitment(createRecruitment(board, postType, i))
+                    .build());
+
+        });
     }
 
     public void createPost(Board board, PostType postType, Role role) {
@@ -101,12 +116,21 @@ public class PostInitializer implements CommandLineRunner {
     public Member createMember(Board board, Role role, int i) {
         return memberRepository.save(Member.builder()
                 .email(role.name().toLowerCase() + " " + board.getBoardName() + i + "@infli.com")
-                .password("password")
-                .name("인플리 " + board.getBoardName() + role.name() + i)
-                .nickname(role.name() + board.getBoardName() + i)
+                .encodedPassword("password")
+                .name(MemberName.of("인플리 " + board.getBoardName() + role.name() + i,
+                        "인플리 " + board.getBoardName() + role.name() + i))
                 .role(role)
                 .university(university)
-                .passwordEncoder(passwordEncoder)
+                .build());
+    }
+
+    public Member createCompanyMember(Board board, Role role, int i) {
+        return memberRepository.save(Member.builder()
+                .email(role.name().toLowerCase() + " " + board.getBoardName() + i + "@infli.com")
+                .encodedPassword("password")
+                .company(Company.create("카카오 " + i))
+                .role(role)
+                .university(university)
                 .build());
     }
 

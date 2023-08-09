@@ -5,9 +5,8 @@ import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.*;
 
-import com.plana.infli.domain.editor.post.PostEditor;
-import com.plana.infli.domain.embeddable.Recruitment;
-import com.plana.infli.service.PostService;
+import com.plana.infli.domain.editor.PostEditor;
+import com.plana.infli.domain.embedded.post.Recruitment;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -49,12 +48,12 @@ public class Post extends BaseEntity {
     private Member member;
 
     // 조회수
-    private int viewCount = 0;
+    private int viewCount;
 
     // 해당 글에 댓글을 작성한 회원의 갯수
-    private int commentMemberCount = 0;
+    private int commentMemberCount;
 
-    private boolean isDeleted = false;
+    private boolean isDeleted;
 
     @Version
     private Long version;
@@ -66,14 +65,20 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post")
     private List<PostLike> likes = new ArrayList<>();
 
+
     @Builder
-    private Post(Board board, PostType postType, Member member,
-            String title, String content, @Nullable Recruitment recruitment) {
+    private Post(Board board, PostType postType, String title, String content,
+            Member member, @Nullable Recruitment recruitment) {
+
         this.board = board;
         this.postType = postType;
-        this.member = member;
         this.title = title;
         this.content = content;
+        this.thumbnailUrl = null;
+        this.member = member;
+        this.viewCount = 0;
+        this.commentMemberCount = 0;
+        this.isDeleted = false;
         this.recruitment = recruitment;
     }
 
@@ -82,7 +87,8 @@ public class Post extends BaseEntity {
                 .title(title)
                 .content(content)
                 .thumbnailUrl(thumbnailUrl)
-                .recruitment(recruitment);
+                .recruitment(recruitment)
+                .isDeleted(isDeleted);
     }
 
     public void edit(PostEditor postEditor) {
@@ -90,19 +96,8 @@ public class Post extends BaseEntity {
         this.content = postEditor.getContent();
         this.thumbnailUrl = postEditor.getThumbnailUrl();
         this.recruitment = postEditor.getRecruitment();
-    }
-
-    //TODO 이름 변경 필요
-    public int increaseCount() {
-        commentMemberCount++;
-        return commentMemberCount;
-    }
-
-    public static void plusViewCount(Post post) {
-        post.viewCount++;
-    }
-
-    public static void delete(Post post) {
-        post.isDeleted = true;
+        this.isDeleted = postEditor.isDeleted();
+        this.viewCount = postEditor.getViewCount();
+        this.commentMemberCount = postEditor.getCommentMemberCount();
     }
 }

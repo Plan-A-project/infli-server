@@ -9,7 +9,6 @@ import com.plana.infli.domain.CommentLike;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.University;
-import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.factory.BoardFactory;
@@ -99,7 +98,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -128,7 +127,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -153,7 +152,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -181,7 +180,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("member", university);
@@ -205,7 +204,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -233,7 +232,7 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -264,7 +263,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -294,7 +293,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -321,7 +320,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -370,7 +369,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -402,7 +401,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -435,7 +434,7 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Member postMember = memberFactory.createStudentMember("postMember", university);
-        Post post = postFactory.createPost(postMember, board);
+        Post post = postFactory.createNormalPost(postMember, board);
 
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -467,7 +466,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -496,7 +495,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = memberFactory.createStudentMember("member", university);
@@ -520,7 +519,7 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(

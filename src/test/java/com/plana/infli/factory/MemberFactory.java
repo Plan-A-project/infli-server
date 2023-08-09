@@ -1,14 +1,19 @@
 package com.plana.infli.factory;
 
 import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
+import static com.plana.infli.domain.embedded.member.MemberStatus.*;
 
+import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.embedded.member.MemberName;
+import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -17,88 +22,101 @@ public class MemberFactory {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private CompanyRepository companyRepository;
+
+    @Autowired
+    private PasswordEncoder encoder;
+
 
     public Member createStudentMember(String nickname, University university) {
-        Member member = Member.builder()
-                .nickname(nickname)
-                .name(nickname)
-                .email(nickname + "@gmail.com")
-                .password("1234")
-                .university(university)
-                .role(STUDENT)
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .build();
+        Member member = of(nickname, university, STUDENT, null, true);
+        return memberRepository.save(member);
+    }
+
+
+    public Member createUncertifiedStudentMember(String nickname, University university) {
+        Member member = of(nickname, university, UNCERTIFIED_STUDENT, null, true);
 
         return memberRepository.save(member);
     }
 
-    public Member createUncertifiedMember(String nickname, University university) {
-        Member member = Member.builder()
-                .nickname(nickname)
-                .name(nickname)
-                .email(nickname + "@gmail.com")
-                .password("1234")
-                .university(university)
-                .role(UNCERTIFIED)
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .build();
+    public Member createUncertifiedCompanyMember(String companyName, University university) {
+
+        Company company = createCompany(companyName);
+
+        Member member = of(null, university, UNCERTIFIED_COMPANY, company, true);
 
         return memberRepository.save(member);
     }
 
-    public Member createCompanyMember(String nickname, University university) {
-        Member member = Member.builder()
-                .nickname(nickname)
-                .name(nickname)
-                .email(nickname + "@gmail.com")
-                .password("1234")
-                .university(university)
-                .role(COMPANY)
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .build();
+
+    public Member createCompanyMember(String companyName, University university) {
+
+        Company company = createCompany(companyName);
+
+        Member member = of(null, university, COMPANY, company, true);
 
         return memberRepository.save(member);
     }
 
     public Member createStudentCouncilMember(String nickname, University university) {
-        Member member = Member.builder()
-                .nickname(nickname)
-                .name(nickname)
-                .email(nickname + "@gmail.com")
-                .password("1234")
-                .university(university)
-                .role(STUDENT_COUNCIL)
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .build();
+
+        Member member = of(nickname, university, STUDENT_COUNCIL, null, true);
 
         return memberRepository.save(member);
     }
 
-    public Member createAdminMember(String nickname, University university) {
-        Member member = Member.builder()
-                .nickname(nickname)
-                .name(nickname)
-                .email(nickname + "@gmail.com")
-                .password("1234")
-                .university(university)
-                .role(ADMIN)
-                .passwordEncoder(new BCryptPasswordEncoder())
-                .build();
+    public Member createAdminMember(University university) {
+
+        Member member = of("관리자", university, ADMIN, null, true);
 
         return memberRepository.save(member);
     }
 
-    public Member createMember(String nickname, University university, Role role) {
-        Member member = Member.builder()
-                .nickname(nickname)
-                .name(nickname)
+    public Member parameterizedTest_PolicyAccepted(University university, Role role) {
+
+        Company company = (role == COMPANY || role == UNCERTIFIED_COMPANY) ?
+                companyRepository.save(Company.create("카카오")) : null;
+
+        Member member = of("nickname", university, role, company, true);
+
+        return memberRepository.save(member);
+    }
+
+    public Member parameterizedTest_PolicyNotAccepted(University university, Role role) {
+
+        Company company = (role == COMPANY || role == UNCERTIFIED_COMPANY) ?
+                companyRepository.save(Company.create("카카오")) : null;
+
+        Member member = of("nickname", university, role, company, false);
+
+        return memberRepository.save(member);
+    }
+
+    private Member of(String nickname, University university, Role role, Company company, boolean hasAcceptedPolicy) {
+
+        MemberName name = createMemberName(nickname);
+
+        return Member.builder()
                 .email(nickname + "@gmail.com")
-                .password("1234")
-                .university(university)
+                .encodedPassword(encoder.encode("1234"))
+                .name(name)
+                .status(create(false, hasAcceptedPolicy))
+                .company(company)
                 .role(role)
-                .passwordEncoder(new BCryptPasswordEncoder())
+                .university(university)
+                .profileImage(defaultProfileImage())
                 .build();
-
-        return memberRepository.save(member);
     }
+
+    @Nullable
+    private static MemberName createMemberName(String nickname) {
+        return nickname != null ? MemberName.of(nickname, nickname) : null;
+    }
+
+    private Company createCompany(String companyName) {
+        return companyRepository.save(Company.create(companyName));
+    }
+
 }

@@ -2,6 +2,7 @@ package com.plana.infli.annotation;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.embedded.member.MemberName;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import java.util.List;
@@ -31,14 +32,10 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
                 .name("푸단대학교")
                 .build());
 
-
-
         Member member = Member.builder()
                 .email(withMockMember.email())
-                .passwordEncoder(passwordEncoder)
-                .password("Test1234!")
-                .name(withMockMember.nickname())
-                .nickname(withMockMember.nickname())
+                .encodedPassword("Test1234!")
+                .name(MemberName.of(withMockMember.nickname(), withMockMember.nickname()))
                 .role(withMockMember.role())
                 .university(university)
                 .build();

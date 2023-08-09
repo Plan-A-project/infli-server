@@ -1,0 +1,49 @@
+package com.plana.infli.web.dto.request.member.signup.company;
+
+import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
+import static com.plana.infli.domain.embedded.member.MemberStatus.*;
+
+import com.plana.infli.domain.Company;
+import com.plana.infli.domain.Member;
+import com.plana.infli.domain.University;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+public class CreateCompanyMemberServiceRequest {
+
+    private final String email;
+
+    private final String password;
+
+    private final String passwordConfirm;
+
+    private final Long universityId;
+
+    private final String companyName;
+
+    @Builder
+    private CreateCompanyMemberServiceRequest(String email, String password, String passwordConfirm,
+            Long universityId, String companyName) {
+        this.email = email;
+        this.password = password;
+        this.passwordConfirm = passwordConfirm;
+        this.universityId = universityId;
+        this.companyName = companyName;
+    }
+
+    public Member toEntity(Company company, String encodedPassword, University university) {
+        return Member.builder()
+                .email(email)
+                .encodedPassword(encodedPassword)
+                .name(null)
+                .status(defaultStatus())
+                .company(company)
+                .role(UNCERTIFIED_COMPANY)
+                .university(university)
+                .profileImage(defaultProfileImage())
+                .build();
+    }
+
+}

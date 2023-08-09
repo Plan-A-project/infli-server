@@ -1,4 +1,4 @@
-package com.plana.infli.domain.embeddable;
+package com.plana.infli.domain.embedded.post;
 
 import static lombok.AccessLevel.*;
 
