@@ -1,7 +1,6 @@
 package com.plana.infli.web.dto.response.post.board;
 
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
-import com.plana.infli.web.dto.response.post.DefaultPost;
 import com.plana.infli.web.dto.response.post.DefaultPostsResponse;
 import java.util.List;
 import lombok.Builder;
@@ -23,7 +22,7 @@ public class BoardPostsResponse extends DefaultPostsResponse {
         this.boardName = boardName;
     }
 
-    public static BoardPostsResponse loadResponse(List<BoardPost> posts,
+    public static BoardPostsResponse of(List<BoardPost> posts,
             PostQueryRequest request) {
 
         return BoardPostsResponse.builder()

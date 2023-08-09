@@ -4,7 +4,8 @@ import static com.plana.infli.domain.Board.isAnonymous;
 import static com.plana.infli.domain.Comment.*;
 import static com.plana.infli.domain.Member.isAdmin;
 import static com.plana.infli.domain.Role.*;
-import static com.plana.infli.domain.editor.comment.CommentEditor.*;
+import static com.plana.infli.domain.editor.CommentEditor.*;
+import static com.plana.infli.domain.editor.PostEditor.increaseCommentMemberCount;
 import static com.plana.infli.exception.custom.BadRequestException.CHILD_COMMENTS_NOT_ALLOWED;
 import static com.plana.infli.exception.custom.BadRequestException.MAX_COMMENT_SIZE_EXCEEDED;
 import static com.plana.infli.exception.custom.NotFoundException.*;
@@ -16,7 +17,6 @@ import static org.springframework.data.domain.PageRequest.of;
 import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.editor.comment.CommentEditor;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -24,7 +24,7 @@ import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.service.aop.Retry;
+import com.plana.infli.service.aop.retry.Retry;
 import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.edit.EditCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.view.post.LoadCommentsInPostServiceRequest;
@@ -100,7 +100,9 @@ public class CommentService {
 
 
     private void checkWritePermission(Member member) {
-        if (member.getRole().equals(UNCERTIFIED)) {
+        if (member.getRole() == UNCERTIFIED_COMPANY ||
+                member.getRole() == UNCERTIFIED_STUDENT) {
+
             throw new AuthorizationFailedException();
         }
     }
@@ -155,7 +157,7 @@ public class CommentService {
 
             // 새로운 식별자 번호를 생성한후 부여한다
             // 이 글에 작성된 댓글들에게 부여된 가장 최근 식별자 번호
-            return post.increaseCount();
+            return increaseCommentMemberCount(post);
         }
 
         // 식별자 번호가 존재하는 경우 기존 번호 그대로 다시 부여한다

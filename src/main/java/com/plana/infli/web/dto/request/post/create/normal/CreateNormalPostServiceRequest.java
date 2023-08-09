@@ -32,7 +32,7 @@ public class CreateNormalPostServiceRequest {
     }
 
 
-    public static Post toNormalPost(Member member, Board board,
+    public static Post toEntity(Member member, Board board,
             CreateNormalPostServiceRequest request) {
 
         return Post.builder()

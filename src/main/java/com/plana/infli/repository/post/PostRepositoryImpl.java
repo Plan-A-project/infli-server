@@ -127,7 +127,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private Expression<String> nicknameEq(Post findPost) {
         return findPost.getBoard().getBoardType() == ANONYMOUS ?
-                nullExpression() : post.member.nickname;
+                nullExpression() : post.member.name.nickname;
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {
@@ -348,7 +348,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(comment)
                 .innerJoin(comment.post, post)
                 .where(comment.post.id.in(ids))
-                .where(comment.isDeleted.isFalse())
+                .where(comment.status.isDeleted.isFalse())
                 .fetch().stream().collect(groupingBy(CommentCount::getPostId));
     }
 

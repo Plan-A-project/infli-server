@@ -3,16 +3,16 @@ package com.plana.infli.service;
 import static com.plana.infli.domain.BoardType.*;
 import static com.plana.infli.domain.BoardType.SubBoardType.*;
 import static com.plana.infli.domain.Member.isAdmin;
-import static com.plana.infli.domain.Post.*;
 import static com.plana.infli.domain.PostType.*;
-import static com.plana.infli.domain.editor.member.MemberEditor.*;
-import static com.plana.infli.domain.editor.post.PostEditor.edit;
-import static com.plana.infli.domain.embeddable.Recruitment.*;
+import static com.plana.infli.domain.editor.MemberEditor.*;
+import static com.plana.infli.domain.editor.PostEditor.delete;
+import static com.plana.infli.domain.editor.PostEditor.edit;
+import static com.plana.infli.domain.editor.PostEditor.increaseViewCount;
+import static com.plana.infli.domain.embedded.post.Recruitment.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
-import static com.plana.infli.web.dto.request.post.create.normal.CreateNormalPostServiceRequest.*;
 import static com.plana.infli.web.dto.response.post.my.MyPostsResponse.loadMyPostsResponse;
 
 import com.plana.infli.domain.Board;
@@ -21,8 +21,8 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.domain.Role;
-import com.plana.infli.domain.embeddable.MemberStatus;
-import com.plana.infli.domain.embeddable.Recruitment;
+import com.plana.infli.domain.embedded.member.MemberStatus;
+import com.plana.infli.domain.embedded.post.Recruitment;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -30,7 +30,8 @@ import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.service.aop.Retry;
+import com.plana.infli.service.aop.retry.Retry;
+import com.plana.infli.utils.S3Uploader;
 import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
@@ -40,17 +41,20 @@ import com.plana.infli.web.dto.request.post.edit.normal.EditNormalPostServiceReq
 import com.plana.infli.web.dto.request.post.view.search.SearchPostsByKeywordServiceRequest;
 import com.plana.infli.web.dto.response.post.board.BoardPost;
 import com.plana.infli.web.dto.response.post.board.BoardPostsResponse;
+import com.plana.infli.web.dto.response.post.image.PostImageUploadResponse;
 import com.plana.infli.web.dto.response.post.my.MyPost;
 import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 
 @Slf4j
@@ -67,14 +71,16 @@ public class PostService {
 
     private final UniversityRepository universityRepository;
 
-    public boolean checkMemberAgreedOnWritePolicy(String email) {
-        MemberStatus memberStatus = findMemberBy(email).getMemberStatus();
+    private final S3Uploader s3Uploader;
+
+    public boolean checkMemberAcceptedWritePolicy(String email) {
+        MemberStatus memberStatus = findMemberBy(email).getStatus();
 
         return memberStatus.isPolicyAccepted();
     }
 
     @Transactional
-    public void confirmWritePolicyAgreement(String email) {
+    public void acceptWritePolicy(String email) {
         Member member = findMemberBy(email);
 
         acceptPolicy(member);
@@ -94,7 +100,9 @@ public class PostService {
 
         validateCreateNormalPostRequest(member, board, request.getPostType());
 
-        return postRepository.save(toNormalPost(member, board, request)).getId();
+        Post post = CreateNormalPostServiceRequest.toEntity(member, board, request);
+
+        return postRepository.save(post).getId();
     }
 
     private Member findMemberWithUniversityBy(String email) {
@@ -110,7 +118,9 @@ public class PostService {
     //TODO
     private void validateCreateNormalPostRequest(Member member, Board board, PostType postType) {
 
-        checkIsInSameUniversity(member, board);
+        checkIfInSameUniversity(member, board);
+
+        checkIfAgreedOnWritePolicy(member);
 
         BoardType boardType = board.getBoardType();
 
@@ -118,10 +128,16 @@ public class PostService {
             throw new BadRequestException(POST_TYPE_NOT_ALLOWED);
         }
 
-        validateWriteRequest(member.getRole(), postType, boardType);
+        checkWritePermission(member.getRole(), postType, boardType);
     }
 
-    private void validateWriteRequest(Role role, PostType postType, BoardType boardType) {
+    private void checkIfAgreedOnWritePolicy(Member member) {
+        if (member.getStatus().isPolicyAccepted() == false) {
+            throw new BadRequestException(WRITING_WITHOUT_POLICY_AGREEMENT_NOT_ALLOWED);
+        }
+    }
+
+    private void checkWritePermission(Role role, PostType postType, BoardType boardType) {
         SubBoardType subBoardType = of(boardType, postType);
 
         if (subBoardType == null) {
@@ -133,7 +149,7 @@ public class PostService {
         }
     }
 
-    private void checkIsInSameUniversity(Member member, Board board) {
+    private void checkIfInSameUniversity(Member member, Board board) {
         if (member.getUniversity().equals(board.getUniversity()) == false) {
             throw new AuthorizationFailedException();
         }
@@ -148,9 +164,9 @@ public class PostService {
 
         validateCreateRecruitmentPostRequest(member, board, request);
 
-        Recruitment recruitment = loadRecruitment(request);
+        Post post = toEntity(member, board, request, loadRecruitment(request));
 
-        return postRepository.save(toRecruitmentPost(member, board, request, recruitment)).getId();
+        return postRepository.save(post).getId();
     }
 
     //TODO
@@ -161,13 +177,15 @@ public class PostService {
             throw new BadRequestException(INVALID_RECRUITMENT_DATE);
         }
 
-        checkIsInSameUniversity(member, board);
+        checkIfInSameUniversity(member, board);
+
+        checkIfAgreedOnWritePolicy(member);
 
         if (isRecruitmentBoard(board) == false) {
             throw new BadRequestException(BOARD_TYPE_IS_NOT_RECRUITMENT);
         }
 
-        validateWriteRequest(member.getRole(), RECRUITMENT, board.getBoardType());
+        checkWritePermission(member.getRole(), RECRUITMENT, board.getBoardType());
     }
 
     private boolean isRecruitmentBoard(Board board) {
@@ -180,6 +198,58 @@ public class PostService {
                 request.getRecruitmentEndDate());
     }
 
+
+    @Transactional
+    public PostImageUploadResponse uploadPostImages(Long postId, List<MultipartFile> multipartFiles, String email) {
+
+        validateImages(multipartFiles);
+
+        Member member = findMemberBy(email);
+
+        Post post = findPostWithMemberBy(postId);
+
+        checkThisMemberIsPostWriter(member, post);
+
+        String directoryPath = "post/post_" + post.getId();
+
+        String thumbnailImageURL = s3Uploader.uploadAsThumbnailImage(multipartFiles.get(0),
+                directoryPath);
+
+        List<String> originalImageUrls = new ArrayList<>();
+        multipartFiles.forEach(multipartFile -> {
+            String url = s3Uploader.uploadAsOriginalImage(multipartFile, directoryPath);
+            originalImageUrls.add(url);
+        });
+
+        return PostImageUploadResponse.of(thumbnailImageURL, originalImageUrls);
+    }
+
+    private void checkThisMemberIsPostWriter(Member member, Post post) {
+        if (post.getMember().equals(member) == false) {
+            throw new AuthorizationFailedException();
+        }
+    }
+
+
+    //TODO
+    private  void validateImages(List<MultipartFile> files) {
+
+        if (files.size() > 11) {
+            throw new BadRequestException(MAX_IMAGES_EXCEEDED);
+        }
+
+        if (files.isEmpty()) {
+            throw new BadRequestException(IMAGE_NOT_PROVIDED);
+        }
+
+        files.forEach(file -> {
+            if (file.isEmpty()) {
+                throw new BadRequestException(IMAGE_NOT_PROVIDED);
+            }
+        });
+    }
+
+
     @Transactional
     public void editNormalPost(EditNormalPostServiceRequest request) {
 
@@ -190,24 +260,17 @@ public class PostService {
         validateEditNormalPostRequest(post, member);
 
         edit(request, post);
-
     }
 
-    //TODO
     private void validateEditNormalPostRequest(Post post, Member member) {
 
         if (isRecruitmentPost(post)) {
-            throw new BadRequestException("");
+            throw new BadRequestException(POST_TYPE_NOT_ALLOWED);
         }
 
         checkThisMemberIsPostWriter(member, post);
     }
 
-    private void checkThisMemberIsPostWriter(Member member, Post post) {
-        if (post.getMember().equals(member) == false) {
-            throw new AuthorizationFailedException();
-        }
-    }
 
     private boolean isRecruitmentPost(Post post) {
         return post.getPostType() == RECRUITMENT;
@@ -229,7 +292,7 @@ public class PostService {
     private void validateEditRecruitmentPostRequest(Post post, Member member) {
 
         if (isRecruitmentPost(post) == false) {
-            throw new BadRequestException("");
+            throw new BadRequestException(POST_TYPE_NOT_ALLOWED);
         }
 
         checkThisMemberIsPostWriter(member, post);
@@ -273,7 +336,7 @@ public class PostService {
 
         checkMemberAndPostIsInSameUniversity(member, post);
 
-        plusViewCount(post);
+        increaseViewCount(post);
 
         PostQueryRequest request = singlePost(post, member);
 
@@ -315,8 +378,7 @@ public class PostService {
 
         List<SearchedPost> posts = postRepository.searchPostByKeyWord(queryRequest);
 
-
-        return null;
+        return SearchedPostsResponse.of(posts, queryRequest);
     }
 
 
@@ -326,7 +388,7 @@ public class PostService {
 
         Board board = findBoardBy(request.getBoardId());
 
-        checkIsInSameUniversity(member, board);
+        checkIfInSameUniversity(member, board);
 
         validateTypes(request.getType(), board.getBoardType());
 
@@ -334,7 +396,7 @@ public class PostService {
 
         List<BoardPost> posts = postRepository.loadPostsByBoard(queryRequest);
 
-        return BoardPostsResponse.loadResponse(posts, queryRequest);
+        return BoardPostsResponse.of(posts, queryRequest);
     }
 
     private void validateTypes(PostType postType, BoardType boardType) {
@@ -345,15 +407,19 @@ public class PostService {
         }
     }
 
-    public void validateWriteRequest(Long boardId, String email,
-            PostType postType) {
+    public boolean checkMemberHasWritePermission(Long boardId, String email, PostType postType) {
 
         Member member = findMemberWithUniversityBy(email);
 
         Board board = findBoardWithUniversityBy(boardId);
 
-        checkIsInSameUniversity(member, board);
+        checkIfInSameUniversity(member, board);
 
-        validateWriteRequest(member.getRole(), postType, board.getBoardType());
+        checkWritePermission(member.getRole(), postType, board.getBoardType());
+
+        return true;
     }
+
+
+
 }

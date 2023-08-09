@@ -4,7 +4,7 @@ import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
-import com.plana.infli.domain.editor.popularboard.PopularBoardEditor;
+import com.plana.infli.domain.editor.PopularBoardEditor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

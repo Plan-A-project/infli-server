@@ -1,6 +1,9 @@
 package com.plana.infli.web.controller;
 
+import static com.plana.infli.web.dto.response.ApiResponse.*;
+
 import com.plana.infli.service.PostLikeService;
+import com.plana.infli.web.dto.response.ApiResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,18 +23,19 @@ public class PostLikeController {
     private final PostLikeService postLikeService;
 
     @PostMapping("/posts/likes/{postId}")
-    public ResponseEntity<String> createPostLike(@PathVariable Long postId,
+    public ApiResponse<Void> createPostLike(@PathVariable Long postId,
             @AuthenticatedPrincipal String email) {
         postLikeService.createPostLike(postId, email);
-        return ResponseEntity.ok("좋아요 생성 완료");
+        return created();
     }
 
     @DeleteMapping("/posts/likes/{postId}")
-    public ResponseEntity<String> cancelPostLike(@PathVariable Long postId,
+    public ApiResponse<String> cancelPostLike(@PathVariable Long postId,
             @AuthenticatedPrincipal String email) {
 
-        //TODO 동시성 고려 필요
+        // TODO 동시성 고려 필요
         postLikeService.cancelPostLike(postId, email);
-        return ResponseEntity.ok("좋아요 취소 완료");
+        return ApiResponse.ok("좋아요 취소 완료");
     }
 }
+

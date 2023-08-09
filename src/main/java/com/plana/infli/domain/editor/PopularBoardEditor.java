@@ -1,4 +1,4 @@
-package com.plana.infli.domain.editor.popularboard;
+package com.plana.infli.domain.editor;
 
 import com.plana.infli.domain.PopularBoard;
 import lombok.Builder;

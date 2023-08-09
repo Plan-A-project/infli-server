@@ -1,4 +1,4 @@
-package com.plana.infli.service.aop;
+package com.plana.infli.service.aop.retry;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;

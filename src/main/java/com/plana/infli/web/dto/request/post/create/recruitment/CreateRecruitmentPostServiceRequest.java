@@ -6,7 +6,7 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
-import com.plana.infli.domain.embeddable.Recruitment;
+import com.plana.infli.domain.embedded.post.Recruitment;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,7 +46,7 @@ public class CreateRecruitmentPostServiceRequest {
     }
 
 
-    public static Post toRecruitmentPost(Member member, Board board, CreateRecruitmentPostServiceRequest request,
+    public static Post toEntity(Member member, Board board, CreateRecruitmentPostServiceRequest request,
             Recruitment recruitment) {
 
         return Post.builder()

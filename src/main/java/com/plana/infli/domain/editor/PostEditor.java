@@ -1,9 +1,9 @@
-package com.plana.infli.domain.editor.post;
+package com.plana.infli.domain.editor;
 
 import static com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest.of;
 
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.embeddable.Recruitment;
+import com.plana.infli.domain.embedded.post.Recruitment;
 import com.plana.infli.web.dto.request.post.edit.normal.EditNormalPostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest;
 import lombok.Builder;
@@ -20,15 +20,24 @@ public class PostEditor {
 
     private final Recruitment recruitment;
 
-    @Builder
-    public PostEditor(String title, String content,
-            String thumbnailUrl, Recruitment recruitment) {
+    private final boolean isDeleted;
 
+    private final int viewCount;
+
+    private final int commentMemberCount;
+
+    @Builder
+    public PostEditor(String title, String content, String thumbnailUrl, Recruitment recruitment,
+            boolean isDeleted, int viewCount, int commentMemberCount) {
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
         this.recruitment = recruitment;
+        this.isDeleted = isDeleted;
+        this.viewCount = viewCount;
+        this.commentMemberCount = commentMemberCount;
     }
+
 
     public static void edit(EditNormalPostServiceRequest request, Post post) {
 
@@ -47,5 +56,33 @@ public class PostEditor {
                 .thumbnailUrl(request.getThumbnailUrl())
                 .recruitment(of(request))
                 .build());
+    }
+
+    public static void delete(Post post) {
+        post.edit(post.toEditor()
+                .isDeleted(true)
+                .build());
+    }
+
+    public static void increaseViewCount(Post post) {
+        int currentViewCount = post.getViewCount();
+
+        int increasedViewCount = currentViewCount + 1;
+
+        post.edit(post.toEditor()
+                .viewCount(increasedViewCount)
+                .build());
+    }
+
+    public static int increaseCommentMemberCount(Post post) {
+        int currentCommentMemberCount = post.getCommentMemberCount();
+
+        int increasedCommentMemberCount = currentCommentMemberCount + 1;
+
+        post.edit(post.toEditor()
+                .commentMemberCount(increasedCommentMemberCount)
+                .build());
+
+        return increasedCommentMemberCount;
     }
 }

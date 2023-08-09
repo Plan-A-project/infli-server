@@ -45,12 +45,12 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .select(new QPostComment(comment.id,
                         nicknameEq(isAnonymous),
                         profileImageUrlEq(isAnonymous),
-                        comment.isDeleted, comment.identifierNumber,
+                        comment.status.isDeleted, comment.identifierNumber,
                         comment.createdAt, comment.content,
                         isMyComment(findMember),
                         comment.commentLikes.size(),
                         comment.id.in(myCommentLikesInThisPost(findPost, findMember)),
-                        comment.parentComment.isNull(), comment.isEdited,
+                        comment.parentComment.isNull(), comment.status.isEdited,
                         isMyComment(findPost.getMember())))
                 .from(comment)
                 .innerJoin(comment.member, member)
@@ -81,13 +81,13 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     private BooleanExpression commentIsNotDeleted() {
-        return comment.isDeleted.isFalse();
+        return comment.status.isDeleted.isFalse();
     }
 
     private BooleanExpression commentIsDeletedButChildCommentExists() {
-        return comment.isDeleted.isTrue()
+        return comment.status.isDeleted.isTrue()
                 .and(comment.children.isNotEmpty()
-                        .and(comment.children.any().isDeleted.isFalse()));
+                        .and(comment.children.any().status.isDeleted.isFalse()));
     }
 
     @Override
@@ -142,7 +142,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     public Optional<Comment> findActiveCommentWithPostBy(Long commentId) {
         return ofNullable(jpaQueryFactory.selectFrom(comment)
                 .where(comment.id.eq(commentId))
-                .where(comment.isDeleted.isFalse())
+                .where(comment.status.isDeleted.isFalse())
                 .innerJoin(comment.post, post).fetchJoin()
                 .fetchOne());
     }
@@ -161,7 +161,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     private Expression<String> nicknameEq(boolean isAnonymous) {
-        return isAnonymous ? nullExpression() : comment.member.nickname;
+        return isAnonymous ? nullExpression() : comment.member.name.nickname;
     }
 
 
@@ -177,13 +177,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
         return count != null ? count : 0;
     }
 
-    @Override
-    public void deleteAllByIdsInBatch(List<Long> ids) {
-        jpaQueryFactory.update(comment)
-                .set(comment.isDeleted, true)
-                .where(comment.id.in(ids))
-                .execute();
-    }
 
     @Override
     public Optional<Comment> findActiveCommentWithMemberAndPostBy(Long commentId) {
@@ -193,15 +186,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .where(commentIsNotDeleted())
                 .where(comment.id.eq(commentId))
                 .fetchOne());
-    }
-
-    @Override
-    public List<Comment> findActiveCommentWithMemberByIdsIn(List<Long> ids) {
-        return jpaQueryFactory.selectFrom(comment)
-                .innerJoin(comment.member, member).fetchJoin()
-                .where(commentIsNotDeleted())
-                .where(comment.id.in(ids))
-                .fetch();
     }
 
     @Override

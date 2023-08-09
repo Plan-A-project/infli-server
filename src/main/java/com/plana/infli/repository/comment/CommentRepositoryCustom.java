@@ -15,12 +15,7 @@ public interface CommentRepositoryCustom {
 
     Long findActiveCommentsCountIn(Post post);
 
-    void deleteAllByIdsInBatch(List<Long> ids);
-
     Optional<Comment> findActiveCommentWithMemberAndPostBy(Long commentId);
-
-
-    List<Comment> findActiveCommentWithMemberByIdsIn(List<Long> ids);
 
     Integer findIdentifierNumberBy(Post post, Member member);
 

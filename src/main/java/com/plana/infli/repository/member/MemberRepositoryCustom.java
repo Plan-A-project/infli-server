@@ -7,6 +7,7 @@ public interface MemberRepositoryCustom {
 
     Optional<Member> findActiveMemberBy(String email);
 
+    boolean existsByNickname(String nickname);
 
     Optional<Member> findActiveMemberWithUniversityBy(String email);
 

@@ -21,11 +21,14 @@ public class MyProfileResponse {
         this.email = email;
     }
 
+    //TODO 기업 회원인 경우
+    // null 해결 해야됨
     public static MyProfileResponse of(Member member) {
         return MyProfileResponse.builder()
-                .nickname(member.getNickname())
+                .nickname(null)
                 .role(member.getRole())
                 .email(member.getEmail())
                 .build();
     }
+
 }

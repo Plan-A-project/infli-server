@@ -1,50 +1,49 @@
-package com.plana.infli.web.dto.request.member.signup.student;
+package com.plana.infli.web.dto.request.member.signup.company;
 
 import static com.plana.infli.domain.Role.*;
-import static com.plana.infli.domain.embedded.member.MemberName.*;
-import static com.plana.infli.domain.embedded.member.MemberProfileImage.defaultProfileImage;
+import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
 import static com.plana.infli.domain.embedded.member.MemberStatus.*;
 
+import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class CreateStudentMemberServiceRequest {
+public class CreateCompanyMemberServiceRequest {
 
     private final String email;
-
-    private final String name;
 
     private final String password;
 
     private final String passwordConfirm;
 
-    private final String nickname;
-
     private final Long universityId;
 
+    private final String companyName;
+
     @Builder
-    private CreateStudentMemberServiceRequest(String email, String name, String password,
-            String passwordConfirm, String nickname, Long universityId) {
+    private CreateCompanyMemberServiceRequest(String email, String password, String passwordConfirm,
+            Long universityId, String companyName) {
         this.email = email;
-        this.name = name;
         this.password = password;
         this.passwordConfirm = passwordConfirm;
-        this.nickname = nickname;
         this.universityId = universityId;
+        this.companyName = companyName;
     }
 
-    public Member toEntity(University university, String encodedPassword) {
+    public Member toEntity(Company company, String encodedPassword, University university) {
         return Member.builder()
                 .email(email)
                 .encodedPassword(encodedPassword)
-                .name(of(name, nickname))
-                .role(UNCERTIFIED_STUDENT)
+                .name(null)
+                .status(defaultStatus())
+                .company(company)
+                .role(UNCERTIFIED_COMPANY)
                 .university(university)
                 .profileImage(defaultProfileImage())
-                .status(defaultStatus())
                 .build();
     }
+
 }

@@ -7,6 +7,7 @@ import static org.springframework.util.StringUtils.*;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.plana.infli.exception.custom.BadRequestException;
+import com.plana.infli.service.aop.upload.Upload;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,6 @@ import java.io.FileOutputStream;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@Transactional(readOnly = true)
 public class S3Uploader {
 
     private final AmazonS3Client amazonS3Client;
@@ -33,7 +33,7 @@ public class S3Uploader {
     private String bucket;
 
 
-    @Transactional
+    @Upload
     public String uploadAsOriginalImage(MultipartFile multipartFile, String directoryPath) {
 
         validateUploadedFile(multipartFile);
@@ -56,13 +56,13 @@ public class S3Uploader {
                 new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
     }
 
-    @SneakyThrows
-    @Transactional
+    @Upload
     public String uploadAsThumbnailImage(MultipartFile multipartFile, String directoryPath) {
 
         validateUploadedFile(multipartFile);
 
-        String storeFileName = generateStoreFileName(cleanPath(multipartFile.getOriginalFilename()));
+        String storeFileName = generateStoreFileName(
+                cleanPath(multipartFile.getOriginalFilename()));
 
         File originalFile = generateFile(multipartFile, storeFileName);
 
@@ -79,8 +79,9 @@ public class S3Uploader {
     }
 
     private void validateUploadedFile(MultipartFile multipartFile) {
-        if (multipartFile == null || multipartFile.isEmpty()
-                || multipartFile.getOriginalFilename() == null) {
+        if (multipartFile == null ||
+                multipartFile.isEmpty() ||
+                multipartFile.getOriginalFilename() == null) {
             throw new BadRequestException(IMAGE_IS_EMPTY);
         }
     }

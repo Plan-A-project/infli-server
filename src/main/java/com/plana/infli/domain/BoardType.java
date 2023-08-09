@@ -2,6 +2,7 @@ package com.plana.infli.domain;
 
 import static com.plana.infli.domain.Role.*;
 
+import jakarta.annotation.Nullable;
 import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,7 @@ public enum BoardType {
 
         private final List<Role> allowedRoles;
 
+        @Nullable
         public static SubBoardType of(BoardType boardType, PostType postType) {
             try {
                 return valueOf(boardType.toString() + "_" + postType.toString());

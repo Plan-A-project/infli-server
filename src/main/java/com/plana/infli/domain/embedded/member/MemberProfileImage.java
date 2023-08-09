@@ -1,10 +1,8 @@
-package com.plana.infli.domain.embeddable;
+package com.plana.infli.domain.embedded.member;
 
 import static lombok.AccessLevel.*;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.Embedded;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
