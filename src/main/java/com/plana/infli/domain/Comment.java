@@ -1,11 +1,14 @@
 package com.plana.infli.domain;
 
+import static com.plana.infli.domain.embedded.comment.CommentStatus.*;
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
-import com.plana.infli.domain.editor.comment.CommentEditor;
+import com.plana.infli.domain.editor.CommentEditor;
+import com.plana.infli.domain.embedded.comment.CommentStatus;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -56,9 +59,8 @@ public class Comment extends BaseEntity {
     @OneToMany(mappedBy = "comment")
     private List<CommentLike> commentLikes = new ArrayList<>();
 
-    private boolean isDeleted = false;
-
-    private boolean isEdited = false;
+    @Embedded
+    private CommentStatus status;
 
     // 글에 댓글을 작성한 회원들에 대한 식별자 번호
     // 회원이 어떤 글에 처음으로 댓글을 작성하는 경우 : 새로운 식별자 번호를 부여 받는다
@@ -76,20 +78,9 @@ public class Comment extends BaseEntity {
         this.content = content;
         this.member = member;
         this.identifierNumber = identifierNumber;
+        this.status = ofDefault();
         bindParentAndChildComment(parentComment);
     }
-
-    public static Comment create(Post post, String content, Member member,
-            Comment parentComment, Integer identifierNumber) {
-        return Comment.builder()
-                .post(post)
-                .content(content)
-                .member(member)
-                .parentComment(parentComment)
-                .identifierNumber(identifierNumber)
-                .build();
-    }
-
 
     private void bindParentAndChildComment(Comment parentComment) {
         if (parentComment == null) {
@@ -101,11 +92,22 @@ public class Comment extends BaseEntity {
         }
     }
 
+    public static Comment create(Post post, String content, Member member,
+            Comment parentComment, Integer identifierNumber) {
+
+        return Comment.builder()
+                .post(post)
+                .content(content)
+                .member(member)
+                .parentComment(parentComment)
+                .identifierNumber(identifierNumber)
+                .build();
+    }
+
     public CommentEditor.CommentEditorBuilder toEditor() {
         return CommentEditor.builder()
                 .content(content)
-                .isEdited(isEdited)
-                .isDeleted(isDeleted);
+                .status(status);
     }
 
     /**
@@ -113,8 +115,7 @@ public class Comment extends BaseEntity {
      */
     public void edit(CommentEditor commentEditor) {
         this.content = commentEditor.getContent();
-        this.isEdited = commentEditor.isEdited();
-        this.isDeleted = commentEditor.isDeleted();
+        this.status = commentEditor.getStatus();
     }
 
 }

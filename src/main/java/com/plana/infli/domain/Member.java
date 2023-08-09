@@ -2,21 +2,23 @@ package com.plana.infli.domain;
 
 import static com.plana.infli.domain.Role.*;
 import static com.plana.infli.domain.Role.ADMIN;
-import static com.plana.infli.domain.embeddable.MemberProfileImage.*;
-import static com.plana.infli.domain.embeddable.MemberStatus.*;
+import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
+import static com.plana.infli.domain.embedded.member.MemberStatus.*;
+import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.PROTECTED;
 
-import com.plana.infli.domain.editor.member.MemberEditor;
-import com.plana.infli.domain.embeddable.MemberProfileImage;
-import com.plana.infli.domain.embeddable.MemberStatus;
+import com.plana.infli.domain.editor.MemberEditor;
+import com.plana.infli.domain.embedded.member.MemberName;
+import com.plana.infli.domain.embedded.member.MemberProfileImage;
+import com.plana.infli.domain.embedded.member.MemberStatus;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -24,7 +26,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -32,87 +33,87 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @SQLDelete(sql = "UPDATE member SET is_deleted = true WHERE member_id=?")
 public class Member extends BaseEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "member_id")
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = IDENTITY)
+    @Column(name = "member_id")
+    private Long id;
 
-  @Column(unique = true, nullable = false)
-  private String email;
+    @Column(unique = true, nullable = false)
+    private String email;
 
-  @Column(nullable = false)
-  private String password;
+    private String password;
 
-  private String name;
+    @Nullable
+    @Embedded
+    private MemberName name;
 
-  private String nickname;
+    @Embedded
+    private MemberStatus status;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private Role role;
+    @Nullable
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
-  @ManyToOne(fetch = LAZY)
-  @JoinColumn(name = "university_id")
-  private University university;
+    @Enumerated(STRING)
+    private Role role;
 
-  @Embedded
-  private MemberProfileImage profileImage;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "university_id")
+    private University university;
 
-  @Embedded
-  private MemberStatus memberStatus;
+    @Embedded
+    private MemberProfileImage profileImage;
 
-  public Member(String email, String password, String name, String nickname,
-          University university, PasswordEncoder passwordEncoder) {
-    this(email, password, name, nickname, UNCERTIFIED, university, passwordEncoder);
-  }
+    @Builder
+    public Member(String email, @Nullable MemberName name, String encodedPassword,
+            @Nullable Company company, Role role, University university,
+            MemberProfileImage profileImage, MemberStatus status) {
 
-  @Builder
-  public Member(String email, String password, String name, String nickname, Role role,
-      University university, PasswordEncoder passwordEncoder) {
-    this.email = email;
-    this.password = passwordEncoder.encode(password);
-    this.name = name;
-    this.nickname = nickname;
-    this.role = role;
-    this.university = university;
-    this.memberStatus = defaultMemberStatus();
-    this.profileImage = defaultProfileImage();
-  }
-
-  public Member(String email, String password, String companyName,
-      PasswordEncoder passwordEncoder) {
-    this.email = email;
-    this.nickname = companyName;
-    this.password = passwordEncoder.encode(password);
-    this.role = UNCERTIFIED;
-  }
-
-  public static Boolean isAdmin(Member member) {
-    return member.role == ADMIN;
-  }
-
-  public void authenticateStudent() {
-    role = STUDENT;
-  }
-
-  public void authenticateCompany() {
-    role = COMPANY;
-  }
+        this.email = email;
+        this.name = name;
+        this.password = encodedPassword;
+        this.company = company;
+        this.university = university;
+        this.role = role;
+        this.status = resolveStatusOrDefault(status);
+        this.profileImage = resolveImageOrDefault(profileImage);
+    }
 
 
-  public MemberEditor.MemberEditorBuilder toEditor() {
-    return MemberEditor.builder()
-            .nickname(nickname)
-            .password(password)
-            .status(memberStatus)
-            .profileImage(profileImage);
-  }
+    private MemberProfileImage resolveImageOrDefault(MemberProfileImage profileImage) {
+        return profileImage != null ? profileImage : defaultProfileImage();
+    }
 
-  public void edit(MemberEditor memberEditor) {
-    this.password = memberEditor.getPassword();
-    this.nickname = memberEditor.getNickname();
-    this.memberStatus = memberEditor.getStatus();
-    this.profileImage = memberEditor.getProfileImage();
-  }
+    private MemberStatus resolveStatusOrDefault(MemberStatus memberStatus) {
+        return memberStatus != null ? memberStatus : defaultStatus();
+    }
+
+    public static boolean isAdmin(Member member) {
+        return member.role == ADMIN;
+    }
+
+    public void authenticateStudent() {
+        role = STUDENT;
+    }
+
+    public void authenticateCompany() {
+        role = COMPANY;
+    }
+
+    public MemberEditor.MemberEditorBuilder toEditor() {
+        return MemberEditor.builder()
+                .name(name)
+                .password(password)
+                .status(status)
+                .profileImage(profileImage);
+    }
+
+    public void edit(MemberEditor memberEditor) {
+        this.password = memberEditor.getPassword();
+        this.name = memberEditor.getName();
+        this.status = memberEditor.getStatus();
+        this.profileImage = memberEditor.getProfileImage();
+    }
 }
 

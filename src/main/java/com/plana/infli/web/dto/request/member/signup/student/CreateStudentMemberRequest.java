@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class CreateStudentMemberRequest {
 
 	@Email(message = "이메일 형식이 올바르지 않습니다.")
@@ -18,8 +18,11 @@ public class CreateStudentMemberRequest {
 	@NotBlank(message = "이름은 필수입니다.")
 	private String name;
 
-	@NotBlank(message = "비밀번호는 필수입니다.")
+	@NotBlank(message = "비밀번호를 입력해주세요")
 	private String password;
+
+	@NotBlank(message = "비밀번호 확인을 입력해주세요")
+	private String passwordConfirm;
 
 	@NotBlank(message = "닉네임은 필수입니다.")
 	private String nickname;
@@ -28,12 +31,24 @@ public class CreateStudentMemberRequest {
 	private Long universityId;
 
 	@Builder
-	public CreateStudentMemberRequest(String email, String name, String password, String nickname,
-			Long universityId) {
+	public CreateStudentMemberRequest(String email, String name, String password,
+			String passwordConfirm, String nickname, Long universityId) {
 		this.email = email;
 		this.name = name;
 		this.password = password;
+		this.passwordConfirm = passwordConfirm;
 		this.nickname = nickname;
 		this.universityId = universityId;
+	}
+
+	public CreateStudentMemberServiceRequest toServiceRequest() {
+		return CreateStudentMemberServiceRequest.builder()
+				.email(email)
+				.name(name)
+				.password(password)
+				.passwordConfirm(passwordConfirm)
+				.nickname(nickname)
+				.universityId(universityId)
+				.build();
 	}
 }

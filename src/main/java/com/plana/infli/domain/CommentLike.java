@@ -36,7 +36,6 @@ public class CommentLike extends BaseEntity {
     private CommentLike(Comment comment, Member member) {
         this.member = member;
         this.comment = comment;
-//        comment.getCommentLikes().add(this);
     }
 
     public static CommentLike create(Comment comment, Member member) {

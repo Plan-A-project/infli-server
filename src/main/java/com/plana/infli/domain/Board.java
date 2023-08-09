@@ -29,11 +29,9 @@ public class Board extends BaseEntity {
     @Column(name = "board_id")
     private Long id;
 
-    @Column(nullable = false)
     @Enumerated(value = STRING)
     private BoardType boardType;
 
-    @Column(nullable = false)
     private String boardName;
 
     @ManyToOne(fetch = LAZY)
@@ -42,7 +40,7 @@ public class Board extends BaseEntity {
 
     private int sequence;
 
-    private boolean isDeleted = false;
+    private boolean isDeleted;
 
     @Builder
     private Board(BoardType boardType, University university) {
@@ -50,6 +48,7 @@ public class Board extends BaseEntity {
         this.boardName = boardType.getBoardName();
         this.university = university;
         this.sequence = boardType.getDefaultSequence();
+        this.isDeleted = false;
     }
 
     public static Board create(BoardType boardType, University university) {
@@ -57,6 +56,6 @@ public class Board extends BaseEntity {
     }
 
     public static boolean isAnonymous(Board board) {
-        return board.getBoardType().equals(ANONYMOUS);
+        return board.getBoardType() == ANONYMOUS;
     }
 }

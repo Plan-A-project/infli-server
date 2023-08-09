@@ -19,17 +19,27 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     @Override
     public Optional<Member> findActiveMemberBy(String email) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
-                .where(member.memberStatus.isDeleted.isFalse())
                 .where(member.email.eq(email))
+                .where(member.status.isDeleted.isFalse())
                 .fetchOne());
+    }
+
+    @Override
+    public boolean existsByNickname(String nickname) {
+        Integer fetchOne = jpaQueryFactory.selectOne()
+                .from(member)
+                .where(member.name.nickname.eq(nickname))
+                .fetchFirst();
+
+        return fetchOne != null;
     }
 
     @Override
     public Optional<Member> findActiveMemberWithUniversityBy(String email) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
                 .leftJoin(member.university, university).fetchJoin()
-                .where(member.memberStatus.isDeleted.isFalse())
                 .where(member.email.eq(email))
+                .where(member.status.isDeleted.isFalse())
                 .fetchOne());
     }
 }

@@ -1,10 +1,12 @@
-package com.plana.infli.domain.editor.member;
+package com.plana.infli.domain.editor;
 
-import static com.plana.infli.domain.embeddable.MemberStatus.*;
+import static com.plana.infli.domain.embedded.member.MemberStatus.*;
 
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.embeddable.MemberProfileImage;
-import com.plana.infli.domain.embeddable.MemberStatus;
+import com.plana.infli.domain.Role;
+import com.plana.infli.domain.embedded.member.MemberName;
+import com.plana.infli.domain.embedded.member.MemberProfileImage;
+import com.plana.infli.domain.embedded.member.MemberStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,17 +17,23 @@ public class MemberEditor {
 
     private final String password;
 
+    private final Role role;
+
     private final MemberStatus status;
+
+    private final MemberName name;
 
     private final MemberProfileImage profileImage;
 
-
     @Builder
-    private MemberEditor(String nickname, String password,
-            MemberStatus status, MemberProfileImage profileImage) {
+    private MemberEditor(String nickname, String password, Role role,
+            MemberStatus status, MemberName name, MemberProfileImage profileImage) {
+
         this.nickname = nickname;
         this.password = password;
+        this.role = role;
         this.status = status;
+        this.name = name;
         this.profileImage = profileImage;
     }
 
@@ -49,35 +57,16 @@ public class MemberEditor {
     }
 
     public static void unregister(Member member) {
-        MemberStatus currentStatus = member.getMemberStatus();
+        boolean policyAccepted = member.getStatus().isPolicyAccepted();
 
         member.edit(member.toEditor()
-                .status(create(
-                        true,
-                        currentStatus.isAuthenticated(),
-                        currentStatus.isPolicyAccepted()))
+                .status(ofDeleted(policyAccepted))
                 .build());
     }
 
     public static void acceptPolicy(Member member) {
-        MemberStatus currentStatus = member.getMemberStatus();
-
         member.edit(member.toEditor()
-                .status(create(
-                        currentStatus.isDeleted(),
-                        currentStatus.isAuthenticated(),
-                        true))
-                .build());
-    }
-
-    public static void authenticate(Member member) {
-        MemberStatus currentStatus = member.getMemberStatus();
-
-        member.edit(member.toEditor()
-                .status(create(
-                        currentStatus.isDeleted(),
-                        true,
-                        currentStatus.isPolicyAccepted()))
+                .status(ofPolicyAccepted())
                 .build());
     }
 }

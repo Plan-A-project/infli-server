@@ -9,8 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostRepository extends JpaRepository<Post, Long>, PostRepositoryCustom {
 
+    // 삭제된 글 포함하여 조회
+    // 테스트 케이스용 메서드
     Optional<Post> findPostById(Long id);
-
-
-    boolean existsByMember(Member member);
 }

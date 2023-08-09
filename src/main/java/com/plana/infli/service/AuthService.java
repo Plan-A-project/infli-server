@@ -20,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class AuthService {
 
 	private final RedisDao redisDao;
+
 	private final JwtManager jwtManager;
+
 	private final JwtProperties jwtProperties;
 
 	private final UserDetailsService userDetailsService;

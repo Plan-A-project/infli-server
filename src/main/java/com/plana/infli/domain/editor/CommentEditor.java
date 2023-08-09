@@ -1,6 +1,9 @@
-package com.plana.infli.domain.editor.comment;
+package com.plana.infli.domain.editor;
+
+import static com.plana.infli.domain.embedded.comment.CommentStatus.*;
 
 import com.plana.infli.domain.Comment;
+import com.plana.infli.domain.embedded.comment.CommentStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -9,29 +12,24 @@ public class CommentEditor {
 
     private final String content;
 
-    private final boolean isEdited;
-
-    private final boolean isDeleted;
-
+    private final CommentStatus status;
 
     @Builder
-    public CommentEditor(String content, boolean isEdited, boolean isDeleted) {
+    public CommentEditor(String content, CommentStatus status) {
         this.content = content;
-        this.isEdited = isEdited;
-        this.isDeleted = isDeleted;
+        this.status = status;
     }
-
 
     public static void editContent(Comment comment, String newContent) {
         comment.edit(comment.toEditor()
                 .content(newContent)
-                .isEdited(true)
+                .status(ofEdited())
                 .build());
     }
 
     public static void delete(Comment comment) {
         comment.edit(comment.toEditor()
-                .isDeleted(true)
+                .status(ofDeleted())
                 .build());
     }
 }

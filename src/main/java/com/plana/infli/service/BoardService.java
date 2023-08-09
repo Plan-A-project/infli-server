@@ -1,7 +1,7 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.PopularBoard.newPopularBoard;
-import static com.plana.infli.domain.editor.popularboard.PopularBoardEditor.*;
+import static com.plana.infli.domain.editor.PopularBoardEditor.*;
 import static com.plana.infli.exception.custom.BadRequestException.NOT_ALL_POPULARBOARD_WAS_CHOSEN;
 import static com.plana.infli.exception.custom.ConflictException.DEFAULT_POPULAR_BOARD_EXISTS;
 import static com.plana.infli.exception.custom.NotFoundException.*;
@@ -314,13 +314,6 @@ public class BoardService {
             List<Board> boardsToEnable) {
         return boardsToEnable.contains(popularBoard.getBoard()) == false
                 && popularBoard.isEnabled();
-    }
-
-
-
-    private Board findBoardWithUniversityJoined(Long boardId) {
-        return boardRepository.findActiveBoardWithUniversityBy(boardId)
-                .orElseThrow(() -> new NotFoundException(BOARD_NOT_FOUND));
     }
 }
 
