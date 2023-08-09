@@ -1,7 +1,6 @@
 package com.plana.infli.controller;
 
 
-import static java.lang.String.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -35,7 +34,6 @@ import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.comment.create.CreateCommentRequest;
 import com.plana.infli.web.dto.request.comment.edit.EditCommentRequest;
-import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -109,7 +107,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         String request = om.writeValueAsString(CreateCommentRequest.builder()
@@ -140,7 +138,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentRepository.save(commentFactory.createComment(
@@ -171,7 +169,7 @@ public class CommentControllerTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         String request = om.writeValueAsString(CreateCommentRequest.builder()
@@ -198,7 +196,7 @@ public class CommentControllerTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentRepository.save(commentFactory.createComment(
@@ -252,7 +250,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentRepository.save(commentFactory.createComment(
@@ -283,7 +281,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         String request = om.writeValueAsString(CreateCommentRequest.builder()
@@ -311,7 +309,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         String request = om.writeValueAsString(CreateCommentRequest.builder()
@@ -339,7 +337,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentRepository.save(commentFactory.createComment(
@@ -370,7 +368,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentRepository.save(commentFactory.createComment(
@@ -401,7 +399,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = findContextMember();
@@ -433,7 +431,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -460,7 +458,7 @@ public class CommentControllerTest {
                 .andDo(print());
         Comment findComment = commentRepository.findById(comment.getId()).get();
         assertThat(findComment.getContent()).isEqualTo("수정된 대댓글입니다");
-        assertThat(findComment.isEdited()).isTrue();
+        assertThat(findComment.getStatus().isEdited()).isTrue();
     }
 
     @DisplayName("댓글 내용 수정시 수정할 댓글 Id 번호는 필수다")
@@ -470,7 +468,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         String request = om.writeValueAsString(EditCommentRequest.builder()
@@ -498,7 +496,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = findContextMember();
@@ -529,7 +527,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = findContextMember();
@@ -560,7 +558,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -595,7 +593,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -630,7 +628,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = findContextMember();
@@ -661,7 +659,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -695,7 +693,7 @@ public class CommentControllerTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -726,7 +724,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = findContextMember();
@@ -740,7 +738,7 @@ public class CommentControllerTest {
 
         //then
         Comment findComment = commentRepository.findById(comment.getId()).get();
-        assertThat(findComment.isDeleted()).isTrue();
+        assertThat(findComment.getStatus().isDeleted()).isTrue();
     }
 
     @DisplayName("대댓글 삭제시 해당 대댓글의 isDeleted 컬럼의 값이 true 가 된다")
@@ -750,7 +748,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
@@ -766,7 +764,7 @@ public class CommentControllerTest {
 
         //then
         Comment findComment = commentRepository.findById(comment.getId()).get();
-        assertThat(findComment.isDeleted()).isTrue();
+        assertThat(findComment.getStatus().isDeleted()).isTrue();
     }
 
     @DisplayName("댓글 삭제시 삭제할 댓글의 Id 번호는 필수다")
@@ -776,7 +774,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Member member = findContextMember();
@@ -799,7 +797,7 @@ public class CommentControllerTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -823,7 +821,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment1 = commentFactory.createComment(
@@ -886,7 +884,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         //when
@@ -908,7 +906,7 @@ public class CommentControllerTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         //when
@@ -931,7 +929,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
@@ -963,7 +961,7 @@ public class CommentControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(

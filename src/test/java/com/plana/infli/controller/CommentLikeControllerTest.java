@@ -106,7 +106,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -137,7 +137,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -166,7 +166,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
 
         String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
@@ -193,7 +193,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -223,7 +223,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -255,7 +255,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -288,7 +288,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);
@@ -320,7 +320,7 @@ public class CommentLikeControllerTest {
         //given
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createPost(
+        Post post = postFactory.createNormalPost(
                 memberFactory.createStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
                 memberFactory.createStudentMember("commentMember", university), post);

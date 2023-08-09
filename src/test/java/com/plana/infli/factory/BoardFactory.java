@@ -1,12 +1,12 @@
 package com.plana.infli.factory;
 
+import static com.plana.infli.domain.Board.*;
 import static com.plana.infli.domain.BoardType.*;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.BoardType;
 import com.plana.infli.domain.University;
 import com.plana.infli.repository.board.BoardRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,28 +17,27 @@ public class BoardFactory {
     private BoardRepository boardRepository;
 
     public Board createAnonymousBoard(University university) {
-        return boardRepository.save(Board.create(ANONYMOUS, university));
+        return boardRepository.save(create(ANONYMOUS, university));
     }
 
     public Board createClubBoard(University university) {
-        return boardRepository.save(Board.create(CLUB, university));
+        return boardRepository.save(create(CLUB, university));
     }
 
     public Board createActivityBoard(University university) {
-        return boardRepository.save(Board.create(ACTIVITY, university));
+        return boardRepository.save(create(ACTIVITY, university));
     }
 
     public Board createEmploymentBoard(University university) {
-        return boardRepository.save(Board.create(EMPLOYMENT, university));
+        return boardRepository.save(create(EMPLOYMENT, university));
     }
 
     public Board createCampusLifeBoard(University university) {
-        return boardRepository.save(Board.create(CAMPUS_LIFE, university));
+        return boardRepository.save(create(CAMPUS_LIFE, university));
     }
 
-
-    public Board createBoard(University university, BoardType boardType) {
-        return boardRepository.save(Board.create(boardType, university));
+    public Board createByBoardType(University university, BoardType boardType) {
+        return boardRepository.save(create(boardType, university));
     }
 
 
