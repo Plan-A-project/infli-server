@@ -22,7 +22,7 @@ public class CommentFactory {
     public Comment createComment(Member member, Post post) {
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .parentCommentId(null)
                 .postId(post.getId())
                 .content("내용입니다")
@@ -36,7 +36,7 @@ public class CommentFactory {
     public Comment createChildComment(Member member, Post post, Comment parentComment) {
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .parentCommentId(parentComment.getId())
                 .postId(post.getId())
                 .content("내용입니다")
