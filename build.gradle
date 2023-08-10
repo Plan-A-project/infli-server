@@ -41,6 +41,11 @@ dependencies {
     testImplementation 'org.projectlombok:lombok:1.18.26'
     testAnnotationProcessor "org.projectlombok:lombok:1.18.26"
 
+
+    // https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-ses
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-ses', version: '1.12.525'
+
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'

@@ -22,19 +22,20 @@ public class PostLikeController {
 
     private final PostLikeService postLikeService;
 
-    @PostMapping("/posts/likes/{postId}")
-    public ApiResponse<Void> createPostLike(@PathVariable Long postId,
-            @AuthenticatedPrincipal String email) {
-        postLikeService.createPostLike(postId, email);
+    @PostMapping("/likes/posts/{postId}")
+    public ApiResponse<Void> createPostLike(@AuthenticatedPrincipal String username,
+            @PathVariable Long postId) {
+
+        postLikeService.createPostLike(username, postId);
         return created();
     }
 
-    @DeleteMapping("/posts/likes/{postId}")
-    public ApiResponse<String> cancelPostLike(@PathVariable Long postId,
-            @AuthenticatedPrincipal String email) {
+    @DeleteMapping("/likes/posts/{postId}")
+    public ApiResponse<String> cancelPostLike(@AuthenticatedPrincipal String username,
+            @PathVariable Long postId) {
 
         // TODO 동시성 고려 필요
-        postLikeService.cancelPostLike(postId, email);
+        postLikeService.cancelPostLike(username, postId);
         return ApiResponse.ok("좋아요 취소 완료");
     }
 }

@@ -21,9 +21,9 @@ public class ModifyNicknameRequest {
         this.newNickname = newNickname;
     }
 
-    public ModifyNicknameServiceRequest toServiceRequest(String email) {
+    public ModifyNicknameServiceRequest toServiceRequest(String username) {
         return ModifyNicknameServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .newNickname(newNickname)
                 .build();
     }

@@ -48,9 +48,9 @@ public class EditRecruitmentPostRequest {
         this.recruitmentEndDate = recruitmentEndDate;
     }
 
-    public EditRecruitmentPostServiceRequest toServiceRequest(String email) {
+    public EditRecruitmentPostServiceRequest toServiceRequest(String username) {
         return EditRecruitmentPostServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .postId(postId)
                 .title(title)
                 .content(content)

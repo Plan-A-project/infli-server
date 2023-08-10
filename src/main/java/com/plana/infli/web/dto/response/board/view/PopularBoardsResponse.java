@@ -16,9 +16,7 @@ public class PopularBoardsResponse {
         this.boards = boards != null ? boards : new ArrayList<>();
     }
 
-    public static PopularBoardsResponse createPopularBoardsResponse(
-            List<SinglePopularBoard> boards) {
-
+    public static PopularBoardsResponse of(List<SinglePopularBoard> boards) {
         return PopularBoardsResponse.builder()
                 .boards(boards)
                 .build();

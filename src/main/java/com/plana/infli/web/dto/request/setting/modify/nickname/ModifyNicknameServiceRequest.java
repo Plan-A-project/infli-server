@@ -6,14 +6,14 @@ import lombok.Getter;
 @Getter
 public class ModifyNicknameServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final String newNickname;
 
     @Builder
-    private ModifyNicknameServiceRequest(String email, String newNickname) {
+    private ModifyNicknameServiceRequest(String username, String newNickname) {
 
-        this.email = email;
+        this.username = username;
         this.newNickname = newNickname;
     }
 }

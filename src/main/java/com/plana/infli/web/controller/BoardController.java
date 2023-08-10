@@ -32,21 +32,21 @@ public class BoardController {
 
     @GetMapping("/boards/popular/exists")
     @Operation(summary = "인기 게시판 기본 설정값 존재하는지 확인")
-    public boolean isPopularBoardCreated(@AuthenticationPrincipal String email) {
-        return boardService.popularBoardExistsBy(email);
+    public boolean isPopularBoardCreated(@AuthenticationPrincipal String username) {
+        return boardService.popularBoardExistsBy(username);
     }
 
 
     @GetMapping("/boards/popular")
     @Operation(summary = "해당 사용자가 보고싶다고 설정한 인기 게시판 목록 조회")
-    public PopularBoardsResponse loadEnabledPopularBoards(@AuthenticationPrincipal String email) {
-        return boardService.loadEnabledPopularBoardsBy(email);
+    public PopularBoardsResponse loadEnabledPopularBoards(@AuthenticationPrincipal String username) {
+        return boardService.loadEnabledPopularBoardsBy(username);
     }
 
     @PostMapping("/boards/popular")
     @Operation(summary = "인기 게시판 기본 설정값 생성")
-    public void createDefaultPopularBoards(@AuthenticationPrincipal String email) {
-        boardService.createDefaultPopularBoards(email);
+    public void createDefaultPopularBoards(@AuthenticationPrincipal String username) {
+        boardService.createDefaultPopularBoards(username);
     }
 
 
@@ -57,31 +57,31 @@ public class BoardController {
     @GetMapping("/settings/boards/popular")
     @Operation(description = "인기 게시판을 회원이 보고 싶은 순서대로 변경하기 위해, 인기 게시판 목록 조회")
     public PopularBoardsSettingsResponse loadEnabledPopularBoardsForSetting(
-            @AuthenticationPrincipal String email) {
-
-        return boardService.loadEnabledPopularBoardsForSettingBy(email);
+            @AuthenticationPrincipal String username) {
+        return boardService.loadEnabledPopularBoardsForSettingBy(username);
     }
 
     @PatchMapping("/settings/boards/popular")
     @Operation(description = "인기 게시판을 회원이 보고 싶은 순서대로 변경")
-    public void changePopularBoardSequence(@AuthenticationPrincipal String email,
+    public void changePopularBoardSequence(@AuthenticationPrincipal String username,
             @RequestBody @Validated EditPopularBoardSequenceRequest request) {
-        boardService.changePopularBoardSequence(request.toServiceRequest(), email);
+        boardService.changePopularBoardSequence(request.toServiceRequest(username));
     }
 
 
     @GetMapping("/settings/boards")
     @Operation(description = "해당 대학에 존재하는 모든 게시판 조회")
-    public BoardListResponse listAllBoards(@AuthenticationPrincipal String email) {
+    public BoardListResponse listAllBoards(@AuthenticationPrincipal String username) {
 
-        return boardService.loadAllBoard(email);
+        return boardService.loadAllBoard(username);
     }
 
     @PostMapping("/settings/boards/popular")
     @Operation(description = "모든 인기 게시판중 보고싶은 인기 게시판만 조회되도록 선택")
-    public void changeBoardVisibility(@AuthenticationPrincipal String email,
+    public void changeBoardVisibility(@AuthenticationPrincipal String username,
             @RequestBody @Validated ChangePopularBoardVisibilityRequest request) {
 
-        boardService.changeBoardVisibility(request.toServiceRequest(), email);
+        boardService.changeBoardVisibility(request.toServiceRequest(username));
+
     }
 }

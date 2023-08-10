@@ -50,13 +50,13 @@ public class JsonLoginProcessingFilter extends AbstractAuthenticationProcessingF
 		ServletInputStream inputStream = request.getInputStream();
 		LoginUser loginUser = objectMapper.readValue(inputStream, LoginUser.class);
 		UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken.unauthenticated(
-			loginUser.getEmail(), loginUser.getPassword());
+			loginUser.getUsername(), loginUser.getPassword());
 		return getAuthenticationManager().authenticate(authRequest);
 	}
 
 	@Getter
 	private static class LoginUser {
-		private String email;
+		private String username;
 		private String password;
 	}
 

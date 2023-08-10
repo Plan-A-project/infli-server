@@ -28,12 +28,13 @@ public class ModifyPasswordRequest {
         this.newPasswordConfirm = newPasswordConfirm;
     }
 
-    public ModifyPasswordServiceRequest toServiceRequest(String email) {
+    public ModifyPasswordServiceRequest toServiceRequest(String username) {
         return ModifyPasswordServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .currentPassword(currentPassword)
                 .newPassword(newPassword)
                 .newPasswordConfirm(newPasswordConfirm)
                 .build();
     }
+
 }

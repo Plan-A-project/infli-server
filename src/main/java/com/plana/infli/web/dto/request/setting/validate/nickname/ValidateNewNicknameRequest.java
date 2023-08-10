@@ -9,18 +9,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ValidateNewNicknameRequest {
 
-    @Pattern(regexp = "^[ㄱ-ㅎ가-힣A-Za-z0-9-_]{2,8}$",
-            message = "닉네임은 2~8자리여야 합니다. 한글, 영어, 숫자 조합 가능.")
+    @Pattern(regexp = "^[ㄱ-ㅎ가-힣A-Za-z0-9-_]{2,8}$", message = "닉네임은 2~8자리여야 합니다. 한글, 영어, 숫자 조합 가능.")
     private String newNickname;
+
 
     @Builder
     private ValidateNewNicknameRequest(String newNickname) {
         this.newNickname = newNickname;
     }
 
-    public ValidateNewNicknameServiceRequest toServiceRequest(String email) {
+    public ValidateNewNicknameServiceRequest toServiceRequest(String username) {
         return ValidateNewNicknameServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .newNickname(newNickname)
                 .build();
     }

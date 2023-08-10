@@ -27,7 +27,7 @@ public class MyProfileResponse {
         return MyProfileResponse.builder()
                 .nickname(null)
                 .role(member.getRole())
-                .email(member.getEmail())
+                .email(member.getUsername())
                 .build();
     }
 

@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public class ModifyPasswordServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final String currentPassword;
 
@@ -15,9 +15,10 @@ public class ModifyPasswordServiceRequest {
     private final String newPasswordConfirm;
 
     @Builder
-    private ModifyPasswordServiceRequest(String email, String currentPassword, String newPassword,
-            String newPasswordConfirm) {
-        this.email = email;
+    private ModifyPasswordServiceRequest(String username, String currentPassword,
+            String newPassword, String newPasswordConfirm) {
+
+        this.username = username;
         this.currentPassword = currentPassword;
         this.newPassword = newPassword;
         this.newPasswordConfirm = newPasswordConfirm;

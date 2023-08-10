@@ -4,7 +4,6 @@ import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.ConflictException.DUPLICATED_NICKNAME;
 import static com.plana.infli.exception.custom.NotFoundException.*;
-import static com.plana.infli.web.dto.response.profile.MyProfileResponse.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.MemberProfileImage;
@@ -38,14 +37,15 @@ public class SettingService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public MyProfileResponse loadMyProfile(String email) {
-        Member member = findMemberBy(email);
+    public MyProfileResponse loadMyProfile(String username) {
 
-        return of(member);
+        Member member = findMemberBy(username);
+
+        return MyProfileResponse.of(member);
     }
 
-    private Member findMemberBy(String email) {
-        return memberRepository.findActiveMemberBy(email)
+    private Member findMemberBy(String username) {
+        return memberRepository.findActiveMemberBy(username)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
@@ -63,7 +63,7 @@ public class SettingService {
 
     @Transactional
     public void changeNickname(ModifyNicknameServiceRequest request) {
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         checkDuplicate(request.getNewNickname());
 
@@ -73,7 +73,7 @@ public class SettingService {
     //TODO
     public void authenticatePassword(AuthenticatePasswordServiceRequest request) {
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         checkPasswordMatches(member, request.getPassword());
     }
@@ -88,7 +88,7 @@ public class SettingService {
     @Transactional
     public void changePassword(ModifyPasswordServiceRequest request) {
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         validateModifyPasswordRequest(member, request);
 
@@ -122,9 +122,9 @@ public class SettingService {
     }
 
     @Transactional
-    public ChangeProfileImageResponse changeProfileImage(String email, MultipartFile multipartFile) {
+    public ChangeProfileImageResponse changeProfileImage(String username, MultipartFile multipartFile) {
 
-        Member member = findMemberBy(email);
+        Member member = findMemberBy(username);
 
         String path = "member/member_" + member.getId();
 
@@ -160,12 +160,12 @@ public class SettingService {
     //TODO 회원탈퇴시 기업회원과 일반 회원 구분해야됨
     private boolean emailAndNameMatches(Member member, UnregisterMemberServiceRequest request) {
         return member.getName().getRealName().equals(request.getName()) &&
-                member.getEmail().equals(request.getEmail());
+                member.getUsername().equals(request.getEmail());
     }
 
 
-    public MyProfileToUnregisterResponse loadProfileToUnregister(String email) {
-        return MyProfileToUnregisterResponse.of(findMemberBy(email));
+    public MyProfileToUnregisterResponse loadProfileToUnregister(String username) {
+        return MyProfileToUnregisterResponse.of(findMemberBy(username));
     }
 
 }

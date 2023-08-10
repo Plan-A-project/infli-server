@@ -33,9 +33,9 @@ public class EditNormalPostRequest {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public EditNormalPostServiceRequest toServiceRequest(String email) {
+    public EditNormalPostServiceRequest toServiceRequest(String username) {
         return EditNormalPostServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .postId(postId)
                 .title(title)
                 .content(content)

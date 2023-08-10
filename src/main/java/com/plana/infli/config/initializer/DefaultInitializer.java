@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"dev", "prod"})
+@Profile({"dev", "prod", "local"})
 @Order(0)
 public class DefaultInitializer implements CommandLineRunner {
 
@@ -46,7 +46,6 @@ public class DefaultInitializer implements CommandLineRunner {
 
     private void createBoardWithType(BoardType boardType) {
         if (boardRepository.existsByBoardTypeAndUniversity(boardType, university) == false) {
-
             boardRepository.save(create(boardType, university));
         }
     }

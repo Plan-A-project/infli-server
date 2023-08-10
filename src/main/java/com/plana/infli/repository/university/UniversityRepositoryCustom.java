@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface UniversityRepositoryCustom {
 
-    Optional<University> findByMemberEmail(String email);
+    Optional<University> findByMemberUsername(String username);
 
     Boolean isMemberAndPostInSameUniversity(Member member, Post post);
 }

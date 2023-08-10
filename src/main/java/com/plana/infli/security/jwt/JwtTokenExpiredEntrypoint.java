@@ -14,8 +14,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtTokenExpiredEntrypoint {
+
 	private static final ObjectMapper objectMapper = new ObjectMapper();
+
 	private static final int SC_TOKEN_EXPIRED = 499;
+
 	private static final String TOKEN_EXPIRED_MESSAGE = "토큰이 만료되었습니다.";
 
 	public void commence(HttpServletRequest request, HttpServletResponse response) throws IOException {

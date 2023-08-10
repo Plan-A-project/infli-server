@@ -1,13 +1,20 @@
 package com.plana.infli.config;
 
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailService;
+import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.aws.mail.simplemail.SimpleEmailServiceJavaMailSender;
+import org.springframework.cloud.aws.mail.simplemail.SimpleEmailServiceMailSender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.javamail.JavaMailSender;
 
 @Configuration
 public class AWSConfig {
@@ -30,4 +37,18 @@ public class AWSConfig {
         amazonS3Client.setRegion(Region.getRegion(Regions.fromName(region)));
         return amazonS3Client;
     }
+
+    @Bean
+    public AmazonSimpleEmailService amazonSimpleEmailService() {
+        return AmazonSimpleEmailServiceClientBuilder.standard()
+                .withCredentials(new AWSStaticCredentialsProvider(basicAWSCredentials()))
+                .withRegion(region)
+                .build();
+    }
+
+    @Bean
+    public MailSender mailSender() {
+        return new SimpleEmailServiceMailSender(amazonSimpleEmailService());
+    }
+
 }

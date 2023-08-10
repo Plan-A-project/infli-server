@@ -33,8 +33,8 @@ public class SettingController {
      * */
     @Operation(description = "회원 정보 조회")
     @GetMapping("/profiles")
-    public MyProfileResponse loadMyProfile(@AuthenticatedPrincipal String email) {
-        return settingService.loadMyProfile(email);
+    public MyProfileResponse loadMyProfile(@AuthenticatedPrincipal String username) {
+        return settingService.loadMyProfile(username);
     }
 
 
@@ -43,16 +43,16 @@ public class SettingController {
      */
     @Operation(description = "사용 가능한 닉네임인지 여부 확인")
     @GetMapping("/validate/nickname")
-    public boolean isAvailableNickname(@AuthenticatedPrincipal String email,
+    public boolean isAvailableNickname(@AuthenticatedPrincipal String username,
             @RequestBody @Validated ValidateNewNicknameRequest request) {
-        return settingService.isAvailableNewNickname(request.toServiceRequest(email));
+        return settingService.isAvailableNewNickname(request.toServiceRequest(username));
     }
 
     @Operation(description = "회원 닉네임 변경")
     @PostMapping("/modify/nickname")
-    public void changeNickname(@AuthenticatedPrincipal String email,
+    public void changeNickname(@AuthenticatedPrincipal String username,
             @RequestBody @Validated ModifyNicknameRequest request) {
-        settingService.changeNickname(request.toServiceRequest(email));
+        settingService.changeNickname(request.toServiceRequest(username));
     }
 
 
@@ -61,10 +61,10 @@ public class SettingController {
      */
     @Operation(description = "비밀번호 확인 - 비밀번호 변경/탈퇴 시")
     @PostMapping("/validate/password")
-    public void authenticatePassword(@AuthenticatedPrincipal String email,
+    public void authenticatePassword(@AuthenticatedPrincipal String username,
             @RequestBody @Validated AuthenticatePasswordRequest request) {
 
-        settingService.authenticatePassword(request.toServiceRequest(email));
+        settingService.authenticatePassword(request.toServiceRequest(username));
     }
 
     /**
@@ -72,20 +72,20 @@ public class SettingController {
      */
     @Operation(description = "회원 비밀번호 변경")
     @PostMapping("/modify/password")
-    public void modifyPassword(@AuthenticatedPrincipal String email,
+    public void modifyPassword(@AuthenticatedPrincipal String username,
             @RequestBody @Validated ModifyPasswordRequest request) {
-
-        settingService.changePassword(request.toServiceRequest(email));
+        settingService.changePassword(request.toServiceRequest(username));
     }
+
 
     /**
      * 프로필 사진 변경
      */
     @Operation(description = "회원 프로필 사진 변경")
     @PostMapping("/modify/profileImage")
-    public ChangeProfileImageResponse changeProfileImage(@AuthenticatedPrincipal String email,
+    public ChangeProfileImageResponse changeProfileImage(@AuthenticatedPrincipal String username,
             @RequestParam("file") MultipartFile profileImage) {
-        return settingService.changeProfileImage(email, profileImage);
+        return settingService.changeProfileImage(username, profileImage);
     }
 
     /**
@@ -93,14 +93,15 @@ public class SettingController {
      */
     @Operation(description = "탈퇴를 요청한 회원의 이름과 이메일 조회")
     @GetMapping("/unregister")
-    public MyProfileToUnregisterResponse loadProfileToUnregister(@AuthenticatedPrincipal String email) {
-        return settingService.loadProfileToUnregister(email);
+    public MyProfileToUnregisterResponse loadProfileToUnregister(@AuthenticatedPrincipal String username) {
+        return settingService.loadProfileToUnregister(username);
     }
 
+    //TODO
     @Operation(description = "회원 탈퇴")
     @PostMapping("/unregister")
-    public void unregister(@AuthenticatedPrincipal String email,
+    public void unregister(@AuthenticatedPrincipal String username,
             @RequestBody @Validated UnregisterMemberRequest request) {
-        settingService.unregisterMember(request.toServiceRequest(email));
+        settingService.unregisterMember(request.toServiceRequest(username));
     }
 }

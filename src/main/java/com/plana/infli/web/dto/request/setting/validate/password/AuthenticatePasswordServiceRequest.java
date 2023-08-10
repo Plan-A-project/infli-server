@@ -6,13 +6,13 @@ import lombok.Getter;
 @Getter
 public class AuthenticatePasswordServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final String password;
 
     @Builder
-    public AuthenticatePasswordServiceRequest(String email, String password) {
-        this.email = email;
+    public AuthenticatePasswordServiceRequest(String username, String password) {
+        this.username = username;
         this.password = password;
     }
 }

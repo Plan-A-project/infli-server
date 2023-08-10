@@ -17,10 +17,11 @@ public class AuthenticatePasswordRequest {
         this.password = password;
     }
 
-    public AuthenticatePasswordServiceRequest toServiceRequest(String email) {
+    public AuthenticatePasswordServiceRequest toServiceRequest(String username) {
         return AuthenticatePasswordServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .password(password)
                 .build();
     }
+
 }
