@@ -4,9 +4,11 @@ import static com.plana.infli.domain.BoardType.*;
 import static com.plana.infli.domain.PostType.*;
 import static com.plana.infli.domain.QBoard.*;
 import static com.plana.infli.domain.QComment.*;
+import static com.plana.infli.domain.QCompany.*;
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QPost.*;
 import static com.plana.infli.domain.QPostLike.*;
+import static com.plana.infli.domain.Role.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder.popular;
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
@@ -20,7 +22,8 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
-import com.plana.infli.exception.custom.BadRequestException;
+import com.plana.infli.domain.QCompany;
+import com.plana.infli.domain.Role;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import com.plana.infli.web.dto.response.post.QCommentCount;
@@ -38,12 +41,13 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.DateTimeExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,25 +98,21 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @Override
     public SinglePostResponse loadSinglePostResponse(PostQueryRequest request) {
-
-        try {
-            return jpaQueryFactory.select(
-                            new QSinglePostResponse(
-                                    post.board.boardName, post.board.id,
-                                    post.postType.stringValue(), nicknameEq(request.getPost()),
-                                    post.id, post.title, post.content, post.createdAt,
-                                    isMyPost(request.getMember()), isAdmin(request.getMember()),
-                                    post.viewCount, post.likes.size(),
-                                    pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
-                                    companyNameEqual(), recruitmentStartDateEqual(),
-                                    recruitmentEndDateEqual()))
-                    .from(post)
-                    .where(post.eq(request.getPost()))
-                    .fetchOne();
-
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
-        }
+        return jpaQueryFactory.select(
+                        new QSinglePostResponse(
+                                post.board.boardName, post.board.id,
+                                post.postType.stringValue(), nicknameEq(),
+                                post.id, post.title, post.content, post.createdAt,
+                                isMyPost(request.getMember()), isAdmin(request.getMember()),
+                                post.viewCount, post.likes.size(),
+                                pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
+                                companyNameEqual(), recruitmentStartDateEqual(),
+                                recruitmentEndDateEqual()))
+                .from(post)
+                .where(post.eq(request.getPost()))
+                .innerJoin(post.member, member)
+                .leftJoin(post.member.company, company)
+                .fetchOne();
     }
 
     private BooleanExpression isMyPost(Member member) {
@@ -125,9 +125,16 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
 
-    private Expression<String> nicknameEq(Post findPost) {
-        return findPost.getBoard().getBoardType() == ANONYMOUS ?
-                nullExpression() : post.member.name.nickname;
+    private StringExpression nicknameEq() {
+
+        return new CaseBuilder()
+                .when(postWriterRoleEqual(COMPANY)).then(post.member.company.name)
+                .when(post.board.boardType.eq(ANONYMOUS)).then(nullExpression())
+                .otherwise(post.member.name.nickname);
+    }
+
+    private BooleanExpression postWriterRoleEqual(Role role) {
+        return post.member.role.eq(role);
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {
@@ -146,7 +153,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private StringExpression companyNameEqual() {
         return new CaseBuilder()
-                .when(post.postType.eq(RECRUITMENT)).then(post.recruitment.companyName)
+                .when(postTypeEqual(RECRUITMENT)).then(post.recruitment.companyName)
                 .otherwise(nullExpression());
     }
 
@@ -279,7 +286,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression postTypeEqual(PostType postType) {
-        return post.postType.eq(postType);
+        return postType != null ? post.postType.eq(postType) : null;
     }
 
 

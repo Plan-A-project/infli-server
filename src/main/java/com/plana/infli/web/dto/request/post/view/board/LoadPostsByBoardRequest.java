@@ -10,26 +10,27 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class LoadPostsByBoardRequest {
 
     @NotNull(message = "글 종류를 선택해주세요")
     private PostType type;
 
-    private String page;
+    private Integer page;
 
     @NotNull(message = "최신순, 인기순 여부를 선택해주세요")
     private PostViewOrder order;
 
     @Builder
-    public LoadPostsByBoardRequest(PostType type, String page, PostViewOrder order) {
+    public LoadPostsByBoardRequest(PostType type, Integer page, PostViewOrder order) {
         this.type = type;
         this.page = page;
         this.order = order;
     }
 
-    public LoadPostsByBoardServiceRequest toServiceRequest(Long boardId, String email) {
+    public LoadPostsByBoardServiceRequest toServiceRequest(Long boardId, String username) {
         return LoadPostsByBoardServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .boardId(boardId)
                 .type(type)
                 .order(order)

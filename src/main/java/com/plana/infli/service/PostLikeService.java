@@ -33,17 +33,25 @@ public class PostLikeService {
     private final UniversityRepository universityRepository;
 
     @Transactional
-    public void createPostLike(Long postId, String email) {
+    public void createPostLike(String username, Long postId) {
 
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        Member member = findMemberBy(username);
 
-        Post post = postRepository.findActivePostBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+        Post post = findPostBy(postId);
 
         validateCreateRequest(member, post);
 
         postLikeRepository.save(create(post, member));
+    }
+
+    private Member findMemberBy(String username) {
+        return memberRepository.findActiveMemberBy(username)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
+
+    private Post findPostBy(Long postId) {
+        return postRepository.findActivePostBy(postId)
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
     private void validateCreateRequest(Member member, Post post) {
@@ -54,16 +62,19 @@ public class PostLikeService {
 
 
     @Transactional
-    public void cancelPostLike(Long postId, String email) {
-        Member member = memberRepository.findActiveMemberBy(email)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    public void cancelPostLike(String username, Long postId) {
 
-        Post post = postRepository.findActivePostBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+        Member member = findMemberBy(username);
 
-        PostLike postLike = postLikeRepository.findByPostAndMember(post, member)
-                .orElseThrow(() -> new BadRequestException(POST_LIKE_NOT_FOUND));
+        Post post = findPostBy(postId);
+
+        PostLike postLike = findPostLikeBy(post, member);
 
         postLikeRepository.delete(postLike);
+    }
+
+    private PostLike findPostLikeBy(Post post, Member member) {
+        return postLikeRepository.findByPostAndMember(post, member)
+                .orElseThrow(() -> new BadRequestException(POST_LIKE_NOT_FOUND));
     }
 }

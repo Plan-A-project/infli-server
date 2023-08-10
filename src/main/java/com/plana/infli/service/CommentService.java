@@ -35,7 +35,6 @@ import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsRespons
 import com.plana.infli.web.dto.response.comment.view.post.PostComment;
 import com.plana.infli.web.dto.response.comment.view.post.PostCommentsResponse;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -55,8 +54,6 @@ public class CommentService {
 
     private final UniversityRepository universityRepository;
 
-    private final EntityManager em;
-
     // 특정 글에 작성된 댓글 목록 조회시 한 페이지당 조회되길 원하는 댓글 갯수
     private static final Integer COMMENT_SIZE_PER_PAGE = 100;
 
@@ -66,7 +63,7 @@ public class CommentService {
 
         validateContentLength(request.getContent());
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         checkWritePermission(member);
 
@@ -172,7 +169,7 @@ public class CommentService {
         validateContentLength(request.getContent());
 
         // 댓글 수정할 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         Post post = findPostBy(request.getPostId());
 
@@ -193,8 +190,8 @@ public class CommentService {
     }
 
 
-    private Member findMemberBy(String email) {
-        return memberRepository.findActiveMemberBy(email)
+    private Member findMemberBy(String username) {
+        return memberRepository.findActiveMemberBy(username)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
@@ -212,10 +209,10 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(String email, Long commentId) {
+    public void deleteComment(String username, Long commentId) {
 
         // 댓글 삭제 요청을 한 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = findMemberBy(email);
+        Member member = findMemberBy(username);
 
         Comment comment = findCommentWithMemberBy(commentId);
 
@@ -246,12 +243,12 @@ public class CommentService {
     public PostCommentsResponse loadCommentsInPost(LoadCommentsInPostServiceRequest request) {
 
         // 댓글 조회를 요청한 회원
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         // 존재하지 않거나, 삭제된 글에 작성된 댓글을 조회할수 없다
         Post post = findPostBy(request.getId());
 
-        PageRequest pageRequest = createPageRequest(request);
+        PageRequest pageRequest = createPageRequest(request.getPage());
 
         // 해당 글에 작성된 댓글 목록
         List<PostComment> comments = commentRepository.findCommentsInPost(post, member,
@@ -266,17 +263,8 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
-    private PageRequest createPageRequest(LoadCommentsInPostServiceRequest request) {
-
-        int page;
-
-        try {
-            page = Integer.parseInt(request.getPage());
-        } catch (NumberFormatException e) {
-            page = 1;
-        }
-
-        return of(request.getPage() == null ? 1 : max(1, page), COMMENT_SIZE_PER_PAGE);
+    private PageRequest createPageRequest(Integer page) {
+        return of(max(1,page), COMMENT_SIZE_PER_PAGE);
     }
 
     public MyCommentsResponse loadMyComments(Integer page, String email) {
@@ -320,10 +308,10 @@ public class CommentService {
         return response;
     }
 
-    public Long findCommentsCountByMember(String email) {
+    public Long findCommentsCountByMember(String username) {
 
         // 자신이 작성한 총 댓글 갯수를 보고싶은 회원
-        Member member = findMemberBy(email);
+        Member member = findMemberBy(username);
 
         return commentRepository.findActiveCommentsCountBy(member);
     }

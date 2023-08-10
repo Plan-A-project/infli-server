@@ -1,5 +1,7 @@
 package com.plana.infli.domain;
 
+import static lombok.AccessLevel.*;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,60 +13,74 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = PROTECTED)
 @Entity
 public class EmailAuthentication extends BaseEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "email_authentication_id")
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "email_authentication_id")
+    private Long id;
 
-  private String email;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
-  @Column(nullable = false)
-  private String secret;
+    private String secret;
 
-  @Column(nullable = false)
-  private LocalDateTime expirationTime;
+    private LocalDateTime secretGeneratedTime;
 
-  private String certificateUrl;
+    @Builder
+    public EmailAuthentication(Member member, String secret,
+            LocalDateTime secretGeneratedTime) {
+        this.member = member;
+        this.secret = secret;
+        this.secretGeneratedTime = secretGeneratedTime;
+    }
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id")
-  private Member member;
+    public static EmailAuthentication create(Member member, LocalDateTime localDateTime) {
 
-  public static EmailAuthentication createEmailAuthentication(Member member) {
-    EmailAuthentication emailAuthentication = new EmailAuthentication();
-    emailAuthentication.secret = UUID.randomUUID().toString();
-    emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
-    emailAuthentication.member = member;
+        String secret = UUID.randomUUID().toString();
 
-    return emailAuthentication;
-  }
+        return EmailAuthentication.builder()
+                .member(member)
+                .secret(secret)
+                .secretGeneratedTime(localDateTime)
+                .build();
+    }
 
-  public static EmailAuthentication createStudentAuthentication(Member member,
-      String studentEmail) {
-    EmailAuthentication emailAuthentication = new EmailAuthentication();
-    emailAuthentication.secret = UUID.randomUUID().toString();
-    emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
-    emailAuthentication.member = member;
-    emailAuthentication.email = studentEmail;
-
-    return emailAuthentication;
-  }
-
-  public static EmailAuthentication createCompanyAuthentication(Member member) {
-    EmailAuthentication emailAuthentication = new EmailAuthentication();
-    emailAuthentication.secret = UUID.randomUUID().toString();
-    emailAuthentication.expirationTime = LocalDateTime.now().plusDays(30);
-    emailAuthentication.member = member;
-
-    return emailAuthentication;
-  }
+//    public static EmailAuthentication createEmailAuthentication(Member member) {
+//        EmailAuthentication emailAuthentication = new EmailAuthentication();
+//        emailAuthentication.secret = java.util.UUID.randomUUID().toString();
+//        emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
+//        emailAuthentication.member = member;
+//
+//        return emailAuthentication;
+//    }
+//
+//    public static EmailAuthentication createStudentAuthentication(Member member,
+//            String studentEmail) {
+//        EmailAuthentication emailAuthentication = new EmailAuthentication();
+//        emailAuthentication.secret = java.util.UUID.randomUUID().toString();
+//        emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
+//        emailAuthentication.member = member;
+//        emailAuthentication.email = studentEmail;
+//
+//        return emailAuthentication;
+//    }
+//
+//    public static EmailAuthentication createCompanyAuthentication(Member member) {
+//        EmailAuthentication emailAuthentication = new EmailAuthentication();
+//        emailAuthentication.secret = UUID.randomUUID().toString();
+//        emailAuthentication.expirationTime = LocalDateTime.now().plusDays(30);
+//        emailAuthentication.member = member;
+//
+//        return emailAuthentication;
+//    }
 }
 

@@ -1,6 +1,7 @@
 package com.plana.infli.controller;
 
 
+import static java.lang.String.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -840,7 +841,7 @@ public class CommentControllerTest {
         //when
         ResultActions resultActions = mvc.perform(
                 get("/api/posts/comments")
-                        .param("id", post.getId().toString())
+                        .param("id", valueOf(post.getId()))
                         .param("page", "1")
                         .with(csrf()));
 
@@ -980,6 +981,6 @@ public class CommentControllerTest {
 
     private Member findContextMember() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByEmail(email).get();
+        return memberRepository.findByUsername(email).get();
     }
 }

@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public class EditNormalPostServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final Long postId;
 
@@ -19,9 +19,10 @@ public class EditNormalPostServiceRequest {
     private final String thumbnailUrl;
 
     @Builder
-    public EditNormalPostServiceRequest(String email, Long postId,
+    public EditNormalPostServiceRequest(String username, Long postId,
             String title, String content, @Nullable String thumbnailUrl) {
-        this.email = email;
+
+        this.username = username;
         this.postId = postId;
         this.title = title;
         this.content = content;

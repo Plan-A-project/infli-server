@@ -36,38 +36,38 @@ public class CommentController {
     @PostMapping("/comments")
     @Operation(summary = "댓글 또는 대댓글 생성")
     public CreateCommentResponse write(@Validated @RequestBody CreateCommentRequest request,
-            @AuthenticationPrincipal String email) {
+            @AuthenticationPrincipal String username) {
 
-        return commentService.createComment(request.toServiceRequest(email));
+        return commentService.createComment(request.toServiceRequest(username));
     }
 
     @PatchMapping("/comments")
     @Operation(summary = "댓글 또는 대댓글 내용 수정")
-    public void edit(@Validated @RequestBody EditCommentRequest request,
-            @AuthenticationPrincipal String email) {
-        commentService.editCommentContent(request.toServiceRequest(email));
+    public void edit(@AuthenticationPrincipal String username,
+            @Validated @RequestBody EditCommentRequest request) {
+
+        commentService.editCommentContent(request.toServiceRequest(username));
     }
 
     @DeleteMapping("/comments/{commentId}")
     @Operation(summary = "댓글 또는 대댓글 삭제")
-    public void delete(@AuthenticationPrincipal String email, @PathVariable Long commentId) {
-        commentService.deleteComment(email, commentId);
+    public void delete(@AuthenticationPrincipal String username, @PathVariable Long commentId) {
+        commentService.deleteComment(username, commentId);
     }
 
     @GetMapping("/posts/comments")
     @Operation(summary = "특정 글에 작성된 댓글과 대댓글 목록 조회")
-    public PostCommentsResponse loadCommentsInPost(@Validated LoadCommentsInPostRequest request,
-            @AuthenticationPrincipal String email) {
+    public PostCommentsResponse loadCommentsInPost(@AuthenticationPrincipal String username,
+            @Validated LoadCommentsInPostRequest request) {
 
-        return commentService.loadCommentsInPost(request.toServiceRequest(email));
+        return commentService.loadCommentsInPost(request.toServiceRequest(username));
     }
 
     @GetMapping("/posts/{postId}/comments/best")
     @Operation(summary = "특정 글에 작성된 댓글들중 베스트 댓글 조회")
     public BestCommentResponse loadBestCommentInPost(@PathVariable Long postId,
-            @AuthenticationPrincipal String email) {
-
-        return commentService.loadBestCommentInPost(postId, email);
+            @AuthenticationPrincipal String username) {
+        return commentService.loadBestCommentInPost(postId, username);
     }
 
     @GetMapping("/posts/{postId}/comments/count")
@@ -78,16 +78,16 @@ public class CommentController {
 
     @GetMapping("/members/comments")
     @Operation(summary = "내가 작성한 댓글 목록 조회")
-    public MyCommentsResponse loadMyComments(Integer page,
-            @AuthenticationPrincipal String email) {
-        return commentService.loadMyComments(page, email);
+    public MyCommentsResponse loadMyComments(@AuthenticationPrincipal String username,
+            Integer page) {
+
+        return commentService.loadMyComments(page, username);
     }
 
     @GetMapping("/members/comments/count")
     @Operation(summary = "내가 총 작성한 댓글 갯수 조회")
-    public Long loadMyCommentsCount(
-            @AuthenticationPrincipal String email) {
+    public Long loadMyCommentsCount(@AuthenticationPrincipal String username) {
 
-        return commentService.findCommentsCountByMember(email);
+        return commentService.findCommentsCountByMember(username);
     }
 }

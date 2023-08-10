@@ -6,14 +6,11 @@ import static com.plana.infli.exception.custom.BadRequestException.NOT_ALL_POPUL
 import static com.plana.infli.exception.custom.ConflictException.DEFAULT_POPULAR_BOARD_EXISTS;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.response.board.settings.board.BoardListResponse.createBoardListResponse;
-import static com.plana.infli.web.dto.response.board.settings.polularboard.PopularBoardsSettingsResponse.createPopularBoardsSettingsResponse;
-import static com.plana.infli.web.dto.response.board.view.PopularBoardsResponse.createPopularBoardsResponse;
 
 import com.plana.infli.domain.PopularBoard;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
-import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
@@ -49,38 +46,27 @@ public class BoardService {
 
     private final UniversityRepository universityRepository;
 
-    public boolean popularBoardExistsBy(String email) {
+    public boolean popularBoardExistsBy(String username) {
 
-        // 로그인하지 않은 회원인 경우 인기 게시판을 볼수 없다
-        checkIsLoggedIn(email);
-
-
-        // 회원이 존재하지 않거나, 삭제된 경우 예외 발생
-        Member member = findMember(email);
+        Member member = findMemberBy(username);
 
         return popularBoardRepository.existsByMember(member);
     }
 
-    private void checkIsLoggedIn(String email) {
-        if (email == null) {
-            throw new AuthenticationFailedException();
-        }
-    }
-
-    private Member findMember(String email) {
+    private Member findMemberBy(String email) {
         return memberRepository.findActiveMemberBy(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-    public PopularBoardsResponse loadEnabledPopularBoardsBy(String email) {
+    public PopularBoardsResponse loadEnabledPopularBoardsBy(String username) {
 
-        Member member = findMember(email);
+        Member member = findMemberBy(username);
 
         checkPopularBoardExists(member);
 
         List<SinglePopularBoard> boards = popularBoardRepository.loadEnabledPopularBoardsBy(member);
 
-        return createPopularBoardsResponse(boards);
+        return PopularBoardsResponse.of(boards);
     }
 
     private void checkPopularBoardExists(Member member) {
@@ -90,11 +76,9 @@ public class BoardService {
     }
 
     @Transactional
-    public void createDefaultPopularBoards(String email) {
+    public void createDefaultPopularBoards(String username) {
 
-        checkIsLoggedIn(email);
-
-        Member member = findMemberWithUniversityJoined(email);
+        Member member = findMemberWithUniversityJoinedBy(username);
 
         checkPopularBoardsAlreadyExists(member);
 
@@ -107,8 +91,8 @@ public class BoardService {
         }
     }
 
-    private Member findMemberWithUniversityJoined(String email) {
-        return memberRepository.findActiveMemberWithUniversityBy(email)
+    private Member findMemberWithUniversityJoinedBy(String username) {
+        return memberRepository.findActiveMemberWithUniversityBy(username)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
@@ -128,29 +112,24 @@ public class BoardService {
     }
 
 
-    public PopularBoardsSettingsResponse loadEnabledPopularBoardsForSettingBy(String email) {
+    public PopularBoardsSettingsResponse loadEnabledPopularBoardsForSettingBy(String username) {
 
-        checkIsLoggedIn(email);
-
-        Member member = findMemberWithUniversityJoined(email);
+        Member member = findMemberWithUniversityJoinedBy(username);
 
         // 회원이 보고싶다고 설정한 "인기 게시판" 모두 조회
         List<SinglePopularBoardForSetting> popularBoards = popularBoardRepository.findAllEnabledPopularBoardsForSettingBy(
                 member);
 
-        return createPopularBoardsSettingsResponse(popularBoards);
+        return PopularBoardsSettingsResponse.of(popularBoards);
     }
 
     @Transactional
-    public void changePopularBoardSequence(EditPopularBoardSequenceServiceRequest request,
-            String email) {
-
-        checkIsLoggedIn(email);
+    public void changePopularBoardSequence(EditPopularBoardSequenceServiceRequest request) {
 
         // "인기 게시판"의 ID 번호들이, 회원이 보고싶어하는 순서대로 담겨져 있다
         List<Long> ids = request.getPopularBoardIds();
 
-        Member member = findMember(email);
+        Member member = findMemberBy(request.getUsername());
 
         List<PopularBoard> popularBoards = findPopularBoardsBy(ids);
 
@@ -212,11 +191,9 @@ public class BoardService {
     }
 
 
-    public BoardListResponse loadAllBoard(String email) {
+    public BoardListResponse loadAllBoard(String username) {
 
-        checkIsLoggedIn(email);
-
-        University university = findUniversityByMemberEmail(email);
+        University university = findUniversityByMemberUsername(username);
 
         // 해당 대학에 존재하는 모든 게시판 조회
         List<SingleBoard> boards = boardRepository.loadAllBoardBy(university);
@@ -224,24 +201,21 @@ public class BoardService {
         return createBoardListResponse(university.getId(), boards);
     }
 
-    private University findUniversityByMemberEmail(String email) {
-        return universityRepository.findByMemberEmail(email)
+    private University findUniversityByMemberUsername(String email) {
+        return universityRepository.findByMemberUsername(email)
                 .orElseThrow(() -> new NotFoundException(UNIVERSITY_NOT_FOUND));
     }
 
 
     @Transactional
-    public void changeBoardVisibility(ChangePopularBoardVisibilityServiceRequest request,
-            String email) {
-
-        checkIsLoggedIn(email);
+    public void changeBoardVisibility(ChangePopularBoardVisibilityServiceRequest request) {
 
         // 보고싶은 인기 게시판에 해당되는 게시판의 Id 번호 List
         // Ex) 동아리 인기 게시판과 익명 인기 게시판을 보고싶은 경우,
         //     동아리 게시판의 ID 번호와 익명 게시판의 ID 번호 목록
         List<Long> boardIds = request.getBoardIds();
 
-        Member member = findMemberWithUniversityJoined(email);
+        Member member = findMemberWithUniversityJoinedBy(request.getUsername());
 
         // 조회되길 희망하는 게시판 List
         List<Board> wantToSeeBoards = boardRepository.findAllWithUniversityByIdIn(boardIds);

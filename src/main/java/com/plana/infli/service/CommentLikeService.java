@@ -44,7 +44,7 @@ public class CommentLikeService {
     @Transactional
     public Long createCommentLike(CreateCommentLikeServiceRequest request) {
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         Post post = findPostBy(request.getPostId());
 
@@ -65,8 +65,8 @@ public class CommentLikeService {
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
-    private Member findMemberBy(String email) {
-        return memberRepository.findActiveMemberBy(email)
+    private Member findMemberBy(String username) {
+        return memberRepository.findActiveMemberBy(username)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
@@ -93,7 +93,7 @@ public class CommentLikeService {
     @Transactional
     public void cancelCommentLike(CancelCommentLikeServiceRequest request) {
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         Post post = findPostBy(request.getPostId());
 

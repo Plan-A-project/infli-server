@@ -28,9 +28,9 @@ public class CreateCommentRequest {
         this.content = content;
     }
 
-    public CreateCommentServiceRequest toServiceRequest(String email) {
+    public CreateCommentServiceRequest toServiceRequest(String username) {
         return CreateCommentServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .postId(postId)
                 .parentCommentId(parentCommentId)
                 .content(content)

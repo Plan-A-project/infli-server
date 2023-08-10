@@ -14,6 +14,8 @@ public class MemberStatus {
 
     private boolean isDeleted;
 
+    private boolean isAuthenticated;
+
     private boolean policyAccepted;
 
     @Builder

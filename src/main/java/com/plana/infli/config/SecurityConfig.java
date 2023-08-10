@@ -35,6 +35,7 @@ public class SecurityConfig {
 
   @Autowired
   private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
   @Autowired
   private JwtTokenExpiredEntrypoint jwtTokenExpiredEntrypoint;
 

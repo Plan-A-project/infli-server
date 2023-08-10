@@ -19,8 +19,10 @@ public class ChangePopularBoardVisibilityRequest {
         this.boardIds = boardIds;
     }
 
-    public ChangePopularBoardVisibilityServiceRequest toServiceRequest() {
+    public ChangePopularBoardVisibilityServiceRequest toServiceRequest(String username) {
         return ChangePopularBoardVisibilityServiceRequest.builder()
-                .boardIds(boardIds).build();
+                .username(username)
+                .boardIds(boardIds)
+                .build();
     }
 }

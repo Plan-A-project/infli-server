@@ -6,15 +6,15 @@ import lombok.Getter;
 @Getter
 public class LoadCommentsInPostServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final Long id;
 
-    private final String page;
+    private final Integer page;
 
     @Builder
-    public LoadCommentsInPostServiceRequest(String email, Long id, String page) {
-        this.email = email;
+    public LoadCommentsInPostServiceRequest(String username, Long id, Integer page) {
+        this.username = username;
         this.id = id;
         this.page = page;
     }

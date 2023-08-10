@@ -41,9 +41,9 @@ public class CreateRecruitmentPostRequest {
     }
 
 
-    public CreateRecruitmentPostServiceRequest toServiceRequest(String email) {
+    public CreateRecruitmentPostServiceRequest toServiceRequest(String username) {
         return CreateRecruitmentPostServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .boardId(boardId)
                 .title(title)
                 .content(content)
@@ -52,4 +52,5 @@ public class CreateRecruitmentPostRequest {
                 .recruitmentEndDate(recruitmentEndDate)
                 .build();
     }
+
 }

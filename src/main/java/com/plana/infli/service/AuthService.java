@@ -28,19 +28,19 @@ public class AuthService {
 	private final UserDetailsService userDetailsService;
 
 	public HttpHeaders reissue(String refreshToken) {
-		String email = jwtManager.resolveRefreshToken(
+		String username = jwtManager.resolveRefreshToken(
 			refreshToken.substring(jwtProperties.getTokenPrefix().length() + 1));
 
-		if (!StringUtils.hasText(redisDao.getValues(email))) {
+		if (!StringUtils.hasText(redisDao.getValues(username))) {
 			throw new TokenExpiredException("토큰이 만료되었습니다.", Instant.now());
 		}
 
-		UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+		UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 		String accessToken = jwtManager.createAccessToken(userDetails);
 		String newRefreshToken = jwtManager.createRefreshToken(userDetails);
 
-		redisDao.deleteValues(email);
-		redisDao.setValues(email, newRefreshToken);
+		redisDao.deleteValues(username);
+		redisDao.setValues(username, newRefreshToken);
 
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add(jwtProperties.getAccessTokenHeaderName(),

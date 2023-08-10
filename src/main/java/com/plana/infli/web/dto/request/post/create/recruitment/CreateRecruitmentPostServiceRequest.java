@@ -14,9 +14,10 @@ import lombok.Getter;
 @Getter
 public class CreateRecruitmentPostServiceRequest {
 
+    //TODO
     private final PostType postType = RECRUITMENT;
 
-    private final String email;
+    private final String username;
 
     private final Long boardId;
 
@@ -32,11 +33,11 @@ public class CreateRecruitmentPostServiceRequest {
 
 
     @Builder
-    public CreateRecruitmentPostServiceRequest(String email, Long boardId, String title,
-            String content,
-            String recruitmentCompanyName, LocalDateTime recruitmentStartDate,
+    public CreateRecruitmentPostServiceRequest(String username, Long boardId, String title,
+            String content, String recruitmentCompanyName, LocalDateTime recruitmentStartDate,
             LocalDateTime recruitmentEndDate) {
-        this.email = email;
+
+        this.username = username;
         this.boardId = boardId;
         this.title = title;
         this.content = content;
@@ -46,17 +47,14 @@ public class CreateRecruitmentPostServiceRequest {
     }
 
 
-    public static Post toEntity(Member member, Board board, CreateRecruitmentPostServiceRequest request,
-            Recruitment recruitment) {
-
+    public Post toEntity(Member member, Board board, Recruitment recruitment) {
         return Post.builder()
                 .board(board)
                 .member(member)
-                .postType(request.getPostType())
-                .title(request.getTitle())
-                .content(request.getContent())
+                .postType(postType)
+                .title(title)
+                .content(content)
                 .recruitment(recruitment)
                 .build();
     }
-
 }

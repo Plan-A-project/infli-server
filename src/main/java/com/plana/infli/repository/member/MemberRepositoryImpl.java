@@ -17,9 +17,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Optional<Member> findActiveMemberBy(String email) {
+    public Optional<Member> findActiveMemberBy(String username) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
-                .where(member.email.eq(email))
+                .where(member.username.eq(username))
                 .where(member.status.isDeleted.isFalse())
                 .fetchOne());
     }
@@ -35,10 +35,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     }
 
     @Override
-    public Optional<Member> findActiveMemberWithUniversityBy(String email) {
+    public Optional<Member> findActiveMemberWithUniversityBy(String username) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
                 .leftJoin(member.university, university).fetchJoin()
-                .where(member.email.eq(email))
+                .where(member.username.eq(username))
                 .where(member.status.isDeleted.isFalse())
                 .fetchOne());
     }

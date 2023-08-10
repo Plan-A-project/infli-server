@@ -20,10 +20,10 @@ public abstract class DefaultPost {
 
     private final LocalDateTime createdAt;
 
-    private final String thumbnailURL;
+    private final String thumbnailUrl;
 
     public DefaultPost(Long postId, String title, boolean pressedLike, int likeCount,
-            int viewCount, LocalDateTime createdAt, String thumbnailURL) {
+            int viewCount, LocalDateTime createdAt, String thumbnailUrl) {
 
         this.postId = postId;
         this.title = title;
@@ -31,7 +31,7 @@ public abstract class DefaultPost {
         this.likeCount = likeCount;
         this.viewCount = viewCount;
         this.createdAt = createdAt;
-        this.thumbnailURL = thumbnailURL;
+        this.thumbnailUrl = thumbnailUrl;
     }
 
     public void loadCommentCount(int commentCount) {

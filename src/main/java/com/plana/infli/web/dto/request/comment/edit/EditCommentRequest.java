@@ -26,10 +26,10 @@ public class EditCommentRequest {
         this.content = content;
     }
 
-    public EditCommentServiceRequest toServiceRequest(String email) {
+    public EditCommentServiceRequest toServiceRequest(String username) {
 
         return EditCommentServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .postId(postId)
                 .commentId(commentId)
                 .content(content)

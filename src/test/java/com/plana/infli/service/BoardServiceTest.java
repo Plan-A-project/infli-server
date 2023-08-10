@@ -1,5 +1,6 @@
 package com.plana.infli.service;
 
+import static java.util.List.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -95,7 +96,7 @@ public class BoardServiceTest {
 
 
         //when
-        boolean exists = boardService.popularBoardExistsBy(member.getEmail());
+        boolean exists = boardService.popularBoardExistsBy(member.getUsername());
 
         //then
         assertThat(exists).isFalse();
@@ -114,23 +115,15 @@ public class BoardServiceTest {
         Board activityBoard = boardFactory.createActivityBoard(university);
 
         Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getEmail());
+        boardService.createDefaultPopularBoards(member.getUsername());
 
         //when
-        boolean exists = boardService.popularBoardExistsBy(member.getEmail());
+        boolean exists = boardService.popularBoardExistsBy(member.getUsername());
 
         //then
         assertThat(exists).isTrue();
     }
 
-    @DisplayName("로그인 하지 않은 상태로 인기 게시판 기본 설정값이 존재하는지 조회할수 없다")
-    @Test
-    void defaultPopularBoardExistsWithoutLogin() {
-        //when //then
-        assertThatThrownBy(() -> boardService.popularBoardExistsBy(null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
 
     @DisplayName("존재하지 않는 회원의 인기 게시판 기본 설정값 존재여부를 조회할 수 없다")
     @Test
@@ -156,7 +149,7 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         //when
-        boardService.createDefaultPopularBoards(member.getEmail());
+        boardService.createDefaultPopularBoards(member.getUsername());
 
         //then
         List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
@@ -177,10 +170,10 @@ public class BoardServiceTest {
         Board activityBoard = boardFactory.createActivityBoard(university);
 
         Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getEmail());
+        boardService.createDefaultPopularBoards(member.getUsername());
 
         //when //then
-        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(member.getEmail()))
+        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(member.getUsername()))
                 .isInstanceOf(ConflictException.class)
                 .message().isEqualTo("인기 게시판 기본값이 이미 생성되었습니다");
     }
@@ -204,23 +197,6 @@ public class BoardServiceTest {
 
     }
 
-    @DisplayName("로그인 하지 않은 상태로 인기 게시판 기본 설정값을 생성할수 없다")
-    @Test
-    void createDefaultPopularBoardWithoutLogin() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-
-        Board anonymousBoard = boardFactory.createAnonymousBoard(university);
-        Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
-        Board clubBoard = boardFactory.createClubBoard(university);
-        Board employmentBoard = boardFactory.createEmploymentBoard(university);
-        Board activityBoard = boardFactory.createActivityBoard(university);
-
-        //when //then
-        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
 
 
     @DisplayName("특정 회원이 보고싶은 인기 게시판 기본 설정을 하지 않았을 경우 조회 시나리오")
@@ -237,11 +213,11 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         //when
-        return List.of(
+        return of(
                 dynamicTest("특정 회원이 보고싶은 인기 게시판 기본 설정값이 없는 것을 확인한다",
                         () -> {
                             //when
-                            boolean exists = boardService.popularBoardExistsBy(member.getEmail());
+                            boolean exists = boardService.popularBoardExistsBy(member.getUsername());
 
                             //then
                             assertThat(exists).isFalse();
@@ -250,7 +226,7 @@ public class BoardServiceTest {
                 dynamicTest("기본 설정값이 없는 경우, 해당 대학에 존재하는 모든 게시판에 각각 대응하는 인기 게시판을 생성한다",
                         () -> {
                             //when
-                            boardService.createDefaultPopularBoards(member.getEmail());
+                            boardService.createDefaultPopularBoards(member.getUsername());
 
                             //then
                             assertThat(popularBoardRepository.findEnabledPopularBoardCountBy(
@@ -261,7 +237,7 @@ public class BoardServiceTest {
                         () -> {
                             //when
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getEmail());
+                                    member.getUsername());
 
                             //then
                             assertThat(response.getBoards().size()).isEqualTo(5);
@@ -309,11 +285,11 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         //when
-        return List.of(
+        return of(
                 dynamicTest("해당 대학에 존재하는 모든 게시판에 각각 대응하는 인기 게시판을 생성한다 (기본값 생성)",
                         () -> {
                             //when
-                            boardService.createDefaultPopularBoards(member.getEmail());
+                            boardService.createDefaultPopularBoards(member.getUsername());
 
                             //then
                             assertThat(popularBoardRepository.findEnabledPopularBoardCountBy(
@@ -324,7 +300,7 @@ public class BoardServiceTest {
                         () -> {
                             //when
                             PopularBoardsSettingsResponse response = boardService.loadEnabledPopularBoardsForSettingBy(
-                                    member.getEmail());
+                                    member.getUsername());
 
                             //then
                             assertThat(response.getPopularBoards().size()).isEqualTo(5);
@@ -358,24 +334,6 @@ public class BoardServiceTest {
     }
 
 
-    @DisplayName("로그인 하지 않은 상태로 인기 게시판 목록 조회를 할수 없다")
-    @Test
-    void listPopularBoardWithoutLogin() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-
-        Board anonymousBoard = boardFactory.createAnonymousBoard(university);
-        Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
-        Board clubBoard = boardFactory.createClubBoard(university);
-        Board employmentBoard = boardFactory.createEmploymentBoard(university);
-        Board activityBoard = boardFactory.createActivityBoard(university);
-
-        //when //then
-        assertThatThrownBy(() -> boardService.loadEnabledPopularBoardsForSettingBy(null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
-
     @DisplayName("존재하지 않는 회원의 인기 게시판 목록 조회를 할수 없다")
     @Test
     void listPopularBoardByNotExistingMember() {
@@ -407,7 +365,7 @@ public class BoardServiceTest {
         Board activityBoard = boardFactory.createActivityBoard(university);
 
         Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getEmail());
+        boardService.createDefaultPopularBoards(member.getUsername());
 
         List<PopularBoard> boards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                 member);
@@ -418,15 +376,18 @@ public class BoardServiceTest {
         PopularBoard campusLifePopularBoard = boards.get(4);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .popularBoardIds(
-                        List.of(anonymousPopularBoard.getId(), employMemberPopularBoard.getId(),
-                                activityPopularBoard.getId(), clubPopularBoard.getId(),
-                                campusLifePopularBoard.getId()))
+                .username(member.getUsername())
+                .popularBoardIds(of(
+                        anonymousPopularBoard.getId(),
+                        employMemberPopularBoard.getId(),
+                        activityPopularBoard.getId(),
+                        clubPopularBoard.getId(),
+                        campusLifePopularBoard.getId()))
                 .build();
 
 
         //when
-        boardService.changePopularBoardSequence(request, member.getEmail());
+        boardService.changePopularBoardSequence(request);
 
         //then
         List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
@@ -450,10 +411,11 @@ public class BoardServiceTest {
         Board activityBoard = boardFactory.createActivityBoard(university);
 
         Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getEmail());
+
+        boardService.createDefaultPopularBoards(member.getUsername());
 
         //when
-        BoardListResponse response = boardService.loadAllBoard(member.getEmail());
+        BoardListResponse response = boardService.loadAllBoard(member.getUsername());
 
         //then
         assertThat(response.getUniversityId()).isEqualTo(university.getId());
@@ -482,19 +444,23 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         //when
-        return List.of(
+        return of(
                 dynamicTest("인기 게시판 기본값 설정 후, 5개의 인기 게시판 중에서 학교생활과 익명 인기게시판만 보고싶다고 선택한다",
                         () -> {
                             //given
-                            boardService.createDefaultPopularBoards(member.getEmail());
+                            boardService.createDefaultPopularBoards(member.getUsername());
 
                             ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                                    .boardIds(
-                                            List.of(campusLifeBoard.getId(), anonymousBoard.getId()))
+                                    .username(member.getUsername())
+                                    .boardIds(of(
+                                            campusLifeBoard.getId(),
+                                            anonymousBoard.getId()))
                                     .build();
 
                             //when
-                            boardService.changeBoardVisibility(request, member.getEmail());
+                            boardService.changeBoardVisibility(request);
+
+
                         }),
 
                 dynamicTest("학교생활과, 익명 인기 게시판만 보고싶다고 설정 완료후, 보고싶다고 설정한 인기 게시판 목록을 조회하면"
@@ -502,7 +468,7 @@ public class BoardServiceTest {
                         () -> {
                             //then
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getEmail());
+                                    member.getUsername());
                             assertThat(response.getBoards()).hasSize(2)
                                     .extracting("boardId", "boardName", "boardType")
                                     .containsExactly(
@@ -532,21 +498,22 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         //when
-        return List.of(
+        return of(
                 dynamicTest("인기 게시판 기본값 설정 후, 5개의 인기 게시판 중에서 동아리, 익명, 채용 인기게시판만 보고싶다고 선택한다",
                         () -> {
                             //given
-                            boardService.createDefaultPopularBoards(member.getEmail());
+                            boardService.createDefaultPopularBoards(member.getUsername());
 
                             ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
+                                    .username(member.getUsername())
                                     .boardIds(
-                                            List.of(clubBoard.getId(),
+                                            of(clubBoard.getId(),
                                                     anonymousBoard.getId(),
                                                     employmentBoard.getId()))
                                     .build();
 
                             //when
-                            boardService.changeBoardVisibility(request, member.getEmail());
+                            boardService.changeBoardVisibility(request);
                         }),
 
                 dynamicTest("동아리, 익명, 채용 인기게시판만 보고싶다고 설정 완료후, 보고싶다고 설정한 인기 게시판 목록을 조회하면"
@@ -554,7 +521,7 @@ public class BoardServiceTest {
                         () -> {
                             //then
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getEmail());
+                                    member.getUsername());
                             assertThat(response.getBoards()).hasSize(3)
                                     .extracting("boardId", "boardName", "boardType")
                                     .containsExactly(
@@ -585,20 +552,21 @@ public class BoardServiceTest {
                                     employmentBoard, member);
 
                             EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
+                                    .username(member.getUsername())
                                     .popularBoardIds(
-                                            List.of(anonymousPopularBoard.getId(),
+                                            of(anonymousPopularBoard.getId(),
                                                     clubPopularBoard.getId(),
                                                     employmentPopularBoard.getId()))
                                     .build();
 
-                            boardService.changePopularBoardSequence(request, member.getEmail());
+                            boardService.changePopularBoardSequence(request);
                         }),
 
                 dynamicTest("다시한번 보고싶다고 설정한 인기 게시판 목록을 조회하면 1.익명 2.동아리 3.채용 순서대로 총 3개만 조회된다",
                         () -> {
                             //then
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getEmail());
+                                    member.getUsername());
                             assertThat(response.getBoards()).hasSize(3)
                                     .extracting("boardId", "boardName", "boardType")
                                     .containsExactly(
@@ -627,11 +595,12 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                .boardIds(List.of(999L))
+                .username(member.getUsername())
+                .boardIds(of(999L))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> boardService.changeBoardVisibility(request, member.getEmail()))
+        assertThatThrownBy(() -> boardService.changeBoardVisibility(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시판을 찾을수 없습니다");
     }
@@ -648,31 +617,14 @@ public class BoardServiceTest {
         Board otherBoard = boardFactory.createClubBoard(otherUniversity);
 
         ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                .boardIds(List.of(otherBoard.getId()))
+                .username(member.getUsername())
+                .boardIds(of(otherBoard.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> boardService.changeBoardVisibility(request, member.getEmail()))
+        assertThatThrownBy(() -> boardService.changeBoardVisibility(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
-    }
-
-    @DisplayName("로그인 하지 않은 상태로 보고싶은 인기 게시판을 선택할수 없다")
-    @Test
-    void choosingToSeePopularPostsWithoutLogin() {
-
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board anonymousBoard = boardFactory.createAnonymousBoard(university);
-
-        ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                .boardIds(List.of(anonymousBoard.getId()))
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> boardService.changeBoardVisibility(request, null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
 
     }
 
@@ -684,25 +636,16 @@ public class BoardServiceTest {
         Board anonymousBoard = boardFactory.createAnonymousBoard(university);
 
         ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                .boardIds(List.of(anonymousBoard.getId()))
+                .username("aaaaaaa")
+                .boardIds(of(anonymousBoard.getId()))
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> boardService.changeBoardVisibility(request, "aaaaaa"))
+        assertThatThrownBy(() -> boardService.changeBoardVisibility(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
 
     }
-
-    @DisplayName("홈설정 변경을 위해서, 로그인 하지 않은 상태로 해당 대학에 존재하는 모든 게시판을 조회할수 없다")
-    @Test
-    void listAllExistingBoardsForSettingWithoutLogin() {
-        //when //then
-        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
-
 
     @DisplayName("홈설정 변경을 위해서, 존재하지 않는 회원의 대학에 존재하는 모든 게시판을 조회할수 없다")
     @Test
@@ -721,36 +664,18 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .popularBoardIds(List.of(999L, 111L, 2L))
+                .username(member.getUsername())
+                .popularBoardIds(of(999L, 111L, 2L))
                 .build();
 
         //when //then
         assertThatThrownBy(
-                () -> boardService.changePopularBoardSequence(request, member.getEmail()))
+                () -> boardService.changePopularBoardSequence(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("인기 게시판을 찾을수 없습니다");
+
     }
 
-    @DisplayName("로그인 하지 않은 상태로 보고싶은 인기 게시판의 정렬 순서를 변경할 수 없다")
-    @Test
-    void changePopularBoardSequenceWithoutLogin() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createCampusLifeBoard(university);
-
-        Member member = memberFactory.createStudentMember("member", university);
-        PopularBoard popularBoard = popularBoardFactory.create(member, board, 0);
-
-        EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .popularBoardIds(List.of(popularBoard.getId()))
-                .build();
-
-        //when //then
-        assertThatThrownBy(
-                () -> boardService.changePopularBoardSequence(request, null))
-                .isInstanceOf(AuthenticationFailedException.class)
-                .message().isEqualTo("인증을 하지 못하였습니다. 로그인 후 이용해 주세요");
-    }
 
     @DisplayName("존재하지 않는 회원은 보고싶은 인기 게시판의 정렬 순서를 변경할 수 없다")
     @Test
@@ -763,14 +688,16 @@ public class BoardServiceTest {
         PopularBoard popularBoard = popularBoardFactory.create(member, board, 0);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .popularBoardIds(List.of(popularBoard.getId()))
+                .username("aaaaaaa")
+                .popularBoardIds(of(popularBoard.getId()))
                 .build();
 
         //when //then
         assertThatThrownBy(
-                () -> boardService.changePopularBoardSequence(request, "aaaaaa"))
+                () -> boardService.changePopularBoardSequence(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
+
     }
 
     @DisplayName("다른 회원이 보고싶어하는 인기 게시판의 정렬 순서를 내가 변경할 수 없다")
@@ -785,7 +712,7 @@ public class BoardServiceTest {
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
         Member otherMember = memberFactory.createStudentMember("otherMember", university);
-        boardService.createDefaultPopularBoards(otherMember.getEmail());
+        boardService.createDefaultPopularBoards(otherMember.getUsername());
 
         List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                 otherMember);
@@ -793,8 +720,9 @@ public class BoardServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
+                .username(member.getUsername())
                 .popularBoardIds(
-                        List.of(popularBoards.get(2).getId(),
+                        of(popularBoards.get(2).getId(),
                                 popularBoards.get(1).getId(),
                                 popularBoards.get(4).getId(),
                                 popularBoards.get(0).getId(),
@@ -803,9 +731,10 @@ public class BoardServiceTest {
 
         //when //then
         assertThatThrownBy(
-                () -> boardService.changePopularBoardSequence(request, member.getEmail()))
+                () -> boardService.changePopularBoardSequence(request))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
+
     }
 
     @DisplayName("보고싶어하는 인기 게시판의 정렬 순서 변경 요청시, 존재하는 모든 보고싶은 인기 게시판의 ID 번호를 순서대로 담아서 요청해야 된다"
@@ -822,21 +751,23 @@ public class BoardServiceTest {
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
         Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getEmail());
+        boardService.createDefaultPopularBoards(member.getUsername());
 
         List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                 member);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
+                .username(member.getUsername())
                 .popularBoardIds(
-                        List.of(popularBoards.get(2).getId(),
+                        of(popularBoards.get(2).getId(),
                                 popularBoards.get(3).getId()))
                 .build();
 
         //when //then
         assertThatThrownBy(
-                () -> boardService.changePopularBoardSequence(request, member.getEmail()))
+                () -> boardService.changePopularBoardSequence(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("모든 보고싶은 게시판이 선택되지 않았습니다");
+
     }
 }

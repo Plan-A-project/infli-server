@@ -5,6 +5,7 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostType;
 import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardServiceRequest;
+import com.plana.infli.web.dto.request.post.view.search.SearchPostsByKeywordServiceRequest;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class PostQueryRequest {
     private final String keyword;
 
     @Builder
-    public PostQueryRequest(Post post, Member member, Board board, String page, int size,
+    public PostQueryRequest(Post post, Member member, Board board, Integer page, int size,
             PostType type, PostViewOrder viewOrder, String keyword) {
 
         this.post = post;
@@ -49,7 +50,7 @@ public class PostQueryRequest {
                 .build();
     }
 
-    public static PostQueryRequest myPosts(Member member, String page, int size) {
+    public static PostQueryRequest myPosts(Member member, Integer page, int size) {
         return PostQueryRequest.builder()
                 .member(member)
                 .page(page)
@@ -71,12 +72,12 @@ public class PostQueryRequest {
     }
 
     public static PostQueryRequest searchByKeyword(Member member,
-            String keyword, String page, int size) {
+            SearchPostsByKeywordServiceRequest request, int size) {
 
         return PostQueryRequest.builder()
                 .member(member)
-                .keyword(keyword)
-                .page(page)
+                .keyword(request.getKeyword())
+                .page(request.getPage())
                 .size(size)
                 .build();
     }
@@ -93,12 +94,12 @@ public class PostQueryRequest {
     }
 
 
-    private int convert(String page) {
-        try {
-            return Math.max(1, Integer.parseInt(page));
-        } catch (NumberFormatException e) {
+    private int convert(Integer page) {
+        if (page == null) {
             return 1;
         }
+
+        return Math.max(1, page);
     }
 
     public long getOffset() {

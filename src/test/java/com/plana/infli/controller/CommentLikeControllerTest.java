@@ -347,6 +347,6 @@ public class CommentLikeControllerTest {
 
     private Member findContextMember() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByEmail(email).get();
+        return memberRepository.findByUsername(email).get();
     }
 }

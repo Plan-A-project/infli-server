@@ -1,5 +1,7 @@
 package com.plana.infli.web.dto.request.post.edit.recruitment;
 
+import static com.plana.infli.domain.embedded.post.Recruitment.*;
+
 import com.plana.infli.domain.embedded.post.Recruitment;
 import jakarta.annotation.Nullable;
 import java.time.LocalDateTime;
@@ -9,7 +11,7 @@ import lombok.Getter;
 @Getter
 public class EditRecruitmentPostServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final Long postId;
 
@@ -27,10 +29,11 @@ public class EditRecruitmentPostServiceRequest {
     private final LocalDateTime recruitmentEndDate;
 
     @Builder
-    public EditRecruitmentPostServiceRequest(String email, Long postId, String title, String content,
-            @Nullable String thumbnailUrl, String recruitmentCompanyName,
+    public EditRecruitmentPostServiceRequest(String username, Long postId, String title,
+            String content, @Nullable String thumbnailUrl, String recruitmentCompanyName,
             LocalDateTime recruitmentStartDate, LocalDateTime recruitmentEndDate) {
-        this.email = email;
+
+        this.username = username;
         this.postId = postId;
         this.title = title;
         this.content = content;
@@ -41,7 +44,8 @@ public class EditRecruitmentPostServiceRequest {
     }
 
     public static Recruitment of(EditRecruitmentPostServiceRequest request) {
-        return Recruitment.create(request.recruitmentCompanyName,
+        return create(request.recruitmentCompanyName,
                 request.recruitmentStartDate, request.recruitmentEndDate);
     }
+
 }
