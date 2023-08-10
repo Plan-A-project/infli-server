@@ -124,14 +124,14 @@ public class PostController {
     @Operation(summary = "특정 게시판에 작성된 글 목록 조회")
     public ApiResponse<BoardPostsResponse> loadsPostsByBoard(@AuthenticatedPrincipal String username,
             @PathVariable Long boardId, @Validated LoadPostsByBoardRequest request) {
-
         return ok(postService.loadPostsByBoard(request.toServiceRequest(boardId, username)));
     }
 
     @GetMapping("/posts/search")
     @Operation(summary = "글 키워드로 검색")
     public ApiResponse<SearchedPostsResponse> searchPostsByKeyword(
-            @AuthenticatedPrincipal String username, SearchPostsByKeywordRequest request) {
+            @AuthenticatedPrincipal String username,
+            @Validated SearchPostsByKeywordRequest request) {
 
         return ok(postService.searchPostsByKeyword(request.toServiceRequest(username)));
     }

@@ -17,6 +17,7 @@
 //import com.plana.infli.annotation.MockMvcTest;
 //import com.plana.infli.annotation.WithMockMember;
 //import com.plana.infli.domain.Board;
+//import com.plana.infli.domain.Member;
 //import com.plana.infli.domain.Post;
 //import com.plana.infli.domain.University;
 //import com.plana.infli.factory.BoardFactory;
@@ -107,256 +108,277 @@
 //        universityRepository.deleteAllInBatch();
 //    }
 //
-//    @DisplayName("익명 글 생성")
+////    @DisplayName("익명 글 생성")
+////    @WithMockMember
+////    @Test
+////    void createPost() throws Exception {
+////        //given
+////        University university = universityRepository.findByName("푸단대학교").get();
+////        Board board = boardFactory.createAnonymousBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title("제목입니다")
+////                .content("내용입니다")
+////                .postType(NORMAL)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        Post findPost = postRepository.findAll().get(0);
+////        resultActions.andExpect(status().isCreated())
+////                .andExpect(content().string(valueOf(findPost.getId())))
+////                .andDo(print());
+////
+////        assertThat(findPost.getTitle()).isEqualTo("제목입니다");
+////        assertThat(findPost.getBoard().getId()).isEqualTo(board.getId());
+////        assertThat(findPost.getContent()).isEqualTo("내용입니다");
+////        assertThat(findPost.getPostType()).isEqualTo(NORMAL);
+////    }
+////
+////    @DisplayName("로그인을 하지 않은 상태로 글 작성을 할수 업다")
+////    @Test
+////    void createAnonymousPostWithoutLogin() throws Exception {
+////        //given
+////        University university = universityFactory.createUniversity("푸단대학교");
+////        Board board = boardFactory.createEmploymentBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title("제목입니다")
+////                .content("내용입니다")
+////                .postType(NORMAL)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isUnauthorized())
+////                .andExpect(jsonPath("$.message").value("토큰이 올바르지 않습니다."))
+////                .andDo(print());
+////
+////    }
+////
+////    @DisplayName("글 작성시 게시판 Id 번호는 필수다")
+////    @WithMockMember
+////    @Test
+////    void createPostWithoutBoardId() throws Exception {
+////
+////        //given
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(null)
+////                .title("제목입니다")
+////                .content("내용입니다")
+////                .postType(NORMAL)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isBadRequest())
+////                .andExpect(jsonPath("$.validation.boardId").value("게시판 ID를 입력해주세요"))
+////                .andDo(print());
+////    }
+////
+////    @DisplayName("글 작성시 제목은 필수다")
+////    @WithMockMember
+////    @Test
+////    void createPostWithoutPostId() throws Exception {
+////
+////        //given
+////        University university = universityRepository.findByName("푸단대학교").get();
+////        Board board = boardFactory.createEmploymentBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title(null)
+////                .content("내용입니다")
+////                .postType(NORMAL)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isBadRequest())
+////                .andExpect(jsonPath("$.validation.title").value("글 제목을 입력해주세요"))
+////                .andDo(print());
+////    }
+////
+////    @DisplayName("글 작성시 내용은 필수다")
+////    @WithMockMember
+////    @Test
+////    void createPostWithoutContent() throws Exception {
+////
+////        //given
+////        University university = universityRepository.findByName("푸단대학교").get();
+////        Board board = boardFactory.createEmploymentBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title("제목입니다")
+////                .content(null)
+////                .postType(NORMAL)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isBadRequest())
+////                .andExpect(jsonPath("$.validation.content").value("글 내용을 입력해주세요"))
+////                .andDo(print());
+////    }
+////
+////    @DisplayName("글 작성시 글 종류 선택은 필수다")
+////    @WithMockMember
+////    @Test
+////    void createPostWithoutPostType() throws Exception {
+////
+////        //given
+////        University university = universityRepository.findByName("푸단대학교").get();
+////        Board board = boardFactory.createEmploymentBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title("제목입니다")
+////                .content("내용입니다")
+////                .postType(null)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isBadRequest())
+////                .andExpect(jsonPath("$.validation.postType").value("게시글 종류를 선택해주세요"))
+////                .andDo(print());
+////    }
+////
+////    @DisplayName("모집글 글 작성시 모집 회사 입력은 필수다")
+////    @WithMockMember
+////    @Test
+////    void createRecruitmentPostWithoutCompanyName() throws Exception {
+////
+////        //given
+////        University university = universityRepository.findByName("푸단대학교").get();
+////        Board board = boardFactory.createEmploymentBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title("제목입니다")
+////                .content("내용입니다")
+////                .postType(RECRUITMENT)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isBadRequest())
+////                .andExpect(jsonPath("$['validation']['recruitment.companyName']").value("회사명을 입력해주세요"))
+////                .andDo(print());
+////    }
+//
+////    @DisplayName("모집글 글 작성시 모집 시작일은 필수다")
+////    @WithMockMember
+////    @Test
+////    void createRecruitmentPostWithoutStartDate() throws Exception {
+////
+////        //given
+////        University university = universityRepository.findByName("푸단대학교").get();
+////        Board board = boardFactory.createEmploymentBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title("제목입니다")
+////                .content("내용입니다")
+////                .postType(RECRUITMENT)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isBadRequest())
+////                .andExpect(jsonPath("$['validation']['recruitment.startDate']").value("모집 시작일을 입력해주세요"))
+////                .andDo(print());
+////    }
+////
+////    @DisplayName("모집글 글 작성시 모집 종료일은 필수다")
+////    @WithMockMember
+////    @Test
+////    void createRecruitmentPostWithoutEndDate() throws Exception {
+////
+////        //given
+////        University university = universityRepository.findByName("푸단대학교").get();
+////        Board board = boardFactory.createEmploymentBoard(university);
+////
+////        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
+////                .boardId(board.getId())
+////                .title("제목입니다")
+////                .content("내용입니다")
+////                .postType(RECRUITMENT)
+////                .build());
+////
+////        //when
+////        ResultActions resultActions = mvc.perform(post("/api/posts")
+////                .contentType(APPLICATION_JSON)
+////                .content(request)
+////                .with(csrf()));
+////
+////        //then
+////        resultActions.andExpect(status().isBadRequest())
+////                .andExpect(jsonPath("$['validation']['recruitment.endDate']").value("모집 종료일을 입력해주세요"))
+////                .andDo(print());
+////    }
+//
+//    @DisplayName("특정 게시판의 글 목록 조회")
 //    @WithMockMember
 //    @Test
-//    void createPost() throws Exception {
+//    void loadPostsByBoard() throws Exception {
+//
 //        //given
 //        University university = universityRepository.findByName("푸단대학교").get();
-//        Board board = boardFactory.createAnonymousBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .postType(NORMAL)
-//                .build());
+//        Board board = boardFactory.createActivityBoard(university);
+//        Member member = memberFactory.createStudentMember("a", university);
+//        Post post = postFactory.createPost(member, board, NORMAL);
 //
 //        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
+//        ResultActions resultActions = mvc.perform(
+//                get("/api/posts/{boardId}?type=NORMAL&page=1&order=recent", board.getId())
+//                        .with(csrf()));
 //
 //        //then
-//        Post findPost = postRepository.findAll().get(0);
-//        resultActions.andExpect(status().isCreated())
-//                .andExpect(content().string(valueOf(findPost.getId())))
-//                .andDo(print());
-//
-//        assertThat(findPost.getTitle()).isEqualTo("제목입니다");
-//        assertThat(findPost.getBoard().getId()).isEqualTo(board.getId());
-//        assertThat(findPost.getContent()).isEqualTo("내용입니다");
-//        assertThat(findPost.getPostType()).isEqualTo(NORMAL);
-//    }
-//
-//    @DisplayName("로그인을 하지 않은 상태로 글 작성을 할수 업다")
-//    @Test
-//    void createAnonymousPostWithoutLogin() throws Exception {
-//        //given
-//        University university = universityFactory.createUniversity("푸단대학교");
-//        Board board = boardFactory.createEmploymentBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .postType(NORMAL)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isUnauthorized())
-//                .andExpect(jsonPath("$.message").value("토큰이 올바르지 않습니다."))
-//                .andDo(print());
-//
-//    }
-//
-//    @DisplayName("글 작성시 게시판 Id 번호는 필수다")
-//    @WithMockMember
-//    @Test
-//    void createPostWithoutBoardId() throws Exception {
-//
-//        //given
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(null)
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .postType(NORMAL)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.validation.boardId").value("게시판 ID를 입력해주세요"))
-//                .andDo(print());
-//    }
-//
-//    @DisplayName("글 작성시 제목은 필수다")
-//    @WithMockMember
-//    @Test
-//    void createPostWithoutPostId() throws Exception {
-//
-//        //given
-//        University university = universityRepository.findByName("푸단대학교").get();
-//        Board board = boardFactory.createEmploymentBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title(null)
-//                .content("내용입니다")
-//                .postType(NORMAL)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.validation.title").value("글 제목을 입력해주세요"))
-//                .andDo(print());
-//    }
-//
-//    @DisplayName("글 작성시 내용은 필수다")
-//    @WithMockMember
-//    @Test
-//    void createPostWithoutContent() throws Exception {
-//
-//        //given
-//        University university = universityRepository.findByName("푸단대학교").get();
-//        Board board = boardFactory.createEmploymentBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title("제목입니다")
-//                .content(null)
-//                .postType(NORMAL)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.validation.content").value("글 내용을 입력해주세요"))
-//                .andDo(print());
-//    }
-//
-//    @DisplayName("글 작성시 글 종류 선택은 필수다")
-//    @WithMockMember
-//    @Test
-//    void createPostWithoutPostType() throws Exception {
-//
-//        //given
-//        University university = universityRepository.findByName("푸단대학교").get();
-//        Board board = boardFactory.createEmploymentBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .postType(null)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$.validation.postType").value("게시글 종류를 선택해주세요"))
-//                .andDo(print());
-//    }
-//
-//    @DisplayName("모집글 글 작성시 모집 회사 입력은 필수다")
-//    @WithMockMember
-//    @Test
-//    void createRecruitmentPostWithoutCompanyName() throws Exception {
-//
-//        //given
-//        University university = universityRepository.findByName("푸단대학교").get();
-//        Board board = boardFactory.createEmploymentBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .postType(RECRUITMENT)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$['validation']['recruitment.companyName']").value("회사명을 입력해주세요"))
-//                .andDo(print());
-//    }
-//
-//    @DisplayName("모집글 글 작성시 모집 시작일은 필수다")
-//    @WithMockMember
-//    @Test
-//    void createRecruitmentPostWithoutStartDate() throws Exception {
-//
-//        //given
-//        University university = universityRepository.findByName("푸단대학교").get();
-//        Board board = boardFactory.createEmploymentBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .postType(RECRUITMENT)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$['validation']['recruitment.startDate']").value("모집 시작일을 입력해주세요"))
-//                .andDo(print());
-//    }
-//
-//    @DisplayName("모집글 글 작성시 모집 종료일은 필수다")
-//    @WithMockMember
-//    @Test
-//    void createRecruitmentPostWithoutEndDate() throws Exception {
-//
-//        //given
-//        University university = universityRepository.findByName("푸단대학교").get();
-//        Board board = boardFactory.createEmploymentBoard(university);
-//
-//        String request = om.writeValueAsString(CreateNormalPostRequest.builder()
-//                .boardId(board.getId())
-//                .title("제목입니다")
-//                .content("내용입니다")
-//                .postType(RECRUITMENT)
-//                .build());
-//
-//        //when
-//        ResultActions resultActions = mvc.perform(post("/api/posts")
-//                .contentType(APPLICATION_JSON)
-//                .content(request)
-//                .with(csrf()));
-//
-//        //then
-//        resultActions.andExpect(status().isBadRequest())
-//                .andExpect(jsonPath("$['validation']['recruitment.endDate']").value("모집 종료일을 입력해주세요"))
+//        resultActions.andExpect(status().isOk())
 //                .andDo(print());
 //    }
 //
