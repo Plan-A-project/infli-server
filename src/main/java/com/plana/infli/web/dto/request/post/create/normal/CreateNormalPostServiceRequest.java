@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 public class CreateNormalPostServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final Long boardId;
 
@@ -21,10 +21,10 @@ public class CreateNormalPostServiceRequest {
     private final PostType postType;
 
     @Builder
-    public CreateNormalPostServiceRequest(String email, Long boardId,
+    public CreateNormalPostServiceRequest(String username, Long boardId,
             String title, String content, PostType postType) {
 
-        this.email = email;
+        this.username = username;
         this.boardId = boardId;
         this.title = title;
         this.content = content;

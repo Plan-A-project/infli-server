@@ -6,15 +6,15 @@ import lombok.Getter;
 @Getter
 public class CancelCommentLikeServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final Long postId;
 
     private final Long commentId;
 
     @Builder
-    private CancelCommentLikeServiceRequest(String email, Long postId, Long commentId) {
-        this.email = email;
+    private CancelCommentLikeServiceRequest(String username, Long postId, Long commentId) {
+        this.username = username;
         this.postId = postId;
         this.commentId = commentId;
     }

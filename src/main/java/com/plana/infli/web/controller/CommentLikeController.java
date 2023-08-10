@@ -32,9 +32,9 @@ public class CommentLikeController {
     @ApiResponse(responseCode = "409", description = "이미 해당 댓글에 좋아요를 눌렀음")
     @ApiResponse(responseCode = "401", description = "로그인을 하지 않은 상태")
     public ResponseEntity<Long> createCommentLike(@RequestBody @Validated CreateCommentLikeRequest request,
-            @AuthenticationPrincipal String email) {
+            @AuthenticationPrincipal String username) {
 
-        return ok(commentLikeService.createCommentLike(request.toServiceRequest(email)));
+        return ok(commentLikeService.createCommentLike(request.toServiceRequest(username)));
     }
 
     @DeleteMapping("/comments/likes")

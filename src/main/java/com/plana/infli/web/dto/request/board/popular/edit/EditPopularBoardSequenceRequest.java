@@ -20,8 +20,9 @@ public class EditPopularBoardSequenceRequest {
         this.popularBoardIds = popularBoardIds;
     }
 
-    public EditPopularBoardSequenceServiceRequest toServiceRequest() {
+    public EditPopularBoardSequenceServiceRequest toServiceRequest(String username) {
         return EditPopularBoardSequenceServiceRequest.builder()
+                .username(username)
                 .popularBoardIds(popularBoardIds)
                 .build();
     }

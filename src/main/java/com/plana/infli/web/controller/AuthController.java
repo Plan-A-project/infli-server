@@ -8,7 +8,6 @@ import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberRequest;
 import com.plana.infli.web.dto.response.ApiResponse;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -33,28 +32,24 @@ public class AuthController {
     @PostMapping("/signup/student")
     @ResponseStatus(CREATED)
     public ApiResponse<Long> signupAsStudentMember(@RequestBody @Validated CreateStudentMemberRequest request) {
-
         return created(memberService.signupAsStudentMember(request.toServiceRequest()));
     }
 
     @PostMapping("/signup/company")
     @ResponseStatus(CREATED)
     public ApiResponse<Long> signupAsCompanyMember(@RequestBody @Validated CreateCompanyMemberRequest request) {
-
         return created(memberService.signupAsCompanyMember(request.toServiceRequest()));
     }
 
-    @GetMapping("/validate/email")
-    public ApiResponse<String> validateEmail(@RequestParam @Email String email) {
-
-        memberService.checkEmailDuplicate(email);
+    @GetMapping("/signup/validate/username")
+    public ApiResponse<String> validateUsername(@RequestParam String username) {
+        memberService.checkUsernameDuplicate(username);
         return ok("사용 가능한 이메일 입니다");
     }
 
-    @GetMapping("/validate/nickname")
+    @GetMapping("/signup/validate/nickname")
     public ApiResponse<String> validateNickname(@RequestParam String nickname) {
-
-        memberService.checkNicknameDuplicated(nickname);
+        memberService.checkNicknameDuplicate(nickname);
         return ok("사용 가능한 닉네임 입니다");
     }
 

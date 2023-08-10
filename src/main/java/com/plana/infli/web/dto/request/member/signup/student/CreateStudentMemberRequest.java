@@ -3,7 +3,6 @@ package com.plana.infli.web.dto.request.member.signup.student;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateStudentMemberRequest {
 
-	@Email(message = "이메일 형식이 올바르지 않습니다.")
-	private String email;
+	@Email(message = "아이디를 입력해주세요")
+	private String username;
 
-	@NotBlank(message = "이름은 필수입니다.")
-	private String name;
+	@NotBlank(message = "이름을 입력해주세요")
+	private String realName;
 
 	@NotBlank(message = "비밀번호를 입력해주세요")
 	private String password;
@@ -24,17 +23,17 @@ public class CreateStudentMemberRequest {
 	@NotBlank(message = "비밀번호 확인을 입력해주세요")
 	private String passwordConfirm;
 
-	@NotBlank(message = "닉네임은 필수입니다.")
+	@NotBlank(message = "닉네임을 입력해주세요")
 	private String nickname;
 
 	@NotNull(message = "대학교 번호는 필수입니다.")
 	private Long universityId;
 
 	@Builder
-	public CreateStudentMemberRequest(String email, String name, String password,
+	public CreateStudentMemberRequest(String username, String realName, String password,
 			String passwordConfirm, String nickname, Long universityId) {
-		this.email = email;
-		this.name = name;
+		this.username = username;
+		this.realName = realName;
 		this.password = password;
 		this.passwordConfirm = passwordConfirm;
 		this.nickname = nickname;
@@ -43,12 +42,13 @@ public class CreateStudentMemberRequest {
 
 	public CreateStudentMemberServiceRequest toServiceRequest() {
 		return CreateStudentMemberServiceRequest.builder()
-				.email(email)
-				.name(name)
+				.username(username)
+				.realName(realName)
 				.password(password)
 				.passwordConfirm(passwordConfirm)
 				.nickname(nickname)
 				.universityId(universityId)
 				.build();
 	}
+
 }

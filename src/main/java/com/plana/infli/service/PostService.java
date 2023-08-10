@@ -1,7 +1,6 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.BoardType.*;
-import static com.plana.infli.domain.BoardType.SubBoardType.*;
 import static com.plana.infli.domain.Member.isAdmin;
 import static com.plana.infli.domain.PostType.*;
 import static com.plana.infli.domain.editor.MemberEditor.*;
@@ -11,9 +10,7 @@ import static com.plana.infli.domain.editor.PostEditor.increaseViewCount;
 import static com.plana.infli.domain.embedded.post.Recruitment.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.NotFoundException.*;
-import static com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
-import static com.plana.infli.web.dto.response.post.my.MyPostsResponse.loadMyPostsResponse;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.BoardType;
@@ -73,28 +70,28 @@ public class PostService {
 
     private final S3Uploader s3Uploader;
 
-    public boolean checkMemberAcceptedWritePolicy(String email) {
-        MemberStatus memberStatus = findMemberBy(email).getStatus();
+    public boolean checkMemberAcceptedWritePolicy(String username) {
+        MemberStatus memberStatus = findMemberBy(username).getStatus();
 
         return memberStatus.isPolicyAccepted();
     }
 
     @Transactional
-    public void acceptWritePolicy(String email) {
-        Member member = findMemberBy(email);
+    public void acceptWritePolicy(String username) {
+        Member member = findMemberBy(username);
 
         acceptPolicy(member);
     }
 
-    private Member findMemberBy(String email) {
-        return memberRepository.findActiveMemberBy(email)
+    private Member findMemberBy(String username) {
+        return memberRepository.findActiveMemberBy(username)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
     @Transactional
     public Long createNormalPost(CreateNormalPostServiceRequest request) {
 
-        Member member = findMemberWithUniversityBy(request.getEmail());
+        Member member = findMemberWithUniversityBy(request.getUsername());
 
         Board board = findBoardWithUniversityBy(request.getBoardId());
 
@@ -105,8 +102,8 @@ public class PostService {
         return postRepository.save(post).getId();
     }
 
-    private Member findMemberWithUniversityBy(String email) {
-        return memberRepository.findActiveMemberWithUniversityBy(email)
+    private Member findMemberWithUniversityBy(String username) {
+        return memberRepository.findActiveMemberWithUniversityBy(username)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
@@ -138,7 +135,7 @@ public class PostService {
     }
 
     private void checkWritePermission(Role role, PostType postType, BoardType boardType) {
-        SubBoardType subBoardType = of(boardType, postType);
+        SubBoardType subBoardType = SubBoardType.of(boardType, postType);
 
         if (subBoardType == null) {
             throw new BadRequestException(INVALID_BOARD_TYPE);
@@ -158,20 +155,19 @@ public class PostService {
     @Transactional
     public Long createRecruitmentPost(CreateRecruitmentPostServiceRequest request) {
 
-        Member member = findMemberWithUniversityBy(request.getEmail());
+        Member member = findMemberWithUniversityBy(request.getUsername());
 
         Board board = findBoardWithUniversityBy(request.getBoardId());
 
         validateCreateRecruitmentPostRequest(member, board, request);
 
-        Post post = toEntity(member, board, request, loadRecruitment(request));
+        Post post = request.toEntity(member, board, loadRecruitment(request));
 
         return postRepository.save(post).getId();
     }
 
     //TODO
-    private void validateCreateRecruitmentPostRequest(Member member, Board board,
-            CreateRecruitmentPostServiceRequest request) {
+    private void validateCreateRecruitmentPostRequest(Member member, Board board, CreateRecruitmentPostServiceRequest request) {
 
         if (request.getRecruitmentStartDate().isAfter(request.getRecruitmentEndDate())) {
             throw new BadRequestException(INVALID_RECRUITMENT_DATE);
@@ -200,11 +196,11 @@ public class PostService {
 
 
     @Transactional
-    public PostImageUploadResponse uploadPostImages(Long postId, List<MultipartFile> multipartFiles, String email) {
+    public PostImageUploadResponse uploadPostImages(Long postId, List<MultipartFile> multipartFiles, String username) {
 
         validateImages(multipartFiles);
 
-        Member member = findMemberBy(email);
+        Member member = findMemberBy(username);
 
         Post post = findPostWithMemberBy(postId);
 
@@ -253,7 +249,7 @@ public class PostService {
     @Transactional
     public void editNormalPost(EditNormalPostServiceRequest request) {
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         Post post = findPostWithMemberBy(request.getPostId());
 
@@ -280,7 +276,7 @@ public class PostService {
     @Transactional
     public void editRecruitmentPost(EditRecruitmentPostServiceRequest request) {
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         Post post = findPostWithMemberBy(request.getPostId());
 
@@ -300,9 +296,9 @@ public class PostService {
 
 
     @Transactional
-    public void deletePost(Long postId, String email) {
+    public void deletePost(Long postId, String username) {
 
-        Member member = findMemberBy(email);
+        Member member = findMemberBy(username);
 
         Post post = findPostWithMemberBy(postId);
 
@@ -327,12 +323,11 @@ public class PostService {
 
     @Transactional
     @Retry
-    public SinglePostResponse loadSinglePost(Long postId, String email) {
+    public SinglePostResponse loadSinglePost(Long postId, String username) {
 
-        Member member = findMemberBy(email);
+        Member member = findMemberBy(username);
 
-        Post post = postRepository.findActivePostWithOptimisticLock(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+        Post post = findPostWithLockBy(postId);
 
         checkMemberAndPostIsInSameUniversity(member, post);
 
@@ -343,6 +338,11 @@ public class PostService {
         return postRepository.loadSinglePostResponse(request);
     }
 
+    private Post findPostWithLockBy(Long postId) {
+        return postRepository.findActivePostWithOptimisticLock(postId)
+                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
+    }
+
     private void checkMemberAndPostIsInSameUniversity(Member member, Post post) {
         if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
             throw new AuthorizationFailedException();
@@ -350,15 +350,15 @@ public class PostService {
     }
 
 
-    public MyPostsResponse loadMyPosts(String email, String page) {
+    public MyPostsResponse loadMyPosts(String username, Integer page) {
 
-        Member member = findMemberBy(email);
+        Member member = findMemberBy(username);
 
         PostQueryRequest request = myPosts(member, page, 20);
 
         List<MyPost> posts = postRepository.loadMyPosts(request);
 
-        return loadMyPostsResponse(request, posts);
+        return MyPostsResponse.of(request, posts);
     }
 
 
@@ -371,10 +371,9 @@ public class PostService {
 
     public SearchedPostsResponse searchPostsByKeyword(SearchPostsByKeywordServiceRequest request) {
 
-        Member member = findMemberWithUniversityBy(request.getEmail());
+        Member member = findMemberWithUniversityBy(request.getUsername());
 
-        PostQueryRequest queryRequest = searchByKeyword(member, request.getKeyword(),
-                request.getPage(), 20);
+        PostQueryRequest queryRequest = searchByKeyword(member, request, 20);
 
         List<SearchedPost> posts = postRepository.searchPostByKeyWord(queryRequest);
 
@@ -384,7 +383,7 @@ public class PostService {
 
     public BoardPostsResponse loadPostsByBoard(LoadPostsByBoardServiceRequest request) {
 
-        Member member = findMemberBy(request.getEmail());
+        Member member = findMemberBy(request.getUsername());
 
         Board board = findBoardBy(request.getBoardId());
 
@@ -400,16 +399,16 @@ public class PostService {
     }
 
     private void validateTypes(PostType postType, BoardType boardType) {
-        SubBoardType subBoardType = of(boardType, postType);
+        SubBoardType subBoardType = SubBoardType.of(boardType, postType);
 
         if (subBoardType == null) {
             throw new BadRequestException(INVALID_BOARD_TYPE);
         }
     }
 
-    public boolean checkMemberHasWritePermission(Long boardId, String email, PostType postType) {
+    public boolean checkMemberHasWritePermission(Long boardId, String username, PostType postType) {
 
-        Member member = findMemberWithUniversityBy(email);
+        Member member = findMemberWithUniversityBy(username);
 
         Board board = findBoardWithUniversityBy(boardId);
 
@@ -419,7 +418,4 @@ public class PostService {
 
         return true;
     }
-
-
-
 }

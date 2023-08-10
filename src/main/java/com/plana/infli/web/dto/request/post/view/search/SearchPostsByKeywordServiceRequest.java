@@ -6,15 +6,15 @@ import lombok.Getter;
 @Getter
 public class SearchPostsByKeywordServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final String keyword;
 
-    private final String page;
+    private final Integer page;
 
     @Builder
-    public SearchPostsByKeywordServiceRequest(String email, String keyword, String page) {
-        this.email = email;
+    public SearchPostsByKeywordServiceRequest(String username, String keyword, Integer page) {
+        this.username = username;
         this.keyword = keyword;
         this.page = page;
     }

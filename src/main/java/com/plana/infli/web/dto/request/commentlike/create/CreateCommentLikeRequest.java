@@ -21,9 +21,9 @@ public class CreateCommentLikeRequest {
         this.commentId = commentId;
     }
 
-    public CreateCommentLikeServiceRequest toServiceRequest(String email) {
+    public CreateCommentLikeServiceRequest toServiceRequest(String username) {
         return CreateCommentLikeServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .postId(postId)
                 .commentId(commentId)
                 .build();

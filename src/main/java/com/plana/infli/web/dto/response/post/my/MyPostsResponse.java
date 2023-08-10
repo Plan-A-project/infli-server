@@ -17,7 +17,7 @@ public class MyPostsResponse extends DefaultPostsResponse {
         super(sizeRequest, currentPage, actualSize, posts);
     }
 
-    public static MyPostsResponse loadMyPostsResponse(PostQueryRequest request,
+    public static MyPostsResponse of(PostQueryRequest request,
             List<? extends DefaultPost> posts) {
 
         return MyPostsResponse.builder()

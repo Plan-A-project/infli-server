@@ -13,7 +13,7 @@ import lombok.Getter;
 @Getter
 public class CreateCompanyMemberServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final String password;
 
@@ -24,9 +24,10 @@ public class CreateCompanyMemberServiceRequest {
     private final String companyName;
 
     @Builder
-    private CreateCompanyMemberServiceRequest(String email, String password, String passwordConfirm,
-            Long universityId, String companyName) {
-        this.email = email;
+    private CreateCompanyMemberServiceRequest(String username, String password,
+            String passwordConfirm, Long universityId, String companyName) {
+
+        this.username = username;
         this.password = password;
         this.passwordConfirm = passwordConfirm;
         this.universityId = universityId;
@@ -35,7 +36,7 @@ public class CreateCompanyMemberServiceRequest {
 
     public Member toEntity(Company company, String encodedPassword, University university) {
         return Member.builder()
-                .email(email)
+                .username(username)
                 .encodedPassword(encodedPassword)
                 .name(null)
                 .status(defaultStatus())
@@ -45,5 +46,4 @@ public class CreateCompanyMemberServiceRequest {
                 .profileImage(defaultProfileImage())
                 .build();
     }
-
 }

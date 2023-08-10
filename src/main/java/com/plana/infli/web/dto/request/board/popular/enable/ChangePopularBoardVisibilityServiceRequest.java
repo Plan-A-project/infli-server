@@ -8,10 +8,13 @@ import lombok.Getter;
 @Getter
 public class ChangePopularBoardVisibilityServiceRequest {
 
-    List<Long> boardIds;
+    private final String username;
+
+    private final List<Long> boardIds;
 
     @Builder
-    public ChangePopularBoardVisibilityServiceRequest(List<Long> boardIds) {
+    public ChangePopularBoardVisibilityServiceRequest(String username, List<Long> boardIds) {
+        this.username = username;
         this.boardIds = boardIds;
     }
 }

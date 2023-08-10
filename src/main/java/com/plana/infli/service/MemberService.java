@@ -51,9 +51,10 @@ public class MemberService {
     }
 
     private void validateCreateStudentMemberRequest(CreateStudentMemberServiceRequest request) {
+
         checkPasswordConfirmMatch(request.getPassword(), request.getPasswordConfirm());
-        checkEmailDuplicate(request.getEmail());
-        checkNicknameDuplicated(request.getNickname());
+        checkUsernameDuplicate(request.getUsername());
+        checkNicknameDuplicate(request.getNickname());
     }
 
     private void checkPasswordConfirmMatch(String password, String passwordConfirm) {
@@ -62,14 +63,14 @@ public class MemberService {
         }
     }
 
-    public void checkEmailDuplicate(String email) {
-        if (memberRepository.existsByEmail(email)) {
+    public void checkUsernameDuplicate(String username) {
+        if (memberRepository.existsByUsername(username)) {
             throw new ConflictException(DUPLICATED_EMAIL);
         }
     }
 
-    public void checkNicknameDuplicated(String email) {
-        if (memberRepository.existsByNickname(email)) {
+    public void checkNicknameDuplicate(String nickname) {
+        if (memberRepository.existsByNickname(nickname)) {
             throw new ConflictException(DUPLICATED_NICKNAME);
         }
     }
@@ -101,7 +102,7 @@ public class MemberService {
 
     private void validateCreateCompanyMemberRequest(CreateCompanyMemberServiceRequest request) {
         checkPasswordConfirmMatch(request.getPassword(), request.getPasswordConfirm());
-        checkEmailDuplicate(request.getEmail());
+        checkUsernameDuplicate(request.getUsername());
     }
 
 }

@@ -1,5 +1,8 @@
 package com.plana.infli.security;
 
+import static com.plana.infli.exception.custom.NotFoundException.*;
+
+import com.plana.infli.exception.custom.NotFoundException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -18,11 +21,12 @@ public class UserDetailServiceImpl implements UserDetailsService {
 	private final MemberRepository memberRepository;
 
 	@Override
-	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-		Member member = memberRepository.findByEmail(email)
-			.orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자 입니다."));
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		Member member = memberRepository.findActiveMemberBy(username)
+				.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+
 		return User.builder()
-			.username(member.getEmail())
+			.username(member.getUsername())
 			.password(member.getPassword())
 			.roles(member.getRole().name())
 			.build();

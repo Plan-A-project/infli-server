@@ -34,11 +34,11 @@ public class CreateNormalPostRequest {
     }
 
 
-    public CreateNormalPostServiceRequest toServiceRequest(String email) {
+    public CreateNormalPostServiceRequest toServiceRequest(String username) {
 
         return CreateNormalPostServiceRequest
                 .builder()
-                .email(email)
+                .username(username)
                 .boardId(boardId)
                 .title(title)
                 .content(content)

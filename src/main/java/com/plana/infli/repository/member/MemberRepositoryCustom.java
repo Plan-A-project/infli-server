@@ -5,10 +5,10 @@ import java.util.Optional;
 
 public interface MemberRepositoryCustom {
 
-    Optional<Member> findActiveMemberBy(String email);
+    Optional<Member> findActiveMemberBy(String username);
 
     boolean existsByNickname(String nickname);
 
-    Optional<Member> findActiveMemberWithUniversityBy(String email);
+    Optional<Member> findActiveMemberWithUniversityBy(String username);
 
 }

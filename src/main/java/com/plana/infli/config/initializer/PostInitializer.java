@@ -115,7 +115,7 @@ public class PostInitializer implements CommandLineRunner {
 
     public Member createMember(Board board, Role role, int i) {
         return memberRepository.save(Member.builder()
-                .email(role.name().toLowerCase() + " " + board.getBoardName() + i + "@infli.com")
+                .username(role.name().toLowerCase() + " " + board.getBoardName() + i)
                 .encodedPassword("password")
                 .name(MemberName.of("인플리 " + board.getBoardName() + role.name() + i,
                         "인플리 " + board.getBoardName() + role.name() + i))
@@ -126,7 +126,7 @@ public class PostInitializer implements CommandLineRunner {
 
     public Member createCompanyMember(Board board, Role role, int i) {
         return memberRepository.save(Member.builder()
-                .email(role.name().toLowerCase() + " " + board.getBoardName() + i + "@infli.com")
+                .username(role.name().toLowerCase() + " " + board.getBoardName() + i)
                 .encodedPassword("password")
                 .company(Company.create("카카오 " + i))
                 .role(role)

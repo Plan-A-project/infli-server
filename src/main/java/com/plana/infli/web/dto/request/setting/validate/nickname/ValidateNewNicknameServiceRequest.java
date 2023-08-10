@@ -6,13 +6,13 @@ import lombok.Getter;
 @Getter
 public class ValidateNewNicknameServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final String newNickname;
 
     @Builder
-    public ValidateNewNicknameServiceRequest(String email, String newNickname) {
-        this.email = email;
+    public ValidateNewNicknameServiceRequest(String username, String newNickname) {
+        this.username = username;
         this.newNickname = newNickname;
     }
 }

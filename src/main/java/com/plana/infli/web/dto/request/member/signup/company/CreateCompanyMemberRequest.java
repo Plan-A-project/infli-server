@@ -1,7 +1,6 @@
 package com.plana.infli.web.dto.request.member.signup.company;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -12,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Getter
 public class CreateCompanyMemberRequest {
 
-    @Email(message = "이메일 형식으로 입력해주세요")
-    private String email;
+    @Email(message = "아이디를 입력해주세요")
+    private String username;
 
     @NotEmpty(message = "비밀번호를 입력해주세요")
     private String password;
@@ -28,9 +27,9 @@ public class CreateCompanyMemberRequest {
     private String companyName;
 
     @Builder
-    private CreateCompanyMemberRequest(String email, String password, String passwordConfirm,
+    private CreateCompanyMemberRequest(String username, String password, String passwordConfirm,
             Long universityId, String companyName) {
-        this.email = email;
+        this.username = username;
         this.password = password;
         this.passwordConfirm = passwordConfirm;
         this.universityId = universityId;
@@ -40,11 +39,12 @@ public class CreateCompanyMemberRequest {
 
     public CreateCompanyMemberServiceRequest toServiceRequest() {
         return CreateCompanyMemberServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .password(password)
                 .passwordConfirm(passwordConfirm)
                 .universityId(universityId)
                 .companyName(companyName)
                 .build();
     }
+
 }

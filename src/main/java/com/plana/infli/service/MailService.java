@@ -1,19 +1,21 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.editor.MemberEditor.*;
-import static com.plana.infli.exception.custom.NotFoundException.AUTHENTICATION_NOT_FOUND;
+import static com.plana.infli.domain.EmailAuthentication.*;
 import static com.plana.infli.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
+import static java.time.LocalDateTime.*;
 
 import com.plana.infli.domain.EmailAuthentication;
 import com.plana.infli.domain.Member;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.email_authentication.EmailAuthenticationRepository;
 import com.plana.infli.repository.member.MemberRepository;
-import com.plana.infli.web.dto.request.member.StudentAuthenticationRequest;
+import com.plana.infli.web.dto.request.member.emailAuthentication.SendEmailAuthenticationServiceRequest;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -26,128 +28,154 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class MailService {
 
-  private final JavaMailSender mailSender;
-  private final MemberRepository memberRepository;
-  private final EmailAuthenticationRepository emailAuthenticationRepository;
+    private final MailSender mailSender;
 
-  @Transactional
-  public void sendMemberAuthenticationEmail(String email) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    private final MemberRepository memberRepository;
 
-    EmailAuthentication emailAuthentication = EmailAuthentication.createEmailAuthentication(member);
+    private final EmailAuthenticationRepository emailAuthenticationRepository;
 
-    String subject = "INFLI 회원 인증 메일";
-    String secret = emailAuthentication.getSecret();
-    String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
-        "http://localhost:8080/member/email/auth/" + secret + "\n" +
-        "30분안에 인증하셔야 합니다.";
+    @Transactional
+    public void sendMemberAuthenticationEmail(String email) {
 
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(member.getEmail());
-    message.setSubject(subject);
-    message.setText(text);
 
-    mailSender.send(message);
-
-    emailAuthenticationRepository.save(emailAuthentication);
-  }
-
-  @Transactional
-  public void authenticateMemberEmail(String secret) {
-//    EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
-//            secret)
-//        .orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
+//        Member member = memberRepository.findByEmail(email)
+//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+////
+//        EmailAuthentication emailAuthentication = EmailAuthentication.c(
+//                member);
 //
-//    Member member = emailAuthentication.getMember();
+//        String subject = "INFLI 회원 인증 메일";
+//        String secret = emailAuthentication.getSecret();
+//        String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
+//                "http://localhost:8080/member/email/auth/" + secret + "\n" +
+//                "30분안에 인증하셔야 합니다.";
 //
-//    authenticate(member);
-  }
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(member.getEmail());
+//        message.setSubject(subject);
+//        message.setText(text);
+//
+//        mailSender.send(message);
+//
+//        emailAuthenticationRepository.save(emailAuthentication);
+    }
 
-  @Transactional
-  public void sendStudentAuthenticationEmail(String email, StudentAuthenticationRequest request) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    @Transactional
+    public void authenticateMemberEmail(String secret) {
 
-    String studentEmail = request.getStudentEmail();
 
-    EmailAuthentication emailAuthentication = EmailAuthentication.createStudentAuthentication(
-        member, studentEmail);
+        //    EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
+        //            secret)
+        //        .orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
+        //
+        //    Member member = emailAuthentication.getMember();
+        //
+        //    authenticate(member);
+    }
 
-    String subject = "INFLI 학생 회원 인증 메일";
-    String secret = emailAuthentication.getSecret();
-    String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
-        "http://localhost:8080/member/student/auth/" + secret + "\n" +
-        "30분안에 인증하셔야 합니다.";
+    @Transactional
+    public void sendStudentAuthenticationEmail(SendEmailAuthenticationServiceRequest request) {
 
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(member.getEmail());
-    message.setSubject(subject);
-    message.setText(text);
+        Member member = findMemberBy(request.getEmail());
 
-    mailSender.send(message);
+//        check
+//        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+//
+//        mailSender.send(SimpleMailMessage );
 
-    emailAuthenticationRepository.save(emailAuthentication);
-  }
+//
+//        EmailAuthentication emailAuthentication = create(member, now());
+//
+//        MimeMessage message = mailSender.createMimeMessage();
+//
+////        MimeMessageHelper helper = new MimeMessageHelper(
+//                message,
+//        )
+//        String subject = "INFLI 학생 회원 인증 메일";
+//        String secret = emailAuthentication.getSecret();
+//        String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
+//                "http://localhost:8080/member/student/auth/" + secret + "\n" +
+//                "30분안에 인증하셔야 합니다.";
+//
+//        message.setTo(member.getEmail());
+//        message.setSubject(subject);
+//        message.setText(text);
 
-  @Transactional
-  public void authenticateStudent(String secret) {
-    EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
-            secret)
-        .orElseThrow(() -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
+//        mailSender.send(message);
+//
+//        emailAuthenticationRepository.save(emailAuthentication);
+    }
 
-    Member member = emailAuthentication.getMember();
+    private Member findMemberBy(String email) {
 
-    member.authenticateStudent();
-  }
+        return memberRepository.findActiveMemberBy(email)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
 
-  @Transactional
-  public void authenticateCompany(String secret) {
-    EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
-            secret)
-        .orElseThrow(() -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
+    @Transactional
+    public void authenticateStudent(String secret) {
 
-    Member member = emailAuthentication.getMember();
+        EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
+                        secret)
+                .orElseThrow(
+                        () -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
 
-    String subject = "INFLI 기업 회원 인증";
-    String text = "안녕하세요. INFLI 입니다. 기업 회원 인증이 완료되었습니다.";
+        Member member = emailAuthentication.getMember();
 
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setTo(member.getEmail());
-    message.setSubject(subject);
-    message.setText(text);
+        member.authenticateStudent();
+    }
 
-    mailSender.send(message);
-    member.authenticateCompany();
-  }
+    @Transactional
+    public void authenticateCompany(String secret) {
 
-  @Transactional
-  public void sendCompanyAuthenticationEmail(String email, MultipartFile multipartFile)
-      throws MessagingException, IOException {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
+//        EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
+//                        secret)
+//                .orElseThrow(
+//                        () -> new NotFoundException(NotFoundException.AUTHENTICATION_NOT_FOUND));
+//
+//        Member member = emailAuthentication.getMember();
+//
+//        String subject = "INFLI 기업 회원 인증";
+//        String text = "안녕하세요. INFLI 입니다. 기업 회원 인증이 완료되었습니다.";
+//
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setTo(member.getEmail());
+//        message.setSubject(subject);
+//        message.setText(text);
+//
+//        mailSender.send(message);
+//        member.authenticateCompany();
+    }
 
-    EmailAuthentication emailAuthentication = EmailAuthentication.createStudentAuthentication(
-        member, email);
+    @Transactional
+    public void sendCompanyAuthenticationEmail(String email, MultipartFile multipartFile)
+            throws MessagingException, IOException {
 
-    MimeMessage message = mailSender.createMimeMessage();
+//        Member member = memberRepository.findByEmail(email)
+//                .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
+//
+////        EmailAuthentication emailAuthentication = EmailAuthentication.createStudentAuthentication(
+////                member, email);
+//
+//        MimeMessage message = mailSender.createMimeMessage();
+//
+//        String subject = "INFLI 기업 회원 인증 메일";
+//        String secret = emailAuthentication.getSecret();
+//        String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
+//                "http://localhost:8080/member/company/auth/" + secret + "\n" +
+//                "30일 안에 인증하셔야 합니다.";
+//
+//        MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
+//        helper.setTo("infliauthentication@gmail.com");
+//        helper.setSubject(subject);
+//        helper.setText(text);
+//
+//        // 파일 첨부
+//        helper.addAttachment(multipartFile.getOriginalFilename(), multipartFile);
+//
+//        mailSender.send(message);
+//
+//        emailAuthenticationRepository.save(emailAuthentication);
+    }
 
-    String subject = "INFLI 기업 회원 인증 메일";
-    String secret = emailAuthentication.getSecret();
-    String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
-        "http://localhost:8080/member/company/auth/" + secret + "\n" +
-        "30일 안에 인증하셔야 합니다.";
-
-    MimeMessageHelper helper = new MimeMessageHelper(message, true, "utf-8");
-    helper.setTo("infliauthentication@gmail.com");
-    helper.setSubject(subject);
-    helper.setText(text);
-
-    // 파일 첨부
-    helper.addAttachment(multipartFile.getOriginalFilename(), multipartFile);
-
-    mailSender.send(message);
-
-    emailAuthenticationRepository.save(emailAuthentication);
-  }
 }

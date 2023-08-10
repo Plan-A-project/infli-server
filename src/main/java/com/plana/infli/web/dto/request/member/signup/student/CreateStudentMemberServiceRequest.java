@@ -13,9 +13,9 @@ import lombok.Getter;
 @Getter
 public class CreateStudentMemberServiceRequest {
 
-    private final String email;
+    private final String username;
 
-    private final String name;
+    private final String realName;
 
     private final String password;
 
@@ -26,10 +26,10 @@ public class CreateStudentMemberServiceRequest {
     private final Long universityId;
 
     @Builder
-    private CreateStudentMemberServiceRequest(String email, String name, String password,
+    private CreateStudentMemberServiceRequest(String username, String realName, String password,
             String passwordConfirm, String nickname, Long universityId) {
-        this.email = email;
-        this.name = name;
+        this.username = username;
+        this.realName = realName;
         this.password = password;
         this.passwordConfirm = passwordConfirm;
         this.nickname = nickname;
@@ -38,9 +38,9 @@ public class CreateStudentMemberServiceRequest {
 
     public Member toEntity(University university, String encodedPassword) {
         return Member.builder()
-                .email(email)
+                .username(username)
                 .encodedPassword(encodedPassword)
-                .name(of(name, nickname))
+                .name(of(realName, nickname))
                 .role(UNCERTIFIED_STUDENT)
                 .university(university)
                 .profileImage(defaultProfileImage())

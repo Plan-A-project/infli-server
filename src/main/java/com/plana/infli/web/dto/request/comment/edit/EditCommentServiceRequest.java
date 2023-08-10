@@ -2,12 +2,11 @@ package com.plana.infli.web.dto.request.comment.edit;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public class EditCommentServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final Long postId;
 
@@ -16,10 +15,10 @@ public class EditCommentServiceRequest {
     private final String content;
 
     @Builder
-    private EditCommentServiceRequest(String email, Long postId,
+    private EditCommentServiceRequest(String username, Long postId,
             Long commentId, String content) {
 
-        this.email = email;
+        this.username = username;
         this.postId = postId;
         this.commentId = commentId;
         this.content = content;

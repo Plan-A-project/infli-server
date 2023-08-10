@@ -17,10 +17,12 @@ public class EmailAuthenticationRepositoryImpl implements EmailAuthenticationRep
 
 	@Override
 	public Optional<EmailAuthentication> findAvailableEmailAuthentication(String secret) {
-		return Optional.ofNullable(jpaQueryFactory.selectFrom(emailAuthentication)
-			.where(emailAuthentication.secret.eq(secret)
-				.and(emailAuthentication.expirationTime.after(LocalDateTime.now())))
-			.fetchOne());
+//		return Optional.ofNullable(jpaQueryFactory.selectFrom(emailAuthentication)
+//			.where(emailAuthentication.secret.eq(secret)
+//				.and(emailAuthentication.expirationTime.after(LocalDateTime.now())))
+//			.fetchOne());
+
+		return null;
 
 	}
 }

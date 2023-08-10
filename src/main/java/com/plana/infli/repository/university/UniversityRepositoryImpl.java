@@ -23,10 +23,10 @@ public class UniversityRepositoryImpl implements UniversityRepositoryCustom {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Optional<University> findByMemberEmail(String email) {
+    public Optional<University> findByMemberUsername(String username) {
         return ofNullable(jpaQueryFactory.select(member.university)
                 .from(member)
-                .where(member.email.eq(email))
+                .where(member.username.eq(username))
                 .fetchOne());
     }
 

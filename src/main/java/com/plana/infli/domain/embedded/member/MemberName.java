@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @Embeddable
 public class MemberName {
 
+    // 회원 실명 Ex) 유재석
     private String realName;
 
     private String nickname;

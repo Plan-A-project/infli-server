@@ -23,10 +23,11 @@ public class CancelCommentLikeRequest {
     }
 
 
-    public CancelCommentLikeServiceRequest toServiceRequest(String email) {
+    public CancelCommentLikeServiceRequest toServiceRequest(String username) {
         return CancelCommentLikeServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .postId(postId)
                 .commentId(commentId).build();
     }
+
 }

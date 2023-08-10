@@ -9,6 +9,7 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Role;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.embedded.member.MemberName;
+import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import lombok.Getter;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"dev"})
+@Profile({"dev", "local"})
 @Order(1)
 @Transactional
 @Getter
@@ -33,6 +34,8 @@ public class MemberInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     private final UniversityRepository universityRepository;
+
+    private final CompanyRepository companyRepository;
 
     private University university;
 
@@ -53,7 +56,7 @@ public class MemberInitializer implements CommandLineRunner {
 
     private void createMemberWithRole(Role role) {
         memberRepository.save(Member.builder()
-                .email(role.name().toLowerCase() + "@infli.com")
+                .username(role.name().toLowerCase())
                 .encodedPassword(passwordEncoder.encode("password"))
                 .name(of("인플리 " + role.name(), "인플리 " + role.name()))
                 .role(role)
@@ -62,13 +65,17 @@ public class MemberInitializer implements CommandLineRunner {
     }
 
     private void createCompanyMemberWithRole(Role role) {
+        Company company = Company.create("카카오" + role.name());
+        companyRepository.save(company);
+
         memberRepository.save(Member.builder()
-                .email(role.name().toLowerCase() + "@infli.com")
+                .username(role.name().toLowerCase())
                 .encodedPassword(passwordEncoder.encode("password"))
                 .name(of("인플리 " + role.name(), "인플리 " + role.name()))
-                .company(Company.create("카카오" + role.name()))
+                .company(company)
                 .role(role)
                 .university(university)
                 .build());
+
     }
 }

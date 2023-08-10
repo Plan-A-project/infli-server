@@ -33,7 +33,7 @@ public class JwtManager {
 
 	public String createAccessToken(UserDetails userDetails) {
 		return JWT.create()
-			.withClaim("email", userDetails.getUsername())
+			.withClaim("username", userDetails.getUsername())
 			.withClaim("roles", userDetails.getAuthorities().stream()
 				.map(Object::toString).toList())
 			.withIssuedAt(new Date())
@@ -45,7 +45,7 @@ public class JwtManager {
 	public String createRefreshToken(UserDetails userDetails) {
 		return JWT.create()
 			.withIssuedAt(new Date())
-			.withClaim("email", userDetails.getUsername())
+			.withClaim("username", userDetails.getUsername())
 			.withExpiresAt(
 				new Date(System.currentTimeMillis() + jwtProperties.getRefreshTokenExpirationSeconds() * 1000))
 			.sign(algorithm);
@@ -55,20 +55,20 @@ public class JwtManager {
 		DecodedJWT decodedJwt;
 		decodedJwt = jwtVerifier.verify(accessToken);
 
-		String email = decodedJwt.getClaim("email").asString();
+		String username = decodedJwt.getClaim("username").asString();
 		List<SimpleGrantedAuthority> roles = decodedJwt.getClaim("roles")
 			.asList(String.class)
 			.stream()
 			.map(SimpleGrantedAuthority::new)
 			.toList();
 
-		return UsernamePasswordAuthenticationToken.authenticated(email, null, roles);
+		return UsernamePasswordAuthenticationToken.authenticated(username, null, roles);
 	}
 
 	public String resolveRefreshToken(String refreshToken) {
 		DecodedJWT decodedJwt;
 		decodedJwt = jwtVerifier.verify(refreshToken);
 
-		return decodedJwt.getClaim("email").asString();
+		return decodedJwt.getClaim("username").asString();
 	}
 }

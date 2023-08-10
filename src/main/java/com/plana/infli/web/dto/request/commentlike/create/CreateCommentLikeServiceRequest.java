@@ -6,15 +6,15 @@ import lombok.Getter;
 @Getter
 public class CreateCommentLikeServiceRequest {
 
-    private final String email;
+    private final String username;
 
     private final Long postId;
 
     private final Long commentId;
 
     @Builder
-    public CreateCommentLikeServiceRequest(String email, Long postId, Long commentId) {
-        this.email = email;
+    public CreateCommentLikeServiceRequest(String username, Long postId, Long commentId) {
+        this.username = username;
         this.postId = postId;
         this.commentId = commentId;
     }
