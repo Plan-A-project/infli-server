@@ -106,7 +106,7 @@ public class CommentLikeServiceTest {
 
         Member member = memberFactory.createStudentMember("member", university);
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -134,7 +134,7 @@ public class CommentLikeServiceTest {
                 memberFactory.createStudentMember("commentMember", university), post);
 
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .email("aaaa")
+                .username("aaaa")
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -162,7 +162,7 @@ public class CommentLikeServiceTest {
         memberRepository.delete(member);
 
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -185,7 +185,7 @@ public class CommentLikeServiceTest {
 
         Member member = memberFactory.createStudentMember("member", university);
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(99L)
                 .postId(post.getId())
                 .build();
@@ -213,7 +213,7 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
         commentRepository.delete(comment);
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(99L)
                 .postId(post.getId())
                 .build();
@@ -239,9 +239,9 @@ public class CommentLikeServiceTest {
 
         Member member = memberFactory.createStudentMember("member", university);
 
-        postService.deletePost(post.getId(), postMember.getEmail());
+        postService.deletePost(post.getId(), postMember.getUsername());
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -275,7 +275,7 @@ public class CommentLikeServiceTest {
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -302,7 +302,7 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest.builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -335,7 +335,7 @@ public class CommentLikeServiceTest {
                         () -> {
                             CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                                     .builder()
-                                    .email(member.getEmail())
+                                    .username(member.getUsername())
                                     .commentId(comment.getId())
                                     .postId(post.getId())
                                     .build();
@@ -348,7 +348,7 @@ public class CommentLikeServiceTest {
                             //given
                             CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                                     .builder()
-                                    .email(member.getEmail())
+                                    .username(member.getUsername())
                                     .commentId(comment.getId())
                                     .postId(post.getId())
                                     .build();
@@ -382,7 +382,7 @@ public class CommentLikeServiceTest {
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -414,7 +414,7 @@ public class CommentLikeServiceTest {
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -442,11 +442,11 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
         commentLikeFactory.createCommentLike(member, comment);
 
-        postService.deletePost(post.getId(), postMember.getEmail());
+        postService.deletePost(post.getId(), postMember.getUsername());
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -477,7 +477,7 @@ public class CommentLikeServiceTest {
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .email("aaa")
+                .username("aaa")
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -501,7 +501,7 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createStudentMember("member", university);
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(999L)
                 .postId(post.getId())
                 .build();
@@ -530,7 +530,7 @@ public class CommentLikeServiceTest {
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .email(member.getEmail())
+                .username(member.getUsername())
                 .commentId(comment.getId())
                 .postId(999L)
                 .build();

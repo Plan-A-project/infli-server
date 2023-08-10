@@ -16,7 +16,7 @@ public @interface WithMockMember {
 
     String nickname() default "youngjin";
 
-    String email() default "youngjin@gmail.com";
+    String username() default "youngjin1234";
 
     Role role() default STUDENT;
 

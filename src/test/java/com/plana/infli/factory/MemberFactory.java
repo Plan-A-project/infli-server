@@ -12,6 +12,8 @@ import com.plana.infli.domain.embedded.member.MemberName;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import jakarta.annotation.Nullable;
+import java.util.Random;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -79,7 +81,9 @@ public class MemberFactory {
         Company company = (role == COMPANY || role == UNCERTIFIED_COMPANY) ?
                 companyRepository.save(Company.create("카카오")) : null;
 
-        Member member = of("nickname", university, role, company, true);
+        String nickname = (role == COMPANY || role == UNCERTIFIED_COMPANY) ? null : "nickname";
+
+        Member member = of(nickname, university, role, company, true);
 
         return memberRepository.save(member);
     }
@@ -99,7 +103,7 @@ public class MemberFactory {
         MemberName name = createMemberName(nickname);
 
         return Member.builder()
-                .email(nickname + "@gmail.com")
+                .username("" + new Random().nextInt(1000000))
                 .encodedPassword(encoder.encode("1234"))
                 .name(name)
                 .status(create(false, hasAcceptedPolicy))

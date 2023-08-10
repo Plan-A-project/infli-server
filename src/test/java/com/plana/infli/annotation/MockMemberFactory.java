@@ -22,7 +22,7 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
 
     private final UniversityRepository universityRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder encoder;
 
 
     @Override
@@ -33,7 +33,7 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
                 .build());
 
         Member member = Member.builder()
-                .email(withMockMember.email())
+                .username(withMockMember.username())
                 .encodedPassword("Test1234!")
                 .name(MemberName.of(withMockMember.nickname(), withMockMember.nickname()))
                 .role(withMockMember.role())
@@ -43,7 +43,7 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
         Member savedMember = memberRepository.save(member);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                savedMember.getEmail(), null,
+                savedMember.getUsername(), null,
                 List.of(new SimpleGrantedAuthority(savedMember.getRole().toString())));
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
