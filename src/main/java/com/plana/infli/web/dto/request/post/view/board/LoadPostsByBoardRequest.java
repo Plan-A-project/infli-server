@@ -10,12 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 public class LoadPostsByBoardRequest {
 
     @NotNull(message = "글 종류를 선택해주세요")
     private PostType type;
 
+    @NotNull(message = "페이지 정보를 입력해주세요")
     private Integer page;
 
     @NotNull(message = "최신순, 인기순 여부를 선택해주세요")

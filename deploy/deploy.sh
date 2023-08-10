@@ -66,7 +66,7 @@ else
   EXTERNAL_PORT=${EXTERNAL_PORT_BLUE}
 fi
 
-sleep 3
+sleep 90
 
 echo "Health Check Start!"
 for i in {1..20}
