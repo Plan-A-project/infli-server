@@ -15,6 +15,7 @@ import com.plana.infli.domain.University;
 import com.plana.infli.domain.embedded.member.MemberName;
 import com.plana.infli.domain.embedded.post.Recruitment;
 import com.plana.infli.repository.board.BoardRepository;
+import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
@@ -40,6 +41,8 @@ public class PostInitializer implements CommandLineRunner {
     private final PostRepository postRepository;
 
     private final MemberRepository memberRepository;
+
+    private final CompanyRepository companyRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -116,7 +119,7 @@ public class PostInitializer implements CommandLineRunner {
     public Member createMember(Board board, Role role, int i) {
         return memberRepository.save(Member.builder()
                 .username(role.name().toLowerCase() + " " + board.getBoardName() + i)
-                .encodedPassword("password")
+                .encodedPassword(passwordEncoder.encode("password"))
                 .name(MemberName.of("인플리 " + board.getBoardName() + role.name() + i,
                         "인플리 " + board.getBoardName() + role.name() + i))
                 .role(role)
@@ -125,13 +128,15 @@ public class PostInitializer implements CommandLineRunner {
     }
 
     public Member createCompanyMember(Board board, Role role, int i) {
+        Company company = Company.create("카카오 " + i);
+
+        companyRepository.save(company);
         return memberRepository.save(Member.builder()
                 .username(role.name().toLowerCase() + " " + board.getBoardName() + i)
                 .encodedPassword("password")
-                .company(Company.create("카카오 " + i))
+                .company(company)
                 .role(role)
                 .university(university)
                 .build());
     }
-
 }
