@@ -39,7 +39,7 @@ public class Member extends BaseEntity {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String email;
+    private String username;
 
     private String password;
 
@@ -66,11 +66,11 @@ public class Member extends BaseEntity {
     private MemberProfileImage profileImage;
 
     @Builder
-    public Member(String email, @Nullable MemberName name, String encodedPassword,
+    public Member(String username, @Nullable MemberName name, String encodedPassword,
             @Nullable Company company, Role role, University university,
             MemberProfileImage profileImage, MemberStatus status) {
 
-        this.email = email;
+        this.username = username;
         this.name = name;
         this.password = encodedPassword;
         this.company = company;
@@ -97,9 +97,6 @@ public class Member extends BaseEntity {
         role = STUDENT;
     }
 
-    public void authenticateCompany() {
-        role = COMPANY;
-    }
 
     public MemberEditor.MemberEditorBuilder toEditor() {
         return MemberEditor.builder()
