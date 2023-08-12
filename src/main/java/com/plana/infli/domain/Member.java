@@ -1,7 +1,7 @@
 package com.plana.infli.domain;
 
-import static com.plana.infli.domain.Role.*;
-import static com.plana.infli.domain.Role.ADMIN;
+import static com.plana.infli.domain.type.MemberRole.*;
+import static com.plana.infli.domain.type.MemberRole.ADMIN;
 import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
 import static com.plana.infli.domain.embedded.member.MemberStatus.*;
 import static jakarta.persistence.EnumType.*;
@@ -13,6 +13,7 @@ import com.plana.infli.domain.editor.MemberEditor;
 import com.plana.infli.domain.embedded.member.MemberName;
 import com.plana.infli.domain.embedded.member.MemberProfileImage;
 import com.plana.infli.domain.embedded.member.MemberStatus;
+import com.plana.infli.domain.type.MemberRole;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -41,7 +42,10 @@ public class Member extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
+
+    private String universityEmail;
 
     @Nullable
     @Embedded
@@ -56,7 +60,7 @@ public class Member extends BaseEntity {
     private Company company;
 
     @Enumerated(STRING)
-    private Role role;
+    private MemberRole role;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "university_id")
@@ -67,26 +71,18 @@ public class Member extends BaseEntity {
 
     @Builder
     public Member(String username, @Nullable MemberName name, String encodedPassword,
-            @Nullable Company company, Role role, University university,
+            @Nullable Company company, MemberRole role, University university,
             MemberProfileImage profileImage, MemberStatus status) {
 
         this.username = username;
         this.name = name;
         this.password = encodedPassword;
+        this.universityEmail = null;
         this.company = company;
         this.university = university;
         this.role = role;
-        this.status = resolveStatusOrDefault(status);
-        this.profileImage = resolveImageOrDefault(profileImage);
-    }
-
-
-    private MemberProfileImage resolveImageOrDefault(MemberProfileImage profileImage) {
-        return profileImage != null ? profileImage : defaultProfileImage();
-    }
-
-    private MemberStatus resolveStatusOrDefault(MemberStatus memberStatus) {
-        return memberStatus != null ? memberStatus : defaultStatus();
+        this.status = status != null ? status : defaultStatus();
+        this.profileImage = profileImage != null ? profileImage : defaultProfileImage();
     }
 
     public static boolean isAdmin(Member member) {
@@ -102,6 +98,8 @@ public class Member extends BaseEntity {
         return MemberEditor.builder()
                 .name(name)
                 .password(password)
+                .universityEmail(universityEmail)
+                .role(role)
                 .status(status)
                 .profileImage(profileImage);
     }
@@ -109,6 +107,8 @@ public class Member extends BaseEntity {
     public void edit(MemberEditor memberEditor) {
         this.password = memberEditor.getPassword();
         this.name = memberEditor.getName();
+        this.role = memberEditor.getRole();
+        this.universityEmail = memberEditor.getUniversityEmail();
         this.status = memberEditor.getStatus();
         this.profileImage = memberEditor.getProfileImage();
     }

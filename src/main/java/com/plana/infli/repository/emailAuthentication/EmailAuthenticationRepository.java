@@ -1,4 +1,4 @@
-package com.plana.infli.repository.email_authentication;
+package com.plana.infli.repository.emailAuthentication;
 
 import java.util.Optional;
 
@@ -9,5 +9,5 @@ import com.plana.infli.domain.EmailAuthentication;
 public interface EmailAuthenticationRepository
 	extends JpaRepository<EmailAuthentication, Long>, EmailAuthenticationRepositoryCustom {
 
-	Optional<EmailAuthentication> findBySecret(String secret);
+	Optional<EmailAuthentication> findByCode(String code);
 }

@@ -7,6 +7,7 @@ import static lombok.AccessLevel.*;
 
 import com.plana.infli.domain.editor.PostEditor;
 import com.plana.infli.domain.embedded.post.Recruitment;
+import com.plana.infli.domain.type.PostType;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Builder;

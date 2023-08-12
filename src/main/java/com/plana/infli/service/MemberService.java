@@ -65,7 +65,7 @@ public class MemberService {
 
     public void checkUsernameDuplicate(String username) {
         if (memberRepository.existsByUsername(username)) {
-            throw new ConflictException(DUPLICATED_EMAIL);
+            throw new ConflictException(DUPLICATED_USERNAME);
         }
     }
 

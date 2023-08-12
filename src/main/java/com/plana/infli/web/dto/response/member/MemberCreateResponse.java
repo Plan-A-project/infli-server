@@ -1,7 +1,6 @@
 package com.plana.infli.web.dto.response.member;
 
-import com.plana.infli.domain.Member;
-import com.plana.infli.domain.Role;
+import com.plana.infli.domain.type.MemberRole;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,15 +13,15 @@ public class MemberCreateResponse {
 	private String name;
 	private String nickname;
 
-	private Role role;
+	private MemberRole memberRole;
 
 	private boolean isAuthenticated;
 
-	private MemberCreateResponse(String email, String name, String nickname, Role role, boolean isAuthenticated) {
+	private MemberCreateResponse(String email, String name, String nickname, MemberRole memberRole, boolean isAuthenticated) {
 		this.email = email;
 		this.name = name;
 		this.nickname = nickname;
-		this.role = role;
+		this.memberRole = memberRole;
 		this.isAuthenticated = isAuthenticated;
 	}
 

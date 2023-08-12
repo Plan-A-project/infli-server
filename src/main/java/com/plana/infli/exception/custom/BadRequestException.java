@@ -36,7 +36,6 @@ public class BadRequestException extends DefaultException{
 
     public static final String WRITING_WITHOUT_POLICY_AGREEMENT_NOT_ALLOWED = "글 작성 규칙 동의를 먼저 진행해주세요";
 
-
     public BadRequestException(String message) {
         super(message);
     }

@@ -1,9 +1,5 @@
-package com.plana.infli.domain;
+package com.plana.infli.domain.type;
 
-import static com.plana.infli.domain.Role.*;
-import static java.util.List.*;
-
-import java.util.List;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

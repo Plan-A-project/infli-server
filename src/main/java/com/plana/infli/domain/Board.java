@@ -1,11 +1,12 @@
 package com.plana.infli.domain;
 
-import static com.plana.infli.domain.BoardType.*;
+import static com.plana.infli.domain.type.BoardType.*;
 import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+import com.plana.infli.domain.type.BoardType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;

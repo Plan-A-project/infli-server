@@ -1,14 +1,14 @@
 package com.plana.infli.repository.post;
 
-import static com.plana.infli.domain.BoardType.*;
-import static com.plana.infli.domain.PostType.*;
+import static com.plana.infli.domain.type.BoardType.*;
+import static com.plana.infli.domain.type.PostType.*;
 import static com.plana.infli.domain.QBoard.*;
 import static com.plana.infli.domain.QComment.*;
 import static com.plana.infli.domain.QCompany.*;
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QPost.*;
 import static com.plana.infli.domain.QPostLike.*;
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder.popular;
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
@@ -20,10 +20,9 @@ import static java.util.stream.Collectors.groupingBy;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.type.MemberRole;
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.PostType;
-import com.plana.infli.domain.QCompany;
-import com.plana.infli.domain.Role;
+import com.plana.infli.domain.type.PostType;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import com.plana.infli.web.dto.response.post.QCommentCount;
@@ -41,13 +40,11 @@ import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.DateTimeExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -133,8 +130,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .otherwise(post.member.name.nickname);
     }
 
-    private BooleanExpression postWriterRoleEqual(Role role) {
-        return post.member.role.eq(role);
+    private BooleanExpression postWriterRoleEqual(MemberRole memberRole) {
+        return post.member.role.eq(memberRole);
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {

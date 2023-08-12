@@ -1,6 +1,6 @@
 //package com.plana.infli.controller;
 //
-//import static com.plana.infli.domain.PostType.*;
+//import static com.plana.infli.domain.enumValue.PostType.*;
 //import static java.lang.String.*;
 //import static java.time.LocalDateTime.*;
 //import static org.assertj.core.api.Assertions.*;

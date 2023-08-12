@@ -1,7 +1,7 @@
 package com.plana.infli.web.controller;
 
 import com.plana.infli.service.MailService;
-import com.plana.infli.web.dto.request.member.emailAuthentication.SendEmailAuthenticationRequest;
+import com.plana.infli.web.dto.request.member.email.SendEmailAuthenticationRequest;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import jakarta.mail.MessagingException;
 import java.io.IOException;
@@ -30,11 +30,10 @@ public class MemberController {
 //        return ResponseEntity.ok().build();
 //    }
 
-    @PostMapping("/emails/student")
-    public void sendStudentAuthenticationEmail(@AuthenticatedPrincipal String email,
+    @PostMapping("/emails/students")
+    public void sendStudentAuthenticationEmail(@AuthenticatedPrincipal String username,
             @RequestBody @Validated SendEmailAuthenticationRequest request) {
-        mailService.sendStudentAuthenticationEmail(request.toServiceRequest(email));
-
+        mailService.sendStudentAuthenticationEmail(request.toServiceRequest(username));
     }
 
     @PostMapping("/company/auth/send")

@@ -1,11 +1,11 @@
 package com.plana.infli.web.dto.request.post.create.recruitment;
 
-import static com.plana.infli.domain.PostType.*;
+import static com.plana.infli.domain.type.PostType.*;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.PostType;
+import com.plana.infli.domain.type.PostType;
 import com.plana.infli.domain.embedded.post.Recruitment;
 import java.time.LocalDateTime;
 import lombok.Builder;

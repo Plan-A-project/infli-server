@@ -1,15 +1,15 @@
-package com.plana.infli.domain;
+package com.plana.infli.domain.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum Role {
+public enum MemberRole {
 
-	UNCERTIFIED_STUDENT("미인증 학생 회원"),
+	EMAIL_UNCERTIFIED_STUDENT("미인증 학생 회원"),
 
-	UNCERTIFIED_COMPANY("미인증 기업 회원"),
+	EMAIL_UNCERTIFIED_COMPANY("미인증 기업 회원"),
 
 	STUDENT("학생 회원"),
 
