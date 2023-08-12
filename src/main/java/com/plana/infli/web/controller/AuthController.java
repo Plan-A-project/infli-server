@@ -44,7 +44,7 @@ public class AuthController {
     @GetMapping("/signup/validate/username")
     public ApiResponse<String> validateUsername(@RequestParam String username) {
         memberService.checkUsernameDuplicate(username);
-        return ok("사용 가능한 이메일 입니다");
+        return ok("사용 가능한 아이디 입니다");
     }
 
     @GetMapping("/signup/validate/nickname")

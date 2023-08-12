@@ -1,5 +1,6 @@
 package com.plana.infli.domain;
 
+import static java.util.UUID.*;
 import static lombok.AccessLevel.*;
 
 import jakarta.persistence.Column;
@@ -12,7 +13,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,26 +31,30 @@ public class EmailAuthentication extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    private String secret;
+    private String universityEmail;
 
-    private LocalDateTime secretGeneratedTime;
+    private String code;
+
+    private LocalDateTime codeGeneratedTime;
 
     @Builder
-    public EmailAuthentication(Member member, String secret,
-            LocalDateTime secretGeneratedTime) {
+    private EmailAuthentication(Member member, String universityEmail,
+            String code, LocalDateTime codeGeneratedTime) {
+
+        this.universityEmail = universityEmail;
         this.member = member;
-        this.secret = secret;
-        this.secretGeneratedTime = secretGeneratedTime;
+        this.code = code;
+        this.codeGeneratedTime = codeGeneratedTime;
     }
 
-    public static EmailAuthentication create(Member member, LocalDateTime localDateTime) {
+    public static EmailAuthentication create(Member member,
+            LocalDateTime codeGeneratedTIme, String universityEmail) {
 
-        String secret = UUID.randomUUID().toString();
-
-        return EmailAuthentication.builder()
+        return builder()
                 .member(member)
-                .secret(secret)
-                .secretGeneratedTime(localDateTime)
+                .code(randomUUID().toString())
+                .universityEmail(universityEmail)
+                .codeGeneratedTime(codeGeneratedTIme)
                 .build();
     }
 

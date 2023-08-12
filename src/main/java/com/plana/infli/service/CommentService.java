@@ -3,7 +3,7 @@ package com.plana.infli.service;
 import static com.plana.infli.domain.Board.isAnonymous;
 import static com.plana.infli.domain.Comment.*;
 import static com.plana.infli.domain.Member.isAdmin;
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.domain.editor.CommentEditor.*;
 import static com.plana.infli.domain.editor.PostEditor.increaseCommentMemberCount;
 import static com.plana.infli.exception.custom.BadRequestException.CHILD_COMMENTS_NOT_ALLOWED;
@@ -97,8 +97,8 @@ public class CommentService {
 
 
     private void checkWritePermission(Member member) {
-        if (member.getRole() == UNCERTIFIED_COMPANY ||
-                member.getRole() == UNCERTIFIED_STUDENT) {
+        if (member.getRole() == EMAIL_UNCERTIFIED_COMPANY ||
+                member.getRole() == EMAIL_UNCERTIFIED_STUDENT) {
 
             throw new AuthorizationFailedException();
         }

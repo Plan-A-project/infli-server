@@ -1,8 +1,11 @@
-package com.plana.infli.repository.email_authentication;
+package com.plana.infli.repository.emailAuthentication;
 
 import static com.plana.infli.domain.QEmailAuthentication.*;
+import static com.plana.infli.domain.QMember.*;
+import static java.util.Optional.*;
 
-import java.time.LocalDateTime;
+import com.plana.infli.domain.QEmailAuthentication;
+import com.plana.infli.domain.QMember;
 import java.util.Optional;
 
 import com.plana.infli.domain.EmailAuthentication;
@@ -24,5 +27,13 @@ public class EmailAuthenticationRepositoryImpl implements EmailAuthenticationRep
 
 		return null;
 
+	}
+
+	@Override
+	public Optional<EmailAuthentication> findWithMemberBy(String code) {
+		return ofNullable(jpaQueryFactory.selectFrom(emailAuthentication)
+				.innerJoin(emailAuthentication.member, member).fetchJoin()
+				.where(emailAuthentication.code.eq(code))
+				.fetchOne());
 	}
 }

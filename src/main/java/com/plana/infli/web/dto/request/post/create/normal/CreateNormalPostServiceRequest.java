@@ -3,7 +3,7 @@ package com.plana.infli.web.dto.request.post.create.normal;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.PostType;
+import com.plana.infli.domain.type.PostType;
 import lombok.Builder;
 import lombok.Getter;
 

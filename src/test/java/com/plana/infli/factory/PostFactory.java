@@ -1,17 +1,17 @@
 package com.plana.infli.factory;
 
-import static com.plana.infli.domain.BoardType.*;
-import static com.plana.infli.domain.PostType.*;
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.BoardType.*;
+import static com.plana.infli.domain.type.PostType.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.domain.embedded.post.Recruitment.*;
 import static com.plana.infli.exception.custom.BadRequestException.INVALID_BOARD_TYPE;
 
 import com.plana.infli.domain.Board;
-import com.plana.infli.domain.BoardType;
+import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.PostType;
-import com.plana.infli.domain.Role;
+import com.plana.infli.domain.type.PostType;
+import com.plana.infli.domain.type.MemberRole;
 import com.plana.infli.domain.embedded.post.Recruitment;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
@@ -87,8 +87,8 @@ public class PostFactory {
         }
     }
 
-    private void checkIfInvalidAnnouncement(Role role, BoardType boardType) {
-        if (role != ADMIN && role != STUDENT_COUNCIL) {
+    private void checkIfInvalidAnnouncement(MemberRole memberRole, BoardType boardType) {
+        if (memberRole != ADMIN && memberRole != STUDENT_COUNCIL) {
             throw new AuthorizationFailedException();
         }
 

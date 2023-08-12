@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.request.post.create.normal;
 
-import com.plana.infli.domain.PostType;
+import com.plana.infli.domain.type.PostType;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;

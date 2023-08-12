@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.request.member.signup.company;
 
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
 import static com.plana.infli.domain.embedded.member.MemberStatus.*;
 
@@ -41,7 +41,7 @@ public class CreateCompanyMemberServiceRequest {
                 .name(null)
                 .status(defaultStatus())
                 .company(company)
-                .role(UNCERTIFIED_COMPANY)
+                .role(EMAIL_UNCERTIFIED_COMPANY)
                 .university(university)
                 .profileImage(defaultProfileImage())
                 .build();

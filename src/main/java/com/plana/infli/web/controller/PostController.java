@@ -2,7 +2,7 @@ package com.plana.infli.web.controller;
 
 import static com.plana.infli.web.dto.response.ApiResponse.*;
 
-import com.plana.infli.domain.PostType;
+import com.plana.infli.domain.type.PostType;
 import com.plana.infli.service.PostService;
 import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostRequest;
 import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostRequest;

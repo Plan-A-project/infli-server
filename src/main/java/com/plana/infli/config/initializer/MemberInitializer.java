@@ -1,14 +1,13 @@
 package com.plana.infli.config.initializer;
 
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.domain.University.*;
 import static com.plana.infli.domain.embedded.member.MemberName.*;
 
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.Role;
+import com.plana.infli.domain.type.MemberRole;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.embedded.member.MemberName;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
@@ -48,32 +47,32 @@ public class MemberInitializer implements CommandLineRunner {
         createMemberWithRole(STUDENT);
         createMemberWithRole(ADMIN);
         createMemberWithRole(STUDENT_COUNCIL);
-        createMemberWithRole(UNCERTIFIED_STUDENT);
+        createMemberWithRole(EMAIL_UNCERTIFIED_STUDENT);
         createCompanyMemberWithRole(COMPANY);
-        createCompanyMemberWithRole(UNCERTIFIED_COMPANY);
+        createCompanyMemberWithRole(EMAIL_UNCERTIFIED_COMPANY);
 
     }
 
-    private void createMemberWithRole(Role role) {
+    private void createMemberWithRole(MemberRole memberRole) {
         memberRepository.save(Member.builder()
-                .username(role.name().toLowerCase())
+                .username(memberRole.name().toLowerCase())
                 .encodedPassword(passwordEncoder.encode("password"))
-                .name(of("인플리 " + role.name(), "인플리 " + role.name()))
-                .role(role)
+                .name(of("인플리 " + memberRole.name(), "인플리 " + memberRole.name()))
+                .role(memberRole)
                 .university(university)
                 .build());
     }
 
-    private void createCompanyMemberWithRole(Role role) {
-        Company company = Company.create("카카오" + role.name());
+    private void createCompanyMemberWithRole(MemberRole memberRole) {
+        Company company = Company.create("카카오" + memberRole.name());
         companyRepository.save(company);
 
         memberRepository.save(Member.builder()
-                .username(role.name().toLowerCase())
+                .username(memberRole.name().toLowerCase())
                 .encodedPassword(passwordEncoder.encode("password"))
-                .name(of("인플리 " + role.name(), "인플리 " + role.name()))
+                .name(of("인플리 " + memberRole.name(), "인플리 " + memberRole.name()))
                 .company(company)
-                .role(role)
+                .role(memberRole)
                 .university(university)
                 .build());
 
