@@ -11,6 +11,7 @@ import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.member.MemberRepository;
+import com.plana.infli.service.aop.upload.Upload;
 import com.plana.infli.utils.S3Uploader;
 import com.plana.infli.web.dto.request.setting.modify.nickname.ModifyNicknameServiceRequest;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordServiceRequest;
@@ -122,7 +123,9 @@ public class SettingService {
     }
 
     @Transactional
-    public ChangeProfileImageResponse changeProfileImage(String username, MultipartFile multipartFile) {
+    @Upload
+    public ChangeProfileImageResponse changeProfileImage(String username,
+            MultipartFile multipartFile) {
 
         Member member = findMemberBy(username);
 

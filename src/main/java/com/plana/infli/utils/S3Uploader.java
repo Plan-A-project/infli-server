@@ -33,7 +33,6 @@ public class S3Uploader {
     private String bucket;
 
 
-    @Upload
     public String uploadAsOriginalImage(MultipartFile multipartFile, String directoryPath) {
 
         validateUploadedFile(multipartFile);
@@ -56,7 +55,6 @@ public class S3Uploader {
                 new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
     }
 
-    @Upload
     public String uploadAsThumbnailImage(MultipartFile multipartFile, String directoryPath) {
 
         validateUploadedFile(multipartFile);
@@ -88,12 +86,15 @@ public class S3Uploader {
 
     @SneakyThrows(IOException.class)
     private File generateThumbnailFile(String storeFileName, File uploadedFile) {
+
         File thumbnailFile = new File(storeFileName);
 
+        thumbnailFile.createNewFile();
+
         Thumbnails.of(uploadedFile)
-                .size(64, 64)
-                .outputFormat("jpeg")
+                .size(300, 300)
                 .toFile(thumbnailFile);
+
         return thumbnailFile;
     }
 
