@@ -1,9 +1,9 @@
 package com.plana.infli.config.initializer;
 
 import static com.plana.infli.domain.Board.create;
-import static com.plana.infli.domain.BoardType.*;
+import static com.plana.infli.domain.type.BoardType.*;
 
-import com.plana.infli.domain.BoardType;
+import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.University;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.university.UniversityRepository;

@@ -1,8 +1,6 @@
-package com.plana.infli.web.dto.request.member.emailAuthentication;
+package com.plana.infli.web.dto.request.member.email;
 
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,10 +17,11 @@ public class SendEmailAuthenticationRequest {
         this.universityEmail = universityEmail;
     }
 
-    public SendEmailAuthenticationServiceRequest toServiceRequest(String email) {
+    public SendEmailAuthenticationServiceRequest toServiceRequest(String username) {
         return SendEmailAuthenticationServiceRequest.builder()
-                .email(email)
+                .username(username)
                 .universityEmail(universityEmail)
                 .build();
     }
+
 }

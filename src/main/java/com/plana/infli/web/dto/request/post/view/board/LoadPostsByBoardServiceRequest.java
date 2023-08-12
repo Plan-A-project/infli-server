@@ -1,7 +1,7 @@
 package com.plana.infli.web.dto.request.post.view.board;
 
 
-import com.plana.infli.domain.PostType;
+import com.plana.infli.domain.type.PostType;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import lombok.Builder;
 import lombok.Getter;

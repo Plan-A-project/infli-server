@@ -2,12 +2,11 @@ package com.plana.infli.web.dto.request.post.view.board;
 
 
 
-import com.plana.infli.domain.PostType;
+import com.plana.infli.domain.type.PostType;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public class LoadPostsByBoardRequest {

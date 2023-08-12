@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.request.member.signup.student;
 
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.domain.embedded.member.MemberName.*;
 import static com.plana.infli.domain.embedded.member.MemberProfileImage.defaultProfileImage;
 import static com.plana.infli.domain.embedded.member.MemberStatus.*;
@@ -41,7 +41,7 @@ public class CreateStudentMemberServiceRequest {
                 .username(username)
                 .encodedPassword(encodedPassword)
                 .name(of(realName, nickname))
-                .role(UNCERTIFIED_STUDENT)
+                .role(EMAIL_UNCERTIFIED_STUDENT)
                 .university(university)
                 .profileImage(defaultProfileImage())
                 .status(defaultStatus())

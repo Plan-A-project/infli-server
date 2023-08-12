@@ -1,19 +1,18 @@
 package com.plana.infli.factory;
 
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
 import static com.plana.infli.domain.embedded.member.MemberStatus.*;
 
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.Role;
+import com.plana.infli.domain.type.MemberRole;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.embedded.member.MemberName;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import jakarta.annotation.Nullable;
 import java.util.Random;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -38,7 +37,7 @@ public class MemberFactory {
 
 
     public Member createUncertifiedStudentMember(String nickname, University university) {
-        Member member = of(nickname, university, UNCERTIFIED_STUDENT, null, true);
+        Member member = of(nickname, university, EMAIL_UNCERTIFIED_STUDENT, null, true);
 
         return memberRepository.save(member);
     }
@@ -47,7 +46,7 @@ public class MemberFactory {
 
         Company company = createCompany(companyName);
 
-        Member member = of(null, university, UNCERTIFIED_COMPANY, company, true);
+        Member member = of(null, university, EMAIL_UNCERTIFIED_COMPANY, company, true);
 
         return memberRepository.save(member);
     }
@@ -76,29 +75,29 @@ public class MemberFactory {
         return memberRepository.save(member);
     }
 
-    public Member parameterizedTest_PolicyAccepted(University university, Role role) {
+    public Member parameterizedTest_PolicyAccepted(University university, MemberRole memberRole) {
 
-        Company company = (role == COMPANY || role == UNCERTIFIED_COMPANY) ?
+        Company company = (memberRole == COMPANY || memberRole == EMAIL_UNCERTIFIED_COMPANY) ?
                 companyRepository.save(Company.create("카카오")) : null;
 
-        String nickname = (role == COMPANY || role == UNCERTIFIED_COMPANY) ? null : "nickname";
+        String nickname = (memberRole == COMPANY || memberRole == EMAIL_UNCERTIFIED_COMPANY) ? null : "nickname";
 
-        Member member = of(nickname, university, role, company, true);
+        Member member = of(nickname, university, memberRole, company, true);
 
         return memberRepository.save(member);
     }
 
-    public Member parameterizedTest_PolicyNotAccepted(University university, Role role) {
+    public Member parameterizedTest_PolicyNotAccepted(University university, MemberRole memberRole) {
 
-        Company company = (role == COMPANY || role == UNCERTIFIED_COMPANY) ?
+        Company company = (memberRole == COMPANY || memberRole == EMAIL_UNCERTIFIED_COMPANY) ?
                 companyRepository.save(Company.create("카카오")) : null;
 
-        Member member = of("nickname", university, role, company, false);
+        Member member = of("nickname", university, memberRole, company, false);
 
         return memberRepository.save(member);
     }
 
-    private Member of(String nickname, University university, Role role, Company company, boolean hasAcceptedPolicy) {
+    private Member of(String nickname, University university, MemberRole memberRole, Company company, boolean hasAcceptedPolicy) {
 
         MemberName name = createMemberName(nickname);
 
@@ -108,7 +107,7 @@ public class MemberFactory {
                 .name(name)
                 .status(create(false, hasAcceptedPolicy))
                 .company(company)
-                .role(role)
+                .role(memberRole)
                 .university(university)
                 .profileImage(defaultProfileImage())
                 .build();

@@ -1,10 +1,10 @@
 package com.plana.infli.factory;
 
 import static com.plana.infli.domain.Board.*;
-import static com.plana.infli.domain.BoardType.*;
+import static com.plana.infli.domain.type.BoardType.*;
 
 import com.plana.infli.domain.Board;
-import com.plana.infli.domain.BoardType;
+import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.University;
 import com.plana.infli.repository.board.BoardRepository;
 import org.springframework.beans.factory.annotation.Autowired;

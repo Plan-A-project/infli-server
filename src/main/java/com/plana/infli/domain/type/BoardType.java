@@ -1,6 +1,6 @@
-package com.plana.infli.domain;
+package com.plana.infli.domain.type;
 
-import static com.plana.infli.domain.Role.*;
+import static com.plana.infli.domain.type.MemberRole.*;
 
 import jakarta.annotation.Nullable;
 import java.util.List;
@@ -53,7 +53,7 @@ public enum BoardType {
         ;
         private final String boardName;
 
-        private final List<Role> allowedRoles;
+        private final List<MemberRole> allowedMemberRoles;
 
         @Nullable
         public static SubBoardType of(BoardType boardType, PostType postType) {
@@ -64,8 +64,8 @@ public enum BoardType {
             }
         }
 
-        public boolean hasWritePermission(Role role) {
-            return allowedRoles.contains(role);
+        public boolean hasWritePermission(MemberRole memberRole) {
+            return allowedMemberRoles.contains(memberRole);
         }
     }
 

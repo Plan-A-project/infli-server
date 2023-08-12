@@ -1,8 +1,8 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.BoardType.*;
+import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.Member.isAdmin;
-import static com.plana.infli.domain.PostType.*;
+import static com.plana.infli.domain.type.PostType.*;
 import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.domain.editor.PostEditor.delete;
 import static com.plana.infli.domain.editor.PostEditor.edit;
@@ -13,11 +13,11 @@ import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
 
 import com.plana.infli.domain.Board;
-import com.plana.infli.domain.BoardType;
+import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.type.MemberRole;
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.PostType;
-import com.plana.infli.domain.Role;
+import com.plana.infli.domain.type.PostType;
 import com.plana.infli.domain.embedded.member.MemberStatus;
 import com.plana.infli.domain.embedded.post.Recruitment;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
@@ -134,14 +134,14 @@ public class PostService {
         }
     }
 
-    private void checkWritePermission(Role role, PostType postType, BoardType boardType) {
+    private void checkWritePermission(MemberRole memberRole, PostType postType, BoardType boardType) {
         SubBoardType subBoardType = SubBoardType.of(boardType, postType);
 
         if (subBoardType == null) {
             throw new BadRequestException(INVALID_BOARD_TYPE);
         }
 
-        if (subBoardType.hasWritePermission(role) == false) {
+        if (subBoardType.hasWritePermission(memberRole) == false) {
             throw new AuthorizationFailedException();
         }
     }
