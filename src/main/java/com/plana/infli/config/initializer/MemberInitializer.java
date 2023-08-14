@@ -71,7 +71,7 @@ public class MemberInitializer implements CommandLineRunner {
                 .profileImage(ofDefaultProfileImage())
                 .basicCredentials(ofDefaultWithNickname("student"))
                 .companyCredentials(null)
-                .studentCredentials(ofWithEmail("이영진", "aaa@fudan.com"))
+                .studentCredentials(ofWithEmail(ofDefault("이영진"), "aaa@infli.com"))
                 .build());
 
         acceptPolicy(member);

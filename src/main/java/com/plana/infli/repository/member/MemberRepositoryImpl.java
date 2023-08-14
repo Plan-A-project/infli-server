@@ -2,11 +2,13 @@ package com.plana.infli.repository.member;
 
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QUniversity.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 import static java.util.Optional.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.QMember;
 import com.plana.infli.domain.QUniversity;
+import com.plana.infli.domain.type.VerificationStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +19,11 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public boolean existsByUniversityEmail(String universityEmail) {
+    public boolean existsByVerifiedUniversityEmail(String universityEmail) {
         Integer fetchOne = jpaQueryFactory.selectOne()
                 .from(member)
                 .where(member.studentCredentials.universityEmail.eq(universityEmail))
+                .where(member.verificationStatus.eq(SUCCESS))
                 .fetchFirst();
 
         return fetchOne != null;

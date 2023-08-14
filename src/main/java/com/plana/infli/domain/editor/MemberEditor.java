@@ -2,6 +2,7 @@ package com.plana.infli.domain.editor;
 
 import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
 import static com.plana.infli.domain.embedded.member.BasicCredentials.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.BasicCredentials;
@@ -85,16 +86,29 @@ public class MemberEditor {
                 .build());
     }
 
-//    public static void verifyStudentMemberByEmail(Member member, String universityEmail) {
-//
-//
-//
-//        member.edit(member.toEditor()
-//                .universityEmail(universityEmail)
-//                .role(VERIFIED_STUDENT)
-//                .build());
-//    }
-//
+    public static void setVerificationStatusAsPendingByUniversityEmail(Member member, String universityEmail) {
+
+        StudentCredentials newStudentCredentials = StudentCredentials.ofWithEmail(
+                member.getStudentCredentials(), universityEmail);
+
+        member.edit(member.toEditor()
+                .verificationStatus(PENDING)
+                .studentCredentials(newStudentCredentials)
+                .build());
+    }
+
+    public static void setVerificationStatusAsPendingByCompanyCertificate(Member member,
+            String imageUrl) {
+
+        CompanyCredentials newCompanyCredentials = CompanyCredentials.ofWithEmail(
+                member.getStudentCredentials(), imageUrl);
+
+        member.edit(member.toEditor()
+                .verificationStatus(PENDING)
+                .studentCredentials(newStudentCredentials)
+                .build());
+    }
+
 //    public static void authenticateAsCompany(Member member) {
 //        member.edit(member.toEditor()
 //                .role(VERIFIED_COMPANY)

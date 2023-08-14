@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public interface MemberRepositoryCustom {
 
-    boolean existsByUniversityEmail(String universityEmail);
+    boolean existsByVerifiedUniversityEmail(String universityEmail);
 
     boolean existsByUsername(String username);
 

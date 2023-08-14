@@ -7,14 +7,14 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class SendEmailAuthenticationServiceRequest {
+public class SendVerificationMailServiceRequest {
 
     private final String username;
 
     private final String universityEmail;
 
     @Builder
-    public SendEmailAuthenticationServiceRequest(String username, String universityEmail) {
+    public SendVerificationMailServiceRequest(String username, String universityEmail) {
         this.username = username;
         this.universityEmail = universityEmail;
     }

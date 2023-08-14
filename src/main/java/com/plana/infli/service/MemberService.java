@@ -1,6 +1,9 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.Company.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
+import static com.plana.infli.exception.custom.BadRequestException.COMPANY_VERIFICATION_ALREADY_EXISTS;
+import static com.plana.infli.exception.custom.BadRequestException.IMAGE_IS_EMPTY;
 import static com.plana.infli.exception.custom.BadRequestException.NOT_MATCHES_PASSWORD_CONFIRM;
 import static com.plana.infli.exception.custom.ConflictException.*;
 import static com.plana.infli.exception.custom.NotFoundException.*;
@@ -8,18 +11,22 @@ import static com.plana.infli.exception.custom.NotFoundException.*;
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.editor.MemberEditor;
+import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
+import com.plana.infli.utils.S3Uploader;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberServiceRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +35,9 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder encoder;
+
+    private final S3Uploader s3Uploader;
 
     private final UniversityRepository universityRepository;
 
@@ -47,7 +56,7 @@ public class MemberService {
     }
 
     private String encodePassword(String password) {
-        return passwordEncoder.encode(password);
+        return encoder.encode(password);
     }
 
     private void validateCreateStudentMemberRequest(CreateStudentMemberServiceRequest request) {
@@ -105,4 +114,31 @@ public class MemberService {
         checkUsernameDuplicate(request.getUsername());
     }
 
+    @Transactional
+    public void receiveCompanyCertificateImage(String username, MultipartFile file) {
+//        Member member = findMemberBy(username);
+//
+//        validateReceiveCompanyCertificateRequest(member, file);
+//
+//        String directoryPath = "member/member_" + member.getId() + "/certificate/company";
+//
+//        String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
+//
+//        MemberEditor.
+    }
+
+//    private void validateReceiveCompanyCertificateRequest(Member member, MultipartFile file) {
+//        if (file.isEmpty()) {
+//            throw new BadRequestException(IMAGE_IS_EMPTY);
+//        }
+//
+//        if (member.getVerificationStatus() == SUCCESS) {
+//            throw new BadRequestException(COMPANY_VERIFICATION_ALREADY_EXISTS);
+//        }
+//    }
+//
+//    private Member findMemberBy(String username) {
+//        return memberRepository.findActiveMemberBy(username)
+//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+//    }
 }

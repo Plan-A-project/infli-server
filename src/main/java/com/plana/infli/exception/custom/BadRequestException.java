@@ -36,6 +36,12 @@ public class BadRequestException extends DefaultException{
 
     public static final String WRITING_WITHOUT_POLICY_AGREEMENT_NOT_ALLOWED = "글 작성 규칙 동의를 먼저 진행해주세요";
 
+    public static final String INVALID_UNIVERSITY_EMAIL = "유효하지 않은 대학 이메일 주소 입니다";
+
+    public static final String EMAIL_VERIFICATION_ALREADY_EXISTS = "이미 대학교 이메일 인증을 완료했습니다";
+
+    public static final String COMPANY_VERIFICATION_ALREADY_EXISTS = "기업 인증을 완료했습니다";
+
     public BadRequestException(String message) {
         super(message);
     }
