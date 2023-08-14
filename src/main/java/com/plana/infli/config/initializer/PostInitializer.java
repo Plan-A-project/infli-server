@@ -24,7 +24,6 @@
 //import com.plana.infli.repository.university.UniversityRepository;
 //import java.time.LocalDateTime;
 //import java.util.List;
-//import java.util.UUID;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.boot.CommandLineRunner;
 //import org.springframework.context.annotation.Profile;
@@ -48,7 +47,7 @@
 //
 //    private final CompanyRepository companyRepository;
 //
-//    private final PasswordEncoder passwordEncoder;
+//    private final PasswordEncoder encoder;
 //
 //    private University university;
 //
@@ -123,7 +122,7 @@
 //    public Member createMember(Board board, Role role, int i) {
 //        return memberRepository.save(Member.builder()
 //                .username(role.name().toLowerCase() + " " + board.getBoardName() + i)
-//                .encodedPassword(passwordEncoder.encode("password"))
+//                .encodedPassword(encoder.encode("password"))
 //                .name(MemberName.of("인플리 " + board.getBoardName() + role.name() + i,
 //                        "인플리 " + board.getBoardName() + role.name() + i))
 //                .role(role)

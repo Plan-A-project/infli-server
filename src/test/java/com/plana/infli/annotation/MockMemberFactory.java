@@ -83,7 +83,8 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
 
     private StudentCredentials generateStudentInfo(WithMockMember withMockMember) {
         if (withMockMember.role() == STUDENT) {
-            return StudentCredentials.ofWithEmail("이영진", "aaa@infli.com");
+
+            return ofWithEmail(ofDefault("이영진"), "aaa@infli.com");
         }
         return null;
     }

@@ -7,21 +7,20 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class SendEmailAuthenticationRequest {
+public class SendVerificationMailRequest {
 
     @Email(message = "이메일 형식으로 입력해주세요")
     private String universityEmail;
 
     @Builder
-    public SendEmailAuthenticationRequest(String universityEmail) {
+    public SendVerificationMailRequest(String universityEmail) {
         this.universityEmail = universityEmail;
     }
 
-    public SendEmailAuthenticationServiceRequest toServiceRequest(String username) {
-        return SendEmailAuthenticationServiceRequest.builder()
+    public SendVerificationMailServiceRequest toServiceRequest(String username) {
+        return SendVerificationMailServiceRequest.builder()
                 .username(username)
                 .universityEmail(universityEmail)
                 .build();
     }
-
 }
