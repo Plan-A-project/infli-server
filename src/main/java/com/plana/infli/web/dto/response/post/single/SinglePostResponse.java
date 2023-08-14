@@ -26,7 +26,7 @@ public class SinglePostResponse extends DefaultPost {
     // 익명글인 경우 : null
     // 기업 회원이 작한 글인 경우 : 회사 이름
     // 나머지 경우 : 작성자 닉네임
-    private final String writer;
+    private final String nickname ;
 
     // 글 내용
     private final String content;
@@ -41,7 +41,7 @@ public class SinglePostResponse extends DefaultPost {
     private final RecruitmentInfoResponse recruitment;
 
     @QueryProjection
-    public SinglePostResponse(String boardName, Long boardId, String postType, @Nullable String writer,
+    public SinglePostResponse(String boardName, Long boardId, String postType, @Nullable String nickname,
             Long postId, String title, String content, LocalDateTime createdAt, boolean isMyPost,
             boolean isAdmin, int viewCount, int likeCount, boolean pressedLike,String thumbnailURL, String companyName,
             LocalDateTime recruitmentStartedDate, LocalDateTime recruitmentEndDate) {
@@ -51,7 +51,7 @@ public class SinglePostResponse extends DefaultPost {
         this.boardName = boardName;
         this.boardId = boardId;
         this.postType = postType;
-        this.writer = writer;
+        this.nickname = nickname;
         this.content = content;
         this.isMyPost = isMyPost;
         this.isAdmin = isAdmin;

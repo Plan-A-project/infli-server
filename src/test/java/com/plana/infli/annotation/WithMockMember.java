@@ -1,9 +1,9 @@
 package com.plana.infli.annotation;
 
-import static com.plana.infli.domain.type.MemberRole.*;
+import static com.plana.infli.domain.type.Role.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
-import com.plana.infli.domain.type.MemberRole;
+import com.plana.infli.domain.type.Role;
 import java.lang.annotation.Retention;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.security.test.context.support.TestExecutionEvent;
@@ -17,7 +17,7 @@ public @interface WithMockMember {
 
     String username() default "youngjin1234";
 
-    MemberRole role() default STUDENT;
+    Role role() default STUDENT;
 
     @AliasFor(annotation = WithSecurityContext.class)
     TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_EXECUTION;

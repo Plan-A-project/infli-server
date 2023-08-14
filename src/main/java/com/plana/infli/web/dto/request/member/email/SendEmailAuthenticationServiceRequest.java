@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.request.member.email;
 
-import com.plana.infli.domain.EmailAuthentication;
+import com.plana.infli.domain.EmailVerification;
 import com.plana.infli.domain.Member;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -19,7 +19,7 @@ public class SendEmailAuthenticationServiceRequest {
         this.universityEmail = universityEmail;
     }
 
-    public EmailAuthentication toEntity(Member member, LocalDateTime localDateTime) {
-        return EmailAuthentication.create(member, localDateTime, universityEmail);
+    public EmailVerification toEntity(Member member, LocalDateTime localDateTime) {
+        return EmailVerification.create(member, localDateTime, universityEmail);
     }
 }

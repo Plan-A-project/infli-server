@@ -99,14 +99,14 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -128,10 +128,10 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
                 .username("aaaa")
@@ -153,16 +153,16 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         memberRepository.delete(member);
 
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -181,11 +181,11 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(99L)
                 .postId(post.getId())
                 .build();
@@ -205,15 +205,15 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         commentRepository.delete(comment);
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(99L)
                 .postId(post.getId())
                 .build();
@@ -231,17 +231,17 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
         CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -264,18 +264,18 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -294,15 +294,15 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -321,12 +321,12 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         commentLikeFactory.createCommentLike(member, comment);
 
@@ -335,7 +335,7 @@ public class CommentLikeServiceTest {
                         () -> {
                             CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                                     .builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .commentId(comment.getId())
                                     .postId(post.getId())
                                     .build();
@@ -348,7 +348,7 @@ public class CommentLikeServiceTest {
                             //given
                             CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                                     .builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .commentId(comment.getId())
                                     .postId(post.getId())
                                     .build();
@@ -370,19 +370,19 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         commentLikeFactory.createCommentLike(
-                memberFactory.createStudentMember("likeMember", university), comment);
+                memberFactory.createVerifiedStudentMember("likeMember", university), comment);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -402,19 +402,19 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         commentLikeFactory.createCommentLike(member, comment);
 
         commentRepository.delete(comment);
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -433,20 +433,20 @@ public class CommentLikeServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         commentLikeFactory.createCommentLike(member, comment);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(post.getId())
                 .build();
@@ -467,12 +467,12 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         commentLikeFactory.createCommentLike(member, comment);
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
@@ -496,12 +496,12 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(999L)
                 .postId(post.getId())
                 .build();
@@ -520,17 +520,17 @@ public class CommentLikeServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         commentLikeFactory.createCommentLike(member, comment);
 
         CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
                 .builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .commentId(comment.getId())
                 .postId(999L)
                 .build();

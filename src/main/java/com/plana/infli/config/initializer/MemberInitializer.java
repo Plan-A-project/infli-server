@@ -1,13 +1,21 @@
 package com.plana.infli.config.initializer;
 
-import static com.plana.infli.domain.type.MemberRole.*;
+import static com.plana.infli.domain.editor.MemberEditor.*;
+import static com.plana.infli.domain.embedded.member.BasicCredentials.*;
+import static com.plana.infli.domain.embedded.member.ProfileImage.*;
+import static com.plana.infli.domain.embedded.member.StudentCredentials.*;
+import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.domain.University.*;
-import static com.plana.infli.domain.embedded.member.MemberName.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.type.MemberRole;
+import com.plana.infli.domain.embedded.member.CompanyCredentials;
+import com.plana.infli.domain.embedded.member.LoginCredentials;
+import com.plana.infli.domain.embedded.member.StudentCredentials;
+import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
@@ -30,7 +38,7 @@ public class MemberInitializer implements CommandLineRunner {
 
     private final MemberRepository memberRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder encoder;
 
     private final UniversityRepository universityRepository;
 
@@ -44,37 +52,97 @@ public class MemberInitializer implements CommandLineRunner {
         university = universityRepository.findByName("푸단대학교")
                 .orElseGet(() -> universityRepository.save(create("푸단대학교")));
 
-        createMemberWithRole(STUDENT);
+        createVerifiedStudentMember();
+        createUnVerifiedStudentMember();
+
         createMemberWithRole(ADMIN);
         createMemberWithRole(STUDENT_COUNCIL);
-        createMemberWithRole(EMAIL_UNCERTIFIED_STUDENT);
-        createCompanyMemberWithRole(COMPANY);
-        createCompanyMemberWithRole(EMAIL_UNCERTIFIED_COMPANY);
 
+        createVerifiedCompanyMember();
+        createUnVerifiedCompanyMember();
     }
 
-    private void createMemberWithRole(MemberRole memberRole) {
-        memberRepository.save(Member.builder()
-                .username(memberRole.name().toLowerCase())
-                .encodedPassword(passwordEncoder.encode("password"))
-                .name(of("인플리 " + memberRole.name(), "인플리 " + memberRole.name()))
-                .role(memberRole)
+    private void createVerifiedStudentMember() {
+        Member member = memberRepository.save(Member.builder()
                 .university(university)
+                .role(STUDENT)
+                .verificationStatus(SUCCESS)
+                .loginCredentials(LoginCredentials.of("student", encoder.encode("password")))
+                .profileImage(ofDefaultProfileImage())
+                .basicCredentials(ofDefaultWithNickname("student"))
+                .companyCredentials(null)
+                .studentCredentials(ofWithEmail("이영진", "aaa@fudan.com"))
                 .build());
+
+        acceptPolicy(member);
     }
 
-    private void createCompanyMemberWithRole(MemberRole memberRole) {
-        Company company = Company.create("카카오" + memberRole.name());
+    private void createUnVerifiedStudentMember() {
+        Member member = memberRepository.save(Member.builder()
+                .university(university)
+                .role(STUDENT)
+                .verificationStatus(NOT_STARTED)
+                .loginCredentials(
+                        LoginCredentials.of("unverifiedStudent", encoder.encode("password")))
+                .profileImage(ofDefaultProfileImage())
+                .basicCredentials(ofDefaultWithNickname("unverifiedStudent"))
+                .companyCredentials(null)
+                .studentCredentials(ofDefault("이영진"))
+                .build());
+
+        acceptPolicy(member);
+    }
+
+    private void createMemberWithRole(Role role) {
+        Member member = memberRepository.save(Member.builder()
+                .university(university)
+                .role(role)
+                .verificationStatus(SUCCESS)
+                .loginCredentials(
+                        LoginCredentials.of(role.name().toLowerCase(), encoder.encode("password")))
+                .profileImage(ofDefaultProfileImage())
+                .basicCredentials(ofDefaultWithNickname(role.name().toLowerCase()))
+                .companyCredentials(null)
+                .studentCredentials(null)
+                .build());
+
+        acceptPolicy(member);
+    }
+
+    private void createVerifiedCompanyMember() {
+        Company company = Company.create("카카오");
         companyRepository.save(company);
 
-        memberRepository.save(Member.builder()
-                .username(memberRole.name().toLowerCase())
-                .encodedPassword(passwordEncoder.encode("password"))
-                .name(of("인플리 " + memberRole.name(), "인플리 " + memberRole.name()))
-                .company(company)
-                .role(memberRole)
+        Member member = memberRepository.save(Member.builder()
                 .university(university)
+                .role(COMPANY)
+                .verificationStatus(SUCCESS)
+                .loginCredentials(LoginCredentials.of("company", encoder.encode("password")))
+                .profileImage(ofDefaultProfileImage())
+                .basicCredentials(ofDefaultWithNickname("company"))
+                .companyCredentials(CompanyCredentials.ofWithCertificate(company, "aaa.com"))
+                .studentCredentials(null)
                 .build());
 
+        acceptPolicy(member);
+    }
+
+    private void createUnVerifiedCompanyMember() {
+        Company company = Company.create("삼성전자");
+        companyRepository.save(company);
+
+        Member member = memberRepository.save(Member.builder()
+                .university(university)
+                .role(COMPANY)
+                .verificationStatus(NOT_STARTED)
+                .loginCredentials(
+                        LoginCredentials.of("unverifiedCompany", encoder.encode("password")))
+                .profileImage(ofDefaultProfileImage())
+                .basicCredentials(ofDefaultWithNickname("unverifiedCompany"))
+                .companyCredentials(CompanyCredentials.ofDefault(company))
+                .studentCredentials(null)
+                .build());
+
+        acceptPolicy(member);
     }
 }

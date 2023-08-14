@@ -119,12 +119,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postmember", university), board);
+                memberFactory.createVerifiedStudentMember("postmember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
@@ -149,7 +149,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postmember", university), board);
+                memberFactory.createVerifiedStudentMember("postmember", university), board);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .username("aaa")
@@ -176,13 +176,13 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postmember", university), board);
+                memberFactory.createVerifiedStudentMember("postmember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         memberRepository.delete(member);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
@@ -203,12 +203,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postmember", university), board);
+                memberFactory.createVerifiedStudentMember("postmember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("하".repeat(500))
                 .parentCommentId(null)
@@ -228,12 +228,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postmember", university), board);
+                memberFactory.createVerifiedStudentMember("postmember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("하".repeat(501))
                 .parentCommentId(null)
@@ -253,10 +253,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(999L)
                 .content("댓글입니다")
                 .parentCommentId(null)
@@ -275,14 +275,15 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postmember = memberFactory.createStudentMember("postmember", university);
+        Member postmember = memberFactory.createVerifiedStudentMember("postmember", university);
         Post post = postFactory.createNormalPost(postmember, board);
 
-        postService.deletePost(post.getId(), postmember.getUsername());
-        Member member = memberFactory.createStudentMember("nickname", university);
+        postService.deletePost(post.getId(), postmember.getLoginCredentials().getUsername());
+
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
@@ -303,12 +304,12 @@ class CommentServiceTest {
         Board board = boardFactory.createAnonymousBoard(university);
 
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
@@ -327,14 +328,14 @@ class CommentServiceTest {
         University otherUniversity = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(otherUniversity);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", otherUniversity), board);
+                memberFactory.createVerifiedStudentMember("postMember", otherUniversity), board);
 
         University myUniversity = universityFactory.createUniversity("서울대학교");
 
-        Member member = memberFactory.createStudentMember("nickname", myUniversity);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", myUniversity);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(null)
@@ -352,12 +353,12 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
-        Member member1 = memberFactory.createStudentMember("nickname1", university);
-        Member member2 = memberFactory.createStudentMember("nickname2", university);
-        Member member3 = memberFactory.createStudentMember("nickname3", university);
+        Member member1 = memberFactory.createVerifiedStudentMember("nickname1", university);
+        Member member2 = memberFactory.createVerifiedStudentMember("nickname2", university);
+        Member member3 = memberFactory.createVerifiedStudentMember("nickname3", university);
 
         //when
         return List.of(
@@ -365,7 +366,7 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member1.getUsername())
+                                    .username(member1.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
@@ -382,7 +383,7 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member2.getUsername())
+                                    .username(member2.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
@@ -397,7 +398,7 @@ class CommentServiceTest {
                 dynamicTest("글 작성자가 자신의 글에 댓글을 단 경우, 식별자 번호 0번을 부여받는다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(postMember.getUsername())
+                                    .username(postMember.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("글 작성자가 남기는 댓글")
                                     .parentCommentId(null)
@@ -412,7 +413,7 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member3.getUsername())
+                                    .username(member3.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
@@ -428,7 +429,7 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member2.getUsername())
+                                    .username(member2.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
@@ -445,7 +446,7 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member1.getUsername())
+                                    .username(member1.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
@@ -467,7 +468,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("서울대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         int threadCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(32);
@@ -478,11 +479,11 @@ class CommentServiceTest {
             executorService.submit(() -> {
 
                 try {
-                    Member member = memberFactory.createStudentMember("" + finalI,
+                    Member member = memberFactory.createVerifiedStudentMember("" + finalI,
                             university);
 
                     commentService.createComment(CreateCommentServiceRequest.builder()
-                            .username(member.getUsername())
+                            .username(member.getLoginCredentials().getUsername())
                             .content("댓글")
                             .parentCommentId(null)
                             .postId(post.getId())
@@ -515,14 +516,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("대댓글입니다")
                 .parentCommentId(parentComment.getId())
@@ -549,10 +550,10 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
                 .username("aaa")
@@ -576,15 +577,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("하".repeat(500))
                 .parentCommentId(parentComment.getId())
@@ -605,15 +606,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("하".repeat(501))
                 .parentCommentId(parentComment.getId())
@@ -633,18 +634,18 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
@@ -663,12 +664,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(999L)
@@ -688,17 +689,17 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         commentRepository.delete(parentComment);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
@@ -718,19 +719,19 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentComment", university), post);
+                memberFactory.createVerifiedStudentMember("parentComment", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childComment", university), post, parentComment);
+                memberFactory.createVerifiedStudentMember("childComment", university), post, parentComment);
 
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(childComment.getId())
@@ -750,18 +751,18 @@ class CommentServiceTest {
         University otherUniversity = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(otherUniversity);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", otherUniversity), board);
+                memberFactory.createVerifiedStudentMember("postMember", otherUniversity), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", otherUniversity), post);
+                memberFactory.createVerifiedStudentMember("commentMember", otherUniversity), post);
 
 
         University myUniversity = universityFactory.createUniversity("서울대학교");
 
-        Member member = memberFactory.createStudentMember("nickname", myUniversity);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", myUniversity);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
@@ -781,15 +782,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
 
         CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .content("댓글입니다")
                 .parentCommentId(parentComment.getId())
@@ -815,14 +816,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -846,9 +847,9 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         //when
         return List.of(
@@ -856,7 +857,7 @@ class CommentServiceTest {
                         () -> {
                             //given
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("댓글입니다")
                                     .parentCommentId(null)
@@ -871,7 +872,7 @@ class CommentServiceTest {
                             Comment comment = commentRepository.findAll().get(0);
 
                             EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .commentId(comment.getId())
                                     .content("수정된 댓글입니다")
@@ -895,14 +896,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("하".repeat(500))
@@ -923,14 +924,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("하".repeat(501))
@@ -951,10 +952,10 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username("aaa")
@@ -977,16 +978,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         memberRepository.delete(member);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -1006,16 +1007,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member commentMember = memberFactory.createStudentMember("commentMember", university);
+        Member commentMember = memberFactory.createVerifiedStudentMember("commentMember", university);
 
         Comment comment = commentFactory.createComment(commentMember, post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -1035,12 +1036,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(999L)
                 .content("수정된 댓글입니다")
@@ -1060,16 +1061,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         commentRepository.delete(comment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -1089,15 +1090,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member commentMember = memberFactory.createStudentMember("commentMember", university);
+        Member commentMember = memberFactory.createVerifiedStudentMember("commentMember", university);
         Comment comment = commentFactory.createComment(commentMember, post);
         commentRepository.delete(comment);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -1117,15 +1118,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post anotherPost = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember1", university), board);
+                memberFactory.createVerifiedStudentMember("postMember1", university), board);
 
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember2", university), board);
-        Member member = memberFactory.createStudentMember("nickname", university);
+                memberFactory.createVerifiedStudentMember("postMember2", university), board);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(anotherPost.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -1144,14 +1145,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(999L)
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -1170,17 +1171,17 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
@@ -1203,17 +1204,17 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
@@ -1238,13 +1239,13 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childMember", university), post, parentComment);
+                memberFactory.createVerifiedStudentMember("childMember", university), post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username("aaa")
@@ -1267,17 +1268,17 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("하".repeat(500))
@@ -1298,18 +1299,18 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(
                 member, post, parentComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("하".repeat(501))
@@ -1329,12 +1330,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(
                 member, post, parentComment);
@@ -1342,7 +1343,7 @@ class CommentServiceTest {
         memberRepository.delete(member);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
@@ -1362,18 +1363,18 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post, parentComment);
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post, parentComment);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
@@ -1394,12 +1395,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(
                 member, post, parentComment);
@@ -1407,7 +1408,7 @@ class CommentServiceTest {
         commentRepository.delete(childComment);
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
@@ -1427,20 +1428,20 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parenCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parenCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post,
                 parentComment);
 
         commentRepository.delete(childComment);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
@@ -1461,20 +1462,20 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
@@ -1497,14 +1498,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         //when
-        commentService.deleteComment(member.getUsername(), comment.getId());
+        commentService.deleteComment(member.getLoginCredentials().getUsername(), comment.getId());
 
         //then
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
@@ -1520,10 +1521,10 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
 
         //when //then
@@ -1541,11 +1542,11 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
 
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
 
         //when //then
-        assertThatThrownBy(() -> commentService.deleteComment(member.getUsername(), 999L))
+        assertThatThrownBy(() -> commentService.deleteComment(member.getLoginCredentials().getUsername(), 999L))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
@@ -1558,9 +1559,9 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
@@ -1568,7 +1569,7 @@ class CommentServiceTest {
 
 
         //when //then
-        assertThatThrownBy(() -> commentService.deleteComment(member.getUsername(), comment.getId()))
+        assertThatThrownBy(() -> commentService.deleteComment(member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
@@ -1581,15 +1582,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         //when //then
-        assertThatThrownBy(() -> commentService.deleteComment(member.getUsername(), comment.getId()))
+        assertThatThrownBy(() -> commentService.deleteComment(member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
 
@@ -1602,16 +1603,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member admin = memberFactory.createAdminMember(university);
 
 
         //when
-        commentService.deleteComment(admin.getUsername(), comment.getId());
+        commentService.deleteComment(admin.getLoginCredentials().getUsername(), comment.getId());
 
         // then
         assertThat(commentRepository.findAllActiveCommentCount()).isZero();
@@ -1627,19 +1628,19 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(
                 member, post, parentComment);
 
 
         //when
-        commentService.deleteComment(member.getUsername(), childComment.getId());
+        commentService.deleteComment(member.getLoginCredentials().getUsername(), childComment.getId());
 
         //then
         Comment deletedComment = commentRepository.findById(childComment.getId()).get();
@@ -1653,13 +1654,13 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post,
                 parentComment);
 
 
@@ -1679,12 +1680,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment childComment = commentFactory.createChildComment(member, post, parentComment);
 
@@ -1692,7 +1693,7 @@ class CommentServiceTest {
 
         //when //then
         assertThatThrownBy(
-                () -> commentService.deleteComment(member.getUsername(), childComment.getId()))
+                () -> commentService.deleteComment(member.getLoginCredentials().getUsername(), childComment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
@@ -1705,20 +1706,20 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post,
                 parentComment);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         //when //then
         assertThatThrownBy(
-                () -> commentService.deleteComment(member.getUsername(), childComment.getId()))
+                () -> commentService.deleteComment(member.getLoginCredentials().getUsername(), childComment.getId()))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
 
@@ -1731,19 +1732,19 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post,
                 parentComment);
 
         Member admin = memberFactory.createAdminMember(university);
 
         //when
-        commentService.deleteComment(admin.getUsername(), childComment.getId());
+        commentService.deleteComment(admin.getLoginCredentials().getUsername(), childComment.getId());
 
         // then
         Comment findComment = commentRepository.findById(childComment.getId()).get();
@@ -1761,17 +1762,17 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member1 = memberFactory.createStudentMember("nickname1", university);
-        Member member2 = memberFactory.createStudentMember("nickname2", university);
-        Member member3 = memberFactory.createStudentMember("nickname3", university);
+        Member member1 = memberFactory.createVerifiedStudentMember("nickname1", university);
+        Member member2 = memberFactory.createVerifiedStudentMember("nickname2", university);
+        Member member3 = memberFactory.createVerifiedStudentMember("nickname3", university);
 
         return List.of(
                 dynamicTest("member1이 댓글을 작성한다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member1.getUsername())
+                                    .username(member1.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("1번 댓글입니다")
                                     .parentCommentId(null)
@@ -1782,7 +1783,7 @@ class CommentServiceTest {
                 dynamicTest("member2가 댓글을 작성한다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member2.getUsername())
+                                    .username(member2.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("2번 댓글입니다")
                                     .parentCommentId(null)
@@ -1793,7 +1794,7 @@ class CommentServiceTest {
                 dynamicTest("member3이 댓글을 작성한다",
                         () -> {
                             CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                                    .username(member3.getUsername())
+                                    .username(member3.getLoginCredentials().getUsername())
                                     .postId(post.getId())
                                     .content("3번 댓글입니다")
                                     .parentCommentId(null)
@@ -1807,7 +1808,7 @@ class CommentServiceTest {
                             //given
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member1.getUsername())
+                                    .username(member1.getLoginCredentials().getUsername())
                                     .id(post.getId())
                                     .page(1)
                                     .build();
@@ -1843,12 +1844,12 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -1867,16 +1868,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createClubBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member1 = memberFactory.createStudentMember("nickname1", university);
-        Member member2 = memberFactory.createStudentMember("nickname2", university);
+        Member member1 = memberFactory.createVerifiedStudentMember("nickname1", university);
+        Member member2 = memberFactory.createVerifiedStudentMember("nickname2", university);
 
         Comment comment1 = commentFactory.createComment(member1, post);
         Comment comment2 = commentFactory.createComment(member2, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member1.getUsername())
+                .username(member1.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -1887,11 +1888,12 @@ class CommentServiceTest {
         //then
         assertThat(response.getComments()).hasSize(2)
                 .extracting("nickname", "profileImageUrl").containsExactlyInAnyOrder(
-                        tuple(member1.getName().getNickname(),
+                        tuple(member1.getBasicCredentials().getNickname(),
                                 member1.getProfileImage().getThumbnailUrl()),
-                        tuple(member2.getName().getNickname(),
+                        tuple(member2.getBasicCredentials().getNickname(),
                                 member2.getProfileImage().getThumbnailUrl())
                 );
+
     }
 
     @DisplayName("페이징 처리시 한페이지당 댓글 100개씩 조회된다")
@@ -1901,16 +1903,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 101).forEach(i -> {
             commentFactory.createComment(member, post);
         });
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -1931,14 +1933,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -1958,15 +1960,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -1986,17 +1988,17 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2016,15 +2018,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2044,16 +2046,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member commentMember = memberFactory.createStudentMember("commentMember", university);
+        Member commentMember = memberFactory.createVerifiedStudentMember("commentMember", university);
         Comment comment = commentFactory.createComment(commentMember, post);
 
         return List.of(
                 dynamicTest("댓글이 수정된다",
                         () -> {
                             EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                                    .username(commentMember.getUsername())
+                                    .username(commentMember.getLoginCredentials().getUsername())
                                     .commentId(comment.getId())
                                     .postId(post.getId())
                                     .content("수정후 댓글")
@@ -2066,11 +2068,11 @@ class CommentServiceTest {
                 dynamicTest("수정된 댓글은 isEdited 컬럼의 값이 true 다",
                         () -> {
                             //given
-                            Member member = memberFactory.createStudentMember("nickname",
+                            Member member = memberFactory.createVerifiedStudentMember("nickname",
                                     university);
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .id(post.getId())
                                     .page(1)
                                     .build();
@@ -2093,15 +2095,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2120,15 +2122,15 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
         Comment comment = commentFactory.createComment(postMember, post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2148,14 +2150,14 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2175,15 +2177,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member admin = memberFactory.createAdminMember(university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(admin.getUsername())
+                .username(admin.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2201,10 +2203,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(999L)
                 .page(1)
                 .build();
@@ -2222,15 +2224,15 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2250,15 +2252,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(0)
                 .build();
@@ -2277,15 +2279,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(-1)
                 .build();
@@ -2304,17 +2306,17 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         commentRepository.delete(comment);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2333,13 +2335,13 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         CreateCommentResponse parentComment1 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
-                        .username(member.getUsername())
+                        .username(member.getLoginCredentials().getUsername())
                         .postId(post.getId())
                         .content("1번 댓글입니다")
                         .parentCommentId(null)
@@ -2347,7 +2349,7 @@ class CommentServiceTest {
 
         CreateCommentResponse parentComment2 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
-                        .username(member.getUsername())
+                        .username(member.getLoginCredentials().getUsername())
                         .postId(post.getId())
                         .content("2번 댓글입니다")
                         .parentCommentId(null)
@@ -2355,7 +2357,7 @@ class CommentServiceTest {
 
         CreateCommentResponse childComment1 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
-                        .username(member.getUsername())
+                        .username(member.getLoginCredentials().getUsername())
                         .postId(post.getId())
                         .content("1번 댓글의 첫번쨰 대댓글 입니다")
                         .parentCommentId(parentComment1.getCommentId())
@@ -2363,7 +2365,7 @@ class CommentServiceTest {
 
         CreateCommentResponse parentComment3 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
-                        .username(member.getUsername())
+                        .username(member.getLoginCredentials().getUsername())
                         .postId(post.getId())
                         .content("3번 댓글입니다")
                         .parentCommentId(null)
@@ -2371,7 +2373,7 @@ class CommentServiceTest {
 
         CreateCommentResponse childComment2 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
-                        .username(member.getUsername())
+                        .username(member.getLoginCredentials().getUsername())
                         .postId(post.getId())
                         .content("1번 댓글의 두번쨰 대댓글 입니다")
                         .parentCommentId(parentComment1.getCommentId())
@@ -2379,14 +2381,14 @@ class CommentServiceTest {
 
         CreateCommentResponse childComment3 = commentService.createComment(
                 CreateCommentServiceRequest.builder()
-                        .username(member.getUsername())
+                        .username(member.getLoginCredentials().getUsername())
                         .postId(post.getId())
                         .content("2번 댓글의 첫번쨰 대댓글 입니다")
                         .parentCommentId(parentComment2.getCommentId())
                         .build());
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2415,21 +2417,21 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post,
                 parentComment);
 
         commentRepository.delete(childComment);
 
         LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .id(post.getId())
                 .page(1)
                 .build();
@@ -2448,15 +2450,15 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post, parentComment);
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post, parentComment);
 
         return List.of(
                 dynamicTest("대댓글이 존재하는 댓글이 삭제된 경우 해당 댓글은 삭제된 댓글입니다 라고 조회된다",
@@ -2465,7 +2467,7 @@ class CommentServiceTest {
                             commentRepository.delete(parentComment);
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .id(post.getId())
                                     .page(1)
                                     .build();
@@ -2489,7 +2491,7 @@ class CommentServiceTest {
                             commentRepository.delete(childComment);
 
                             LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .id(post.getId())
                                     .page(1)
                                     .build();
@@ -2518,9 +2520,9 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createClubBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
@@ -2530,13 +2532,13 @@ class CommentServiceTest {
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).extracting("commentId", "postId", "isAnonymousBoard", "nickname",
                         "profileImageUrl", "content", "likesCount")
                 .contains(comment.getId(), post.getId(), false,
-                        member.getName().getNickname(),
+                        member.getBasicCredentials().getNickname(),
                         member.getProfileImage().getThumbnailUrl(), comment.getContent(), 10);
 
     }
@@ -2548,9 +2550,9 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("commentMember", university);
+        Member member = memberFactory.createVerifiedStudentMember("commentMember", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
@@ -2560,7 +2562,7 @@ class CommentServiceTest {
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.isAnonymousBoard()).isTrue();
@@ -2575,21 +2577,21 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         IntStream.rangeClosed(1, 9).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nickname" + i, university), comment);
+                    memberFactory.createVerifiedStudentMember("nickname" + i, university), comment);
         });
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).isNull();
@@ -2603,37 +2605,37 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment1 = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember1", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember1", university), post);
 
         Comment comment2 = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember2", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember2", university), post);
 
         Comment comment3 = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember3", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember3", university), post);
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nicknameA" + i, university), comment1);
+                    memberFactory.createVerifiedStudentMember("nicknameA" + i, university), comment1);
         });
 
         IntStream.rangeClosed(1, 11).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nicknameB" + i, university), comment2);
+                    memberFactory.createVerifiedStudentMember("nicknameB" + i, university), comment2);
         });
 
         IntStream.rangeClosed(1, 12).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nicknameC" + i, university), comment3);
+                    memberFactory.createVerifiedStudentMember("nicknameC" + i, university), comment3);
         });
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getCommentId()).isEqualTo(comment3.getId());
@@ -2647,38 +2649,38 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment1 = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember1", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember1", university), post);
 
         Comment comment2 = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember2", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember2", university), post);
 
         Comment comment3 = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember3", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember3", university), post);
 
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nicknameA" + i, university), comment1);
+                    memberFactory.createVerifiedStudentMember("nicknameA" + i, university), comment1);
         });
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nicknameB" + i, university), comment2);
+                    memberFactory.createVerifiedStudentMember("nicknameB" + i, university), comment2);
         });
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nicknameC" + i, university), comment3);
+                    memberFactory.createVerifiedStudentMember("nicknameC" + i, university), comment3);
         });
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getCommentId()).isEqualTo(comment1.getId());
@@ -2692,25 +2694,23 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember", university), post);
 
         Comment childComment = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember", university), post,
                 parentComment);
 
-        IntStream.rangeClosed(1, 10).forEach(i -> {
-            commentLikeFactory.createCommentLike(
-                    memberFactory.createStudentMember("nickname" + i, university), childComment);
-        });
+        IntStream.rangeClosed(1, 10).forEach(i -> commentLikeFactory.createCommentLike(
+                memberFactory.createVerifiedStudentMember("nickname" + i, university), childComment));
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         BestCommentResponse response = commentService.loadBestCommentInPost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getCommentId()).isEqualTo(childComment.getId());
@@ -2720,11 +2720,11 @@ class CommentServiceTest {
     @Test
     void viewBestCommentInNotExistingPost() {
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when //then
         assertThatThrownBy(
-                () -> commentService.loadBestCommentInPost(999L, member.getUsername()))
+                () -> commentService.loadBestCommentInPost(999L, member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
@@ -2735,16 +2735,16 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
         //when //then
         assertThatThrownBy(
-                () -> commentService.loadBestCommentInPost(999L, member.getUsername()))
+                () -> commentService.loadBestCommentInPost(999L, member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
@@ -2761,13 +2761,13 @@ class CommentServiceTest {
         Board board = boardFactory.createAnonymousBoard(university);
 
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         Comment comment = commentFactory.createComment(member, post);
 
         //when
-        MyCommentsResponse response = commentService.loadMyComments(1, member.getUsername());
+        MyCommentsResponse response = commentService.loadMyComments(1, member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).extracting("sizeRequest", "actualSize", "currentPage")
@@ -2785,14 +2785,14 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Post post1 = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember1", university),
+                memberFactory.createVerifiedStudentMember("postMember1", university),
                 boardFactory.createAnonymousBoard(university));
 
         Post post2 = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember2", university),
+                memberFactory.createVerifiedStudentMember("postMember2", university),
                 boardFactory.createClubBoard(university));
 
         Comment myComment1 = commentFactory.createComment(member, post1);
@@ -2801,7 +2801,7 @@ class CommentServiceTest {
 
 
         //when
-        MyCommentsResponse response = commentService.loadMyComments(1, member.getUsername());
+        MyCommentsResponse response = commentService.loadMyComments(1, member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).extracting("sizeRequest", "actualSize", "currentPage")
@@ -2821,13 +2821,13 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Post post1 = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember1", university), board);
+                memberFactory.createVerifiedStudentMember("postMember1", university), board);
 
         Post post2 = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember2", university), board);
+                memberFactory.createVerifiedStudentMember("postMember2", university), board);
 
         Comment comment1 = commentFactory.createComment(member, post1);
 
@@ -2836,7 +2836,7 @@ class CommentServiceTest {
         Comment comment3 = commentFactory.createComment(member, post1);
 
         //when
-        MyCommentsResponse response = commentService.loadMyComments(1, member.getUsername());
+        MyCommentsResponse response = commentService.loadMyComments(1, member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).extracting("sizeRequest", "actualSize", "currentPage")
@@ -2856,10 +2856,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         //when
-        MyCommentsResponse response = commentService.loadMyComments(1, member.getUsername());
+        MyCommentsResponse response = commentService.loadMyComments(1, member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getComments()).isEmpty();
@@ -2873,16 +2873,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         commentRepository.delete(comment);
 
         //when
-        MyCommentsResponse response = commentService.loadMyComments(1, member.getUsername());
+        MyCommentsResponse response = commentService.loadMyComments(1, member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getComments()).isEmpty();
@@ -2894,17 +2894,17 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
         //when
-        MyCommentsResponse response = commentService.loadMyComments(1, member.getUsername());
+        MyCommentsResponse response = commentService.loadMyComments(1, member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2918,18 +2918,18 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Post post = postFactory.createNormalPost(
-                    memberFactory.createStudentMember("postMember" + i, university), board);
+                    memberFactory.createVerifiedStudentMember("postMember" + i, university), board);
 
             Comment parentComment = commentFactory.createComment(member, post);
         });
 
         //when
-        MyCommentsResponse firstPage = commentService.loadMyComments(1, member.getUsername());
-        MyCommentsResponse secondPage = commentService.loadMyComments(2, member.getUsername());
+        MyCommentsResponse firstPage = commentService.loadMyComments(1, member.getLoginCredentials().getUsername());
+        MyCommentsResponse secondPage = commentService.loadMyComments(2, member.getLoginCredentials().getUsername());
 
         //then
         assertThat(firstPage).extracting("sizeRequest", "actualSize", "currentPage")
@@ -2952,17 +2952,17 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         IntStream.rangeClosed(1, 30).forEach(i -> {
             Post post = postFactory.createNormalPost(
-                    memberFactory.createStudentMember("postMember" + i, university), board);
+                    memberFactory.createVerifiedStudentMember("postMember" + i, university), board);
 
             Comment comment = commentFactory.createComment(member, post);
         });
 
         //when
-        Long commentCount = commentService.findCommentsCountByMember(member.getUsername());
+        Long commentCount = commentService.findCommentsCountByMember(member.getLoginCredentials().getUsername());
 
         //then
         assertThat(commentCount).isEqualTo(30);
@@ -2975,16 +2975,16 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         Comment comment = commentFactory.createComment(member, post);
 
         commentRepository.delete(comment);
 
         //when
-        Long commentCount = commentService.findCommentsCountByMember(member.getUsername());
+        Long commentCount = commentService.findCommentsCountByMember(member.getLoginCredentials().getUsername());
 
         //then
         assertThat(commentCount).isEqualTo(0);
@@ -2998,12 +2998,12 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberFactory.createStudentMember("nickname", university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
         memberRepository.delete(member);
 
         //when //then
-        assertThatThrownBy(() -> commentService.findCommentsCountByMember(member.getUsername()))
+        assertThatThrownBy(() -> commentService.findCommentsCountByMember(member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
@@ -3028,20 +3028,20 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment parentComment1 = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember1", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember1", university), post);
 
         Comment parentComment2 = commentFactory.createComment(
-                memberFactory.createStudentMember("parentCommentMember2", university), post);
+                memberFactory.createVerifiedStudentMember("parentCommentMember2", university), post);
 
         Comment childComment1 = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember1", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember1", university), post,
                 parentComment1);
 
         Comment childComment2 = commentFactory.createChildComment(
-                memberFactory.createStudentMember("childCommentMember2", university), post,
+                memberFactory.createVerifiedStudentMember("childCommentMember2", university), post,
                 parentComment2);
 
         //when
@@ -3058,7 +3058,7 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         //when
         Long commentsCount = commentService.findActiveCommentsCountInPost(post.getId());
@@ -3074,10 +3074,10 @@ class CommentServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         commentRepository.delete(comment);
 
@@ -3104,10 +3104,10 @@ class CommentServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
-        Member postMember = memberFactory.createStudentMember("postMember", university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
         Post post = postFactory.createNormalPost(postMember, board);
 
-        postService.deletePost(post.getId(), postMember.getUsername());
+        postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
         //when //then
         assertThatThrownBy(() -> commentService.findActiveCommentsCountInPost(post.getId()))

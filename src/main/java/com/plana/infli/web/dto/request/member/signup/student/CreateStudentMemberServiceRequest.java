@@ -1,12 +1,18 @@
 package com.plana.infli.web.dto.request.member.signup.student;
 
-import static com.plana.infli.domain.type.MemberRole.*;
-import static com.plana.infli.domain.embedded.member.MemberName.*;
-import static com.plana.infli.domain.embedded.member.MemberProfileImage.defaultProfileImage;
-import static com.plana.infli.domain.embedded.member.MemberStatus.*;
+import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
+import static com.plana.infli.domain.embedded.member.ProfileImage.*;
+import static com.plana.infli.domain.embedded.member.StudentCredentials.*;
+import static com.plana.infli.domain.type.Role.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
+import com.plana.infli.domain.embedded.member.LoginCredentials;
+import com.plana.infli.domain.embedded.member.ProfileImage;
+import com.plana.infli.domain.embedded.member.StudentCredentials;
+import com.plana.infli.domain.type.VerificationStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -38,13 +44,14 @@ public class CreateStudentMemberServiceRequest {
 
     public Member toEntity(University university, String encodedPassword) {
         return Member.builder()
-                .username(username)
-                .encodedPassword(encodedPassword)
-                .name(of(realName, nickname))
-                .role(EMAIL_UNCERTIFIED_STUDENT)
                 .university(university)
-                .profileImage(defaultProfileImage())
-                .status(defaultStatus())
+                .role(STUDENT)
+                .verificationStatus(NOT_STARTED)
+                .loginCredentials(LoginCredentials.of(username, encodedPassword))
+                .profileImage(ProfileImage.ofDefaultProfileImage())
+                .basicCredentials(BasicCredentials.ofDefaultWithNickname(nickname))
+                .companyCredentials(null)
+                .studentCredentials(StudentCredentials.ofDefault(realName))
                 .build();
     }
 }

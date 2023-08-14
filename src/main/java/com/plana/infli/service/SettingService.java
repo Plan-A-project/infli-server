@@ -6,7 +6,7 @@ import static com.plana.infli.exception.custom.ConflictException.DUPLICATED_NICK
 import static com.plana.infli.exception.custom.NotFoundException.*;
 
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.embedded.member.MemberProfileImage;
+import com.plana.infli.domain.embedded.member.ProfileImage;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -79,9 +79,11 @@ public class SettingService {
         checkPasswordMatches(member, request.getPassword());
     }
 
-    private void checkPasswordMatches(Member member, String password) {
+    private void checkPasswordMatches(Member member, String newPassword) {
 
-        if (passwordEncoder.matches(password, member.getPassword()) == false) {
+        String currentPassword = member.getLoginCredentials().getPassword();
+
+        if (passwordEncoder.matches(newPassword, currentPassword) == false) {
             throw new BadRequestException(PASSWORD_NOT_MATCH);
         }
     }
@@ -135,7 +137,7 @@ public class SettingService {
 
         String thumbnailUrl = s3Uploader.uploadAsThumbnailImage(multipartFile, path);
 
-        MemberProfileImage newProfileImage = MemberProfileImage.of(originalUrl, thumbnailUrl);
+        ProfileImage newProfileImage = ProfileImage.of(originalUrl, thumbnailUrl);
 
         editProfileImage(member, newProfileImage);
 
@@ -162,10 +164,9 @@ public class SettingService {
 
     //TODO 회원탈퇴시 기업회원과 일반 회원 구분해야됨
     private boolean emailAndNameMatches(Member member, UnregisterMemberServiceRequest request) {
-        return member.getName().getRealName().equals(request.getName()) &&
-                member.getUsername().equals(request.getEmail());
+        return member.getStudentCredentials().getRealName().equals(request.getName()) &&
+                member.getLoginCredentials().getUsername().equals(request.getEmail());
     }
-
 
     public MyProfileToUnregisterResponse loadProfileToUnregister(String username) {
         return MyProfileToUnregisterResponse.of(findMemberBy(username));

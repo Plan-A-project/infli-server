@@ -3,9 +3,10 @@ package com.plana.infli.service;
 import static com.plana.infli.domain.Board.isAnonymous;
 import static com.plana.infli.domain.Comment.*;
 import static com.plana.infli.domain.Member.isAdmin;
-import static com.plana.infli.domain.type.MemberRole.*;
+import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.domain.editor.CommentEditor.*;
 import static com.plana.infli.domain.editor.PostEditor.increaseCommentMemberCount;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.exception.custom.BadRequestException.CHILD_COMMENTS_NOT_ALLOWED;
 import static com.plana.infli.exception.custom.BadRequestException.MAX_COMMENT_SIZE_EXCEEDED;
 import static com.plana.infli.exception.custom.NotFoundException.*;
@@ -17,6 +18,7 @@ import static org.springframework.data.domain.PageRequest.of;
 import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
+import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -96,12 +98,13 @@ public class CommentService {
     }
 
 
+    //TODO
     private void checkWritePermission(Member member) {
-        if (member.getRole() == EMAIL_UNCERTIFIED_COMPANY ||
-                member.getRole() == EMAIL_UNCERTIFIED_STUDENT) {
-
-            throw new AuthorizationFailedException();
+        if (member.getVerificationStatus() == SUCCESS) {
+            return;
         }
+
+        throw new AuthorizationFailedException();
     }
 
 

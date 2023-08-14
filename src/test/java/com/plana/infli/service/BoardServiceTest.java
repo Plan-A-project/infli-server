@@ -8,7 +8,6 @@ import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.PopularBoard;
 import com.plana.infli.domain.University;
-import com.plana.infli.exception.custom.AuthenticationFailedException;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
@@ -92,11 +91,11 @@ public class BoardServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
 
         //when
-        boolean exists = boardService.popularBoardExistsBy(member.getUsername());
+        boolean exists = boardService.popularBoardExistsBy(member.getLoginCredentials().getUsername());
 
         //then
         assertThat(exists).isFalse();
@@ -114,11 +113,11 @@ public class BoardServiceTest {
         Board employmentBoard = boardFactory.createEmploymentBoard(university);
         Board activityBoard = boardFactory.createActivityBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getUsername());
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when
-        boolean exists = boardService.popularBoardExistsBy(member.getUsername());
+        boolean exists = boardService.popularBoardExistsBy(member.getLoginCredentials().getUsername());
 
         //then
         assertThat(exists).isTrue();
@@ -146,10 +145,10 @@ public class BoardServiceTest {
         Board employmentBoard = boardFactory.createEmploymentBoard(university);
         Board activityBoard = boardFactory.createActivityBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
-        boardService.createDefaultPopularBoards(member.getUsername());
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //then
         List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
@@ -169,11 +168,11 @@ public class BoardServiceTest {
         Board employmentBoard = boardFactory.createEmploymentBoard(university);
         Board activityBoard = boardFactory.createActivityBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getUsername());
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when //then
-        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(member.getUsername()))
+        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername()))
                 .isInstanceOf(ConflictException.class)
                 .message().isEqualTo("인기 게시판 기본값이 이미 생성되었습니다");
     }
@@ -210,14 +209,14 @@ public class BoardServiceTest {
         Board clubBoard = boardFactory.createClubBoard(university);
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         return of(
                 dynamicTest("특정 회원이 보고싶은 인기 게시판 기본 설정값이 없는 것을 확인한다",
                         () -> {
                             //when
-                            boolean exists = boardService.popularBoardExistsBy(member.getUsername());
+                            boolean exists = boardService.popularBoardExistsBy(member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(exists).isFalse();
@@ -226,7 +225,7 @@ public class BoardServiceTest {
                 dynamicTest("기본 설정값이 없는 경우, 해당 대학에 존재하는 모든 게시판에 각각 대응하는 인기 게시판을 생성한다",
                         () -> {
                             //when
-                            boardService.createDefaultPopularBoards(member.getUsername());
+                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(popularBoardRepository.findEnabledPopularBoardCountBy(
@@ -237,7 +236,7 @@ public class BoardServiceTest {
                         () -> {
                             //when
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getUsername());
+                                    member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(response.getBoards().size()).isEqualTo(5);
@@ -282,14 +281,14 @@ public class BoardServiceTest {
         Board clubBoard = boardFactory.createClubBoard(university);
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         return of(
                 dynamicTest("해당 대학에 존재하는 모든 게시판에 각각 대응하는 인기 게시판을 생성한다 (기본값 생성)",
                         () -> {
                             //when
-                            boardService.createDefaultPopularBoards(member.getUsername());
+                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(popularBoardRepository.findEnabledPopularBoardCountBy(
@@ -300,7 +299,7 @@ public class BoardServiceTest {
                         () -> {
                             //when
                             PopularBoardsSettingsResponse response = boardService.loadEnabledPopularBoardsForSettingBy(
-                                    member.getUsername());
+                                    member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(response.getPopularBoards().size()).isEqualTo(5);
@@ -364,8 +363,8 @@ public class BoardServiceTest {
         Board employmentBoard = boardFactory.createEmploymentBoard(university);
         Board activityBoard = boardFactory.createActivityBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getUsername());
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         List<PopularBoard> boards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                 member);
@@ -376,7 +375,7 @@ public class BoardServiceTest {
         PopularBoard campusLifePopularBoard = boards.get(4);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .popularBoardIds(of(
                         anonymousPopularBoard.getId(),
                         employMemberPopularBoard.getId(),
@@ -410,12 +409,12 @@ public class BoardServiceTest {
         Board employmentBoard = boardFactory.createEmploymentBoard(university);
         Board activityBoard = boardFactory.createActivityBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
-        boardService.createDefaultPopularBoards(member.getUsername());
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when
-        BoardListResponse response = boardService.loadAllBoard(member.getUsername());
+        BoardListResponse response = boardService.loadAllBoard(member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getUniversityId()).isEqualTo(university.getId());
@@ -441,17 +440,17 @@ public class BoardServiceTest {
         Board clubBoard = boardFactory.createClubBoard(university);
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         return of(
                 dynamicTest("인기 게시판 기본값 설정 후, 5개의 인기 게시판 중에서 학교생활과 익명 인기게시판만 보고싶다고 선택한다",
                         () -> {
                             //given
-                            boardService.createDefaultPopularBoards(member.getUsername());
+                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
                             ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .boardIds(of(
                                             campusLifeBoard.getId(),
                                             anonymousBoard.getId()))
@@ -468,7 +467,7 @@ public class BoardServiceTest {
                         () -> {
                             //then
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getUsername());
+                                    member.getLoginCredentials().getUsername());
                             assertThat(response.getBoards()).hasSize(2)
                                     .extracting("boardId", "boardName", "boardType")
                                     .containsExactly(
@@ -495,17 +494,17 @@ public class BoardServiceTest {
         Board clubBoard = boardFactory.createClubBoard(university);
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         return of(
                 dynamicTest("인기 게시판 기본값 설정 후, 5개의 인기 게시판 중에서 동아리, 익명, 채용 인기게시판만 보고싶다고 선택한다",
                         () -> {
                             //given
-                            boardService.createDefaultPopularBoards(member.getUsername());
+                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
                             ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .boardIds(
                                             of(clubBoard.getId(),
                                                     anonymousBoard.getId(),
@@ -521,7 +520,7 @@ public class BoardServiceTest {
                         () -> {
                             //then
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getUsername());
+                                    member.getLoginCredentials().getUsername());
                             assertThat(response.getBoards()).hasSize(3)
                                     .extracting("boardId", "boardName", "boardType")
                                     .containsExactly(
@@ -552,7 +551,7 @@ public class BoardServiceTest {
                                     employmentBoard, member);
 
                             EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                                    .username(member.getUsername())
+                                    .username(member.getLoginCredentials().getUsername())
                                     .popularBoardIds(
                                             of(anonymousPopularBoard.getId(),
                                                     clubPopularBoard.getId(),
@@ -566,7 +565,7 @@ public class BoardServiceTest {
                         () -> {
                             //then
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
-                                    member.getUsername());
+                                    member.getLoginCredentials().getUsername());
                             assertThat(response.getBoards()).hasSize(3)
                                     .extracting("boardId", "boardName", "boardType")
                                     .containsExactly(
@@ -592,10 +591,10 @@ public class BoardServiceTest {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardIds(of(999L))
                 .build();
 
@@ -611,13 +610,13 @@ public class BoardServiceTest {
 
         //given
         University myUniversity = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.createStudentMember("member", myUniversity);
+        Member member = memberFactory.createVerifiedStudentMember("member", myUniversity);
 
         University otherUniversity = universityFactory.createUniversity("서울대학교");
         Board otherBoard = boardFactory.createClubBoard(otherUniversity);
 
         ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardIds(of(otherBoard.getId()))
                 .build();
 
@@ -661,10 +660,10 @@ public class BoardServiceTest {
     void changeNotExistingPopularBoardSequence() {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .popularBoardIds(of(999L, 111L, 2L))
                 .build();
 
@@ -684,7 +683,7 @@ public class BoardServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createCampusLifeBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
         PopularBoard popularBoard = popularBoardFactory.create(member, board, 0);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
@@ -711,16 +710,16 @@ public class BoardServiceTest {
         Board clubBoard = boardFactory.createClubBoard(university);
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
-        Member otherMember = memberFactory.createStudentMember("otherMember", university);
-        boardService.createDefaultPopularBoards(otherMember.getUsername());
+        Member otherMember = memberFactory.createVerifiedStudentMember("otherMember", university);
+        boardService.createDefaultPopularBoards(otherMember.getLoginCredentials().getUsername());
 
         List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                 otherMember);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .popularBoardIds(
                         of(popularBoards.get(2).getId(),
                                 popularBoards.get(1).getId(),
@@ -750,14 +749,14 @@ public class BoardServiceTest {
         Board clubBoard = boardFactory.createClubBoard(university);
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
 
-        Member member = memberFactory.createStudentMember("member", university);
-        boardService.createDefaultPopularBoards(member.getUsername());
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         List<PopularBoard> popularBoards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                 member);
 
         EditPopularBoardSequenceServiceRequest request = EditPopularBoardSequenceServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .popularBoardIds(
                         of(popularBoards.get(2).getId(),
                                 popularBoards.get(3).getId()))

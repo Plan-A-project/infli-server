@@ -1,12 +1,15 @@
 package com.plana.infli.web.dto.request.member.signup.company;
 
-import static com.plana.infli.domain.type.MemberRole.*;
-import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
-import static com.plana.infli.domain.embedded.member.MemberStatus.*;
+import static com.plana.infli.domain.type.Role.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
+import com.plana.infli.domain.embedded.member.CompanyCredentials;
+import com.plana.infli.domain.embedded.member.LoginCredentials;
+import com.plana.infli.domain.embedded.member.ProfileImage;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,6 +17,8 @@ import lombok.Getter;
 public class CreateCompanyMemberServiceRequest {
 
     private final String username;
+
+    private final String nickname;
 
     private final String password;
 
@@ -24,10 +29,10 @@ public class CreateCompanyMemberServiceRequest {
     private final String companyName;
 
     @Builder
-    private CreateCompanyMemberServiceRequest(String username, String password,
+    private CreateCompanyMemberServiceRequest(String username, String nickname, String password,
             String passwordConfirm, Long universityId, String companyName) {
-
         this.username = username;
+        this.nickname = nickname;
         this.password = password;
         this.passwordConfirm = passwordConfirm;
         this.universityId = universityId;
@@ -36,14 +41,15 @@ public class CreateCompanyMemberServiceRequest {
 
     public Member toEntity(Company company, String encodedPassword, University university) {
         return Member.builder()
-                .username(username)
-                .encodedPassword(encodedPassword)
-                .name(null)
-                .status(defaultStatus())
-                .company(company)
-                .role(EMAIL_UNCERTIFIED_COMPANY)
                 .university(university)
-                .profileImage(defaultProfileImage())
+                .role(COMPANY)
+                .verificationStatus(NOT_STARTED)
+                .loginCredentials(LoginCredentials.of(username, encodedPassword))
+                .profileImage(ProfileImage.ofDefaultProfileImage())
+                .basicCredentials(BasicCredentials.ofDefaultWithNickname(nickname))
+                .companyCredentials(CompanyCredentials.ofDefault(company))
+                .studentCredentials(null)
                 .build();
     }
+
 }
