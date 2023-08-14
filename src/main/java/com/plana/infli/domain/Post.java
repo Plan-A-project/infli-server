@@ -56,9 +56,6 @@ public class Post extends BaseEntity {
 
     private boolean isDeleted;
 
-    @Version
-    private Long version;
-
     @Embedded
     @Nullable
     private Recruitment recruitment;
@@ -66,6 +63,8 @@ public class Post extends BaseEntity {
     @OneToMany(mappedBy = "post")
     private List<PostLike> likes = new ArrayList<>();
 
+    @Version
+    private Long version;
 
     @Builder
     private Post(Board board, PostType postType, String title, String content,

@@ -22,15 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberController {
 
     private final MailService mailService;
+    
 
-//    @PostMapping("/email/auth/send")
-//    public ResponseEntity<Void> sendMemberEmailAuthenticationEmail(
-//            @AuthenticatedPrincipal String email) {
-//        mailService.sendMemberAuthenticationEmail(email);
-//        return ResponseEntity.ok().build();
-//    }
-
-    @PostMapping("/emails/students")
+    @PostMapping("/emails/verification")
     public void sendStudentAuthenticationEmail(@AuthenticatedPrincipal String username,
             @RequestBody @Validated SendEmailAuthenticationRequest request) {
         mailService.sendStudentAuthenticationEmail(request.toServiceRequest(username));

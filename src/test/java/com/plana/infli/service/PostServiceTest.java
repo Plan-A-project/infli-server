@@ -2,7 +2,7 @@ package com.plana.infli.service;
 
 import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.type.PostType.*;
-import static com.plana.infli.domain.type.MemberRole.*;
+import static com.plana.infli.domain.type.Role.*;
 import static java.time.LocalDateTime.now;
 import static java.time.LocalDateTime.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.linesOf;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.type.MemberRole;
+import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.domain.University;
@@ -127,14 +127,14 @@ public class PostServiceTest {
     @DisplayName("모집 글 작성 성공 - 회원 유형, 게시판 유형에 따른 케이스 분류")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void SUCCESS_writeRecruitmentPost(BoardType boardType, MemberRole memberRole) {
+    void SUCCESS_writeRecruitmentPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -164,12 +164,8 @@ public class PostServiceTest {
     public static Stream<Arguments> FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnRecruitment() {
 
         return Stream.of(
-                Arguments.of(ACTIVITY, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(ACTIVITY, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(ACTIVITY, STUDENT_COUNCIL),
 
-                Arguments.of(EMPLOYMENT, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(EMPLOYMENT, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(EMPLOYMENT, STUDENT),
                 Arguments.of(EMPLOYMENT, STUDENT_COUNCIL)
         );
@@ -178,14 +174,14 @@ public class PostServiceTest {
     @DisplayName("모집 글 작성 실패 - 해당 게시판에 모집글 작성 권한이 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnRecruitment")
-    void FAIL_writeRecruitmentPost(BoardType boardType, MemberRole memberRole) {
+    void FAIL_writeRecruitmentPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -227,14 +223,14 @@ public class PostServiceTest {
     @DisplayName("일반 글 작성 성공 - 게시판 유형, 회원 유형에 따른 케이스 분류")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationsToWriteNormalPost")
-    void SUCCESS_writeNormalPost(BoardType boardType, MemberRole memberRole) {
+    void SUCCESS_writeNormalPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -258,26 +254,16 @@ public class PostServiceTest {
     public static Stream<Arguments> FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnNormal() {
 
         return Stream.of(
-                Arguments.of(ANONYMOUS, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(ANONYMOUS, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(ANONYMOUS, STUDENT_COUNCIL),
                 Arguments.of(ANONYMOUS, COMPANY),
 
-                Arguments.of(ACTIVITY, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(ACTIVITY, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(ACTIVITY, STUDENT_COUNCIL),
 
-                Arguments.of(EMPLOYMENT, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(EMPLOYMENT, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(EMPLOYMENT, STUDENT_COUNCIL),
 
-                Arguments.of(CLUB, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(CLUB, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(CLUB, STUDENT_COUNCIL),
                 Arguments.of(CLUB, COMPANY),
 
-                Arguments.of(CAMPUS_LIFE, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(CAMPUS_LIFE, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(CAMPUS_LIFE, COMPANY)
         );
     }
@@ -285,14 +271,14 @@ public class PostServiceTest {
     @DisplayName("일반 글 작성 실패 - 해당 게시판에 일반글 작성 권한이 없는경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnNormal")
-    void FAIL_writeNormalPost(BoardType boardType, MemberRole memberRole) {
+    void FAIL_writeNormalPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -317,14 +303,14 @@ public class PostServiceTest {
     @DisplayName("일반 공지 글 작성 성공 - 게시판 유형, 회원 유형에 따른 케이스 분류")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationsToWriteAnnouncementPost")
-    void SUCCESS_writeAnnouncementPost(BoardType boardType, MemberRole memberRole) {
+    void SUCCESS_writeAnnouncementPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -348,8 +334,6 @@ public class PostServiceTest {
     public static Stream<Arguments> FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnAnnouncement() {
 
         return Stream.of(
-                Arguments.of(CAMPUS_LIFE, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(CAMPUS_LIFE, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(CAMPUS_LIFE, STUDENT),
                 Arguments.of(CAMPUS_LIFE, COMPANY)
         );
@@ -358,14 +342,14 @@ public class PostServiceTest {
     @DisplayName("일반 공지글 작성 실패 - 공지글 작성 권한이 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnAnnouncement")
-    void FAIL_writeAnnouncementPost(BoardType boardType, MemberRole memberRole) {
+    void FAIL_writeAnnouncementPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -400,7 +384,7 @@ public class PostServiceTest {
         Member member = memberFactory.createAdminMember(university);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -433,7 +417,7 @@ public class PostServiceTest {
         Member member = memberFactory.createAdminMember(university);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -465,7 +449,7 @@ public class PostServiceTest {
         Member member = memberFactory.createAdminMember(university);
 
         CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -488,7 +472,7 @@ public class PostServiceTest {
         Member member = memberFactory.createAdminMember(university);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(999L)
                 .title("제목입니다")
                 .content("내용입니다")
@@ -532,7 +516,7 @@ public class PostServiceTest {
         Member member = memberFactory.createAdminMember(university);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(999L)
                 .title("제목입니다")
                 .content("내용입니다")
@@ -574,7 +558,7 @@ public class PostServiceTest {
         Member member = memberFactory.createAdminMember(university);
 
         CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(999L)
                 .title("제목입니다")
                 .content("내용입니다")
@@ -618,10 +602,10 @@ public class PostServiceTest {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createEmploymentBoard(university);
-        Member member = memberFactory.createCompanyMember("카카오", university);
+        Member member = memberFactory.createVerifiedCompanyMember(university);
 
         CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
@@ -639,8 +623,6 @@ public class PostServiceTest {
 
     public static Stream<Arguments> providingRoleForCheckingMemberAcceptedWritePolicy() {
         return Stream.of(
-                Arguments.of(EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(STUDENT),
                 Arguments.of(COMPANY),
                 Arguments.of(STUDENT_COUNCIL),
@@ -651,14 +633,14 @@ public class PostServiceTest {
     @DisplayName("글 작성 규정 동의 여부 확인 - 동의 안한 경우")
     @ParameterizedTest(name = "{index} 회원 유형: {0}")
     @MethodSource("providingRoleForCheckingMemberAcceptedWritePolicy")
-    void False_checkMemberAcceptedWritePolicy(MemberRole memberRole) {
+    void False_checkMemberAcceptedWritePolicy(Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.parameterizedTest_PolicyNotAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyNotAcceptedMemberWithRole(university, role);
 
         //when
-        boolean agreedOnWritePolicy = postService.checkMemberAcceptedWritePolicy(member.getUsername());
+        boolean agreedOnWritePolicy = postService.checkMemberAcceptedWritePolicy(member.getLoginCredentials().getUsername());
 
         //then
         assertThat(agreedOnWritePolicy).isFalse();
@@ -667,14 +649,14 @@ public class PostServiceTest {
     @DisplayName("글 작성 규정 동의 여부 확인 - 동의한 경우")
     @ParameterizedTest(name = "{index} 회원 유형: {0}")
     @MethodSource("providingRoleForCheckingMemberAcceptedWritePolicy")
-    void True_checkMemberAcceptedWritePolicy(MemberRole memberRole) {
+    void True_checkMemberAcceptedWritePolicy(Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         //when
-        boolean agreedOnWritePolicy = postService.checkMemberAcceptedWritePolicy(member.getUsername());
+        boolean agreedOnWritePolicy = postService.checkMemberAcceptedWritePolicy(member.getLoginCredentials().getUsername());
 
         //then
         assertThat(agreedOnWritePolicy).isTrue();
@@ -682,8 +664,6 @@ public class PostServiceTest {
 
     public static Stream<Arguments> providingRoleForMemberAcceptingWritePolicy() {
         return Stream.of(
-                Arguments.of(EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(STUDENT),
                 Arguments.of(COMPANY),
                 Arguments.of(STUDENT_COUNCIL),
@@ -694,28 +674,29 @@ public class PostServiceTest {
     @DisplayName("글 작성 규정 동의함 요청 성공")
     @ParameterizedTest(name = "{index} 회원 유형: {0}")
     @MethodSource("providingRoleForMemberAcceptingWritePolicy")
-    void Success_AcceptingWritePolicy(MemberRole memberRole) {
+    void Success_AcceptingWritePolicy(Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.parameterizedTest_PolicyNotAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyNotAcceptedMemberWithRole(university, role);
 
         //when
-        postService.acceptWritePolicy(member.getUsername());
+        postService.acceptWritePolicy(member.getLoginCredentials().getUsername());
 
         //then
-        Member findMember = memberRepository.findByUsername(member.getUsername()).get();
-        assertThat(findMember.getStatus().isPolicyAccepted()).isTrue();
+        Member findMember = memberRepository.findActiveMemberBy(
+                member.getLoginCredentials().getUsername()).get();
+        assertThat(findMember.getBasicCredentials().isPolicyAccepted()).isTrue();
     }
 
     @DisplayName("글 작성 규정 동의함 요청 실패 - 해당 회원이 탈퇴 회원인 경우")
     @ParameterizedTest(name = "{index} 회원 유형: {0}")
     @MethodSource("providingRoleForMemberAcceptingWritePolicy")
-    void Fail_AcceptingWritePolicyByDeletedMember(MemberRole memberRole) {
+    void Fail_AcceptingWritePolicyByDeletedMember(Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.parameterizedTest_PolicyNotAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyNotAcceptedMemberWithRole(university, role);
         memberRepository.delete(member);
 
         //when //then
@@ -766,51 +747,35 @@ public class PostServiceTest {
     @DisplayName("해당 게시판에 글 작성 권한 있는지 여부 확인 - 권한 있는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형: {1}, 회원 유형 : {2}")
     @MethodSource("possibleCombinationToWritePost")
-    void SUCCESS_checkMemberHasWritePolicy(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void SUCCESS_checkMemberHasWritePolicy(BoardType boardType, PostType postType, Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         //when //then
         assertThat(postService.checkMemberHasWritePermission(board.getId(),
-                member.getUsername(), postType)).isTrue();
+                member.getLoginCredentials().getUsername(), postType)).isTrue();
     }
 
     public static Stream<Arguments> Fail_provideRoleAndBoardTypeAndPostTypeForCheckingMemberHasWritePolicy() {
 
         return Stream.of(
-                Arguments.of(EMPLOYMENT, NORMAL, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(EMPLOYMENT, NORMAL, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(EMPLOYMENT, NORMAL, STUDENT_COUNCIL),
-                Arguments.of(EMPLOYMENT, RECRUITMENT, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(EMPLOYMENT, RECRUITMENT, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(EMPLOYMENT, RECRUITMENT, STUDENT),
                 Arguments.of(EMPLOYMENT, RECRUITMENT, STUDENT_COUNCIL),
 
-                Arguments.of(ACTIVITY, NORMAL, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(ACTIVITY, NORMAL, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(ACTIVITY, NORMAL, STUDENT_COUNCIL),
-                Arguments.of(ACTIVITY, RECRUITMENT, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(ACTIVITY, RECRUITMENT, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(ACTIVITY, RECRUITMENT, STUDENT_COUNCIL),
 
-                Arguments.of(CLUB, NORMAL, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(CLUB, NORMAL, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(CLUB, NORMAL, STUDENT_COUNCIL),
                 Arguments.of(CLUB, NORMAL, COMPANY),
 
-                Arguments.of(ANONYMOUS, NORMAL, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(ANONYMOUS, NORMAL, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(ANONYMOUS, NORMAL, STUDENT_COUNCIL),
                 Arguments.of(ANONYMOUS, NORMAL, COMPANY),
 
-                Arguments.of(CAMPUS_LIFE, NORMAL, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(CAMPUS_LIFE, NORMAL, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(CAMPUS_LIFE, NORMAL, COMPANY),
-                Arguments.of(CAMPUS_LIFE, ANNOUNCEMENT, EMAIL_UNCERTIFIED_STUDENT),
-                Arguments.of(CAMPUS_LIFE, ANNOUNCEMENT, EMAIL_UNCERTIFIED_COMPANY),
                 Arguments.of(CAMPUS_LIFE, ANNOUNCEMENT, STUDENT),
                 Arguments.of(CAMPUS_LIFE, ANNOUNCEMENT, COMPANY)
         );
@@ -819,16 +784,16 @@ public class PostServiceTest {
     @DisplayName("해당 게시판에 글 작성 권한 있는지 여부 확인 - 권한 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("Fail_provideRoleAndBoardTypeAndPostTypeForCheckingMemberHasWritePolicy")
-    void Fail_checkMemberHasWritePolicy(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void Fail_checkMemberHasWritePolicy(BoardType boardType, PostType postType, Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         //when //then
         assertThatThrownBy(() -> postService.checkMemberHasWritePermission(board.getId(),
-                member.getUsername(), postType))
+                member.getLoginCredentials().getUsername(), postType))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
     }
@@ -864,16 +829,16 @@ public class PostServiceTest {
     @DisplayName("일반글 수정 성공")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteNonRecruitmentPost")
-    void Success_EditNormalPost(BoardType boardType, MemberRole memberRole) {
+    void Success_EditNormalPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         Post post = postFactory.createNormalPost(member, board);
 
         EditNormalPostServiceRequest request = EditNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -893,11 +858,11 @@ public class PostServiceTest {
     @DisplayName("일반글 수정 실패 - 수정을 요청한 회원을 찾을수 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteNonRecruitmentPost")
-    void Fail_EditNormalPostByNotExistingMember(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditNormalPostByNotExistingMember(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createNormalPost(member, board);
 
         EditNormalPostServiceRequest request = EditNormalPostServiceRequest.builder()
@@ -917,17 +882,17 @@ public class PostServiceTest {
     @DisplayName("일반글 수정 실패 - 글 작성자가 회원 탈퇴를 한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteNonRecruitmentPost")
-    void Fail_EditNormalPostByDeletedMember(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditNormalPostByDeletedMember(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createNormalPost(member, board);
 
         memberRepository.delete(member);
 
         EditNormalPostServiceRequest request = EditNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -943,13 +908,13 @@ public class PostServiceTest {
     @DisplayName("일반글 수정 실패 - 수정할 글이 존재하지 않는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteNonRecruitmentPost")
-    void Fail_EditNotExistingNormalPost(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditNotExistingNormalPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         EditNormalPostServiceRequest request = EditNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(999L)
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -965,17 +930,17 @@ public class PostServiceTest {
     @DisplayName("일반글 수정 실패 - 수정할 글이 이미 삭제된 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteNonRecruitmentPost")
-    void Fail_EditDeletedNormalPost(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditDeletedNormalPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createNormalPost(member, board);
 
-        postService.deletePost(post.getId(), member.getUsername());
+        postService.deletePost(post.getId(), member.getLoginCredentials().getUsername());
 
         EditNormalPostServiceRequest request = EditNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -991,15 +956,15 @@ public class PostServiceTest {
     @DisplayName("일반글 수정 실패 - 일반글 수정이 아니라 모집글 수정을 요청한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_InvalidRequestToEditRecruitmentPost(BoardType boardType, MemberRole memberRole) {
+    void Fail_InvalidRequestToEditRecruitmentPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createRecruitmentPost(member, board);
 
         EditNormalPostServiceRequest request = EditNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -1015,17 +980,17 @@ public class PostServiceTest {
     @DisplayName("일반글 수정 실패 - 수정할 글이 내가 작성한 글이 아닌 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteNonRecruitmentPost")
-    void Fail_EditNormalPostWroteByOtherMember(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditNormalPostWroteByOtherMember(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createNormalPost(postMember, board);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         EditNormalPostServiceRequest request = EditNormalPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -1042,16 +1007,16 @@ public class PostServiceTest {
     @DisplayName("모집글 수정 성공")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Success_EditRecruitPost(BoardType boardType, MemberRole memberRole) {
+    void Success_EditRecruitPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         Post post = postFactory.createRecruitmentPost(member, board);
 
         EditRecruitmentPostServiceRequest request = EditRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -1077,11 +1042,11 @@ public class PostServiceTest {
     @DisplayName("모집글 수정 실패 - 수정을 요청한 회원을 찾을수 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditRecruitmentPostByNotExistingMember(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditRecruitmentPostByNotExistingMember(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createRecruitmentPost(member, board);
 
         EditRecruitmentPostServiceRequest request = EditRecruitmentPostServiceRequest.builder()
@@ -1104,11 +1069,11 @@ public class PostServiceTest {
     @DisplayName("모집글 수정 실패 - 글 작성자가 회원 탈퇴를 한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditRecruitmentPostByDeletedMember(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditRecruitmentPostByDeletedMember(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createRecruitmentPost(member, board);
 
         memberRepository.delete(member);
@@ -1134,13 +1099,13 @@ public class PostServiceTest {
     @DisplayName("모집글 수정 실패 - 수정할 글이 존재하지 않는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditNotExistingRecruitmentPost(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditNotExistingRecruitmentPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         EditRecruitmentPostServiceRequest request = EditRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(-11L)
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -1159,17 +1124,17 @@ public class PostServiceTest {
     @DisplayName("모집글 수정 실패 - 수정할 글이 이미 삭제된 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditDeletedRecruitmentPost(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditDeletedRecruitmentPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createRecruitmentPost(member, board);
 
-        postService.deletePost(post.getId(), member.getUsername());
+        postService.deletePost(post.getId(), member.getLoginCredentials().getUsername());
 
         EditRecruitmentPostServiceRequest request = EditRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -1188,15 +1153,15 @@ public class PostServiceTest {
     @DisplayName("모집글 수정 실패 - 모집글 수정이 아니라 일반글 수정을 요청한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteNonRecruitmentPost")
-    void Fail_InvalidRequestToEditNormalPost(BoardType boardType, MemberRole memberRole) {
+    void Fail_InvalidRequestToEditNormalPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createNormalPost(member, board);
 
         EditRecruitmentPostServiceRequest request = EditRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -1215,17 +1180,17 @@ public class PostServiceTest {
     @DisplayName("모집글 수정 실패 - 수정할 글이 내가 작성한 글이 아닌 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditRecruitmentPostWroteByOtherMember(BoardType boardType, MemberRole memberRole) {
+    void Fail_EditRecruitmentPostWroteByOtherMember(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createRecruitmentPost(postMember, board);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         EditRecruitmentPostServiceRequest request = EditRecruitmentPostServiceRequest.builder()
-                .username(member.getUsername())
+                .username(member.getLoginCredentials().getUsername())
                 .postId(post.getId())
                 .title("수정된 제목입니다")
                 .content("수정된 내용입니다")
@@ -1245,16 +1210,16 @@ public class PostServiceTest {
     @DisplayName("글 삭제 성공")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
     @MethodSource("possibleCombinationToWritePost")
-    void Success_DeletePost(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void Success_DeletePost(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createPost(member, board, postType);
 
         //when
-        postService.deletePost(post.getId(), member.getUsername());
+        postService.deletePost(post.getId(), member.getLoginCredentials().getUsername());
 
         //then
         Post findPost = postRepository.findPostById(post.getId()).get();
@@ -1264,18 +1229,18 @@ public class PostServiceTest {
     @DisplayName("글 삭제 성공 - 관리자는 타인이 작성한 글도 삭제할수 있다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
     @MethodSource("possibleCombinationToWritePost")
-    void Success_DeletePostByAdmin(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void Success_DeletePostByAdmin(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createPost(member, board, postType);
 
         Member admin = memberFactory.createAdminMember(university);
 
         //when
-        postService.deletePost(post.getId(), admin.getUsername());
+        postService.deletePost(post.getId(), admin.getLoginCredentials().getUsername());
 
         //then
         Post findPost = postRepository.findPostById(post.getId()).get();
@@ -1285,12 +1250,12 @@ public class PostServiceTest {
     @DisplayName("글 삭제 실패 - 글 작성자를 찾을수 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
     @MethodSource("possibleCombinationToWritePost")
-    void Fail_DeletePostByNotExistingMember(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void Fail_DeletePostByNotExistingMember(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createPost(member, board, postType);
 
         //when //then
@@ -1302,18 +1267,18 @@ public class PostServiceTest {
     @DisplayName("글 삭제 실패 - 글 작성자가 회원 탈퇴를 한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
     @MethodSource("possibleCombinationToWritePost")
-    void Fail_DeletePostByDeletedMember(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void Fail_DeletePostByDeletedMember(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createPost(member, board, postType);
 
         memberRepository.delete(member);
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getUsername()))
+        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
@@ -1325,9 +1290,7 @@ public class PostServiceTest {
                 Arguments.of(STUDENT),
                 Arguments.of(STUDENT_COUNCIL),
                 Arguments.of(ADMIN),
-                Arguments.of(COMPANY),
-                Arguments.of(EMAIL_UNCERTIFIED_COMPANY),
-                Arguments.of(EMAIL_UNCERTIFIED_STUDENT)
+                Arguments.of(COMPANY)
         );
     }
 
@@ -1335,13 +1298,13 @@ public class PostServiceTest {
     @DisplayName("글 삭제 실패 - 존재하지 않는글을 삭제할수 없다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
     @MethodSource("existingMemberRole")
-    void Fail_DeleteNotExistingPost(MemberRole memberRole) {
+    void Fail_DeleteNotExistingPost(Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(-10L, member.getUsername()))
+        assertThatThrownBy(() -> postService.deletePost(-10L, member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
@@ -1349,18 +1312,18 @@ public class PostServiceTest {
     @DisplayName("글 삭제 실패 - 이미 삭제된 글을 삭제 시도 할수 없다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
     @MethodSource("possibleCombinationToWritePost")
-    void Fail_DeletePostThatIsAlreadyDeleted(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void Fail_DeletePostThatIsAlreadyDeleted(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member member = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createPost(member, board, postType);
 
-        postService.deletePost(post.getId(), member.getUsername());
+        postService.deletePost(post.getId(), member.getLoginCredentials().getUsername());
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getUsername()))
+        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
@@ -1368,18 +1331,18 @@ public class PostServiceTest {
     @DisplayName("글 삭제 실패 - 내가 작성하지 않은글을 삭제할수 없다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
     @MethodSource("possibleCombinationToWritePost")
-    void Fail_DeletePostThatIsNotMine(BoardType boardType, PostType postType, MemberRole memberRole) {
+    void Fail_DeletePostThatIsNotMine(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
         Post post = postFactory.createPost(postMember, board, postType);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getUsername()))
+        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getLoginCredentials().getUsername()))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
     }
@@ -1387,20 +1350,20 @@ public class PostServiceTest {
     @DisplayName("모집 글 단건 조회")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 작성 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void viewSingleRecruitmentPost(BoardType boardType, MemberRole memberRole) {
+    void viewSingleRecruitmentPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         Post post = postFactory.createPost(postMember, board, RECRUITMENT);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         SinglePostResponse response = postService.loadSinglePost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).extracting("postId", "title", "commentCount",
@@ -1431,18 +1394,18 @@ public class PostServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member postMember = memberFactory.createCompanyMember("구글", university);
+        Member postMember = memberFactory.createVerifiedCompanyMember(university);
 
         Post post = postFactory.createPost(postMember, board, RECRUITMENT);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         SinglePostResponse response = postService.loadSinglePost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getWriter()).isEqualTo(postMember.getCompany().getName());
+        assertThat(response.getNickname()).isEqualTo(postMember.getBasicCredentials().getNickname());
     }
 
     public static Stream<Arguments> possibleCombinationToWriteRecruitmentPostExceptCompanyMember() {
@@ -1459,23 +1422,23 @@ public class PostServiceTest {
     @DisplayName("모집 글 단건 조회 - 학생 또는 관리자 회원이 모집글을 작성한 경우, 글 작성자 이름의 값은 해당 회원의 nickname 이다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 작성 회원 유형 : {1}")
     @MethodSource("possibleCombinationToWriteRecruitmentPostExceptCompanyMember")
-    void viewRecruitmentPostWriterColumByNonCompanyMember(BoardType boardType, MemberRole memberRole) {
+    void viewRecruitmentPostWriterColumByNonCompanyMember(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         Post post = postFactory.createPost(postMember, board, RECRUITMENT);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         SinglePostResponse response = postService.loadSinglePost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getWriter()).isEqualTo(postMember.getName().getNickname());
+        assertThat(response.getNickname()).isEqualTo(postMember.getBasicCredentials().getNickname());
     }
 
 
@@ -1489,21 +1452,21 @@ public class PostServiceTest {
     @DisplayName("익명 글 단건 조회")
     @ParameterizedTest(name = "{index} 글 작성 회원 유형 : {0}")
     @MethodSource("possibleRoleToWriteAnonymousPost")
-    void viewSingleNormalPost(MemberRole memberRole) {
+    void viewSingleNormalPost(Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
 
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         Post post = postFactory.createPost(postMember, board, NORMAL);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         SinglePostResponse response = postService.loadSinglePost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).extracting("postId", "title", "commentCount",
@@ -1517,24 +1480,24 @@ public class PostServiceTest {
     @DisplayName("익명 글 단건 조회 - 익명글 조회시 글 작성자 이름의 값은 null 이다")
     @ParameterizedTest(name = "{index} 글 작성 회원 유형 : {0}")
     @MethodSource("possibleRoleToWriteAnonymousPost")
-    void writerColumOnAnonymousPostIsNull(MemberRole memberRole) {
+    void writerColumOnAnonymousPostIsNull(Role role) {
 
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
 
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         Post post = postFactory.createPost(postMember, board, NORMAL);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         SinglePostResponse response = postService.loadSinglePost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getWriter()).isNull();
+        assertThat(response.getNickname()).isNull();
     }
 
     public static Stream<Arguments> possibleNormalPostExceptAnonymousBoard() {
@@ -1558,28 +1521,28 @@ public class PostServiceTest {
     @DisplayName("익명이 아닌 일반 글 단건 조회")
     @ParameterizedTest(name = "{index} 글 작성 회원 유형 : {0}")
     @MethodSource("possibleNormalPostExceptAnonymousBoard")
-    void viewNonAnonymousNormalPost(BoardType boardType, MemberRole memberRole) {
+    void viewNonAnonymousNormalPost(BoardType boardType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
 
-        Member postMember = memberFactory.parameterizedTest_PolicyAccepted(university, memberRole);
+        Member postMember = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         Post post = postFactory.createPost(postMember, board, NORMAL);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when
         SinglePostResponse response = postService.loadSinglePost(post.getId(),
-                member.getUsername());
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response).extracting("postId", "title", "commentCount",
                         "likeCount", "viewCount", "thumbnailUrl", "boardName", "boardId",
-                        "postType", "writer", "content")
+                        "postType", "nickname", "content")
                 .containsExactly(post.getId(), post.getTitle(), post.getCommentMemberCount(), 0, 1,
                         post.getThumbnailUrl(), board.getBoardName(), board.getId(),
-                        post.getPostType().toString(), postMember.getName().getNickname(),
+                        post.getPostType().toString(), postMember.getBasicCredentials().getNickname(),
                         post.getContent());
     }
 }

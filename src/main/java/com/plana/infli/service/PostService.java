@@ -13,12 +13,12 @@ import static com.plana.infli.exception.custom.NotFoundException.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.*;
 
 import com.plana.infli.domain.Board;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
 import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.type.MemberRole;
+import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
-import com.plana.infli.domain.embedded.member.MemberStatus;
 import com.plana.infli.domain.embedded.post.Recruitment;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
@@ -71,9 +71,9 @@ public class PostService {
     private final S3Uploader s3Uploader;
 
     public boolean checkMemberAcceptedWritePolicy(String username) {
-        MemberStatus memberStatus = findMemberBy(username).getStatus();
+        BasicCredentials basicCredentials = findMemberBy(username).getBasicCredentials();
 
-        return memberStatus.isPolicyAccepted();
+        return basicCredentials.isPolicyAccepted();
     }
 
     @Transactional
@@ -129,19 +129,19 @@ public class PostService {
     }
 
     private void checkIfAgreedOnWritePolicy(Member member) {
-        if (member.getStatus().isPolicyAccepted() == false) {
+        if (member.getBasicCredentials().isPolicyAccepted() == false) {
             throw new BadRequestException(WRITING_WITHOUT_POLICY_AGREEMENT_NOT_ALLOWED);
         }
     }
 
-    private void checkWritePermission(MemberRole memberRole, PostType postType, BoardType boardType) {
+    private void checkWritePermission(Role role, PostType postType, BoardType boardType) {
         SubBoardType subBoardType = SubBoardType.of(boardType, postType);
 
         if (subBoardType == null) {
             throw new BadRequestException(INVALID_BOARD_TYPE);
         }
 
-        if (subBoardType.hasWritePermission(memberRole) == false) {
+        if (subBoardType.hasWritePermission(role) == false) {
             throw new AuthorizationFailedException();
         }
     }
@@ -312,15 +312,6 @@ public class PostService {
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
-    private void validateDeleteRequest(Member member, Post post) {
-
-        if (isAdmin(member)) {
-            return;
-        }
-
-        checkThisMemberIsPostWriter(member, post);
-    }
-
     @Transactional
     @Retry
     public SinglePostResponse loadSinglePost(Long postId, String username) {
@@ -336,6 +327,15 @@ public class PostService {
         PostQueryRequest request = singlePost(post, member);
 
         return postRepository.loadSinglePostResponse(request);
+    }
+
+    private void validateDeleteRequest(Member member, Post post) {
+
+        if (isAdmin(member)) {
+            return;
+        }
+
+        checkThisMemberIsPostWriter(member, post);
     }
 
     private Post findPostWithLockBy(Long postId) {

@@ -1,19 +1,19 @@
 package com.plana.infli.domain;
 
-import static com.plana.infli.domain.type.MemberRole.*;
-import static com.plana.infli.domain.type.MemberRole.ADMIN;
-import static com.plana.infli.domain.embedded.member.MemberProfileImage.*;
-import static com.plana.infli.domain.embedded.member.MemberStatus.*;
+import static com.plana.infli.domain.type.Role.ADMIN;
 import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.PROTECTED;
 
 import com.plana.infli.domain.editor.MemberEditor;
-import com.plana.infli.domain.embedded.member.MemberName;
-import com.plana.infli.domain.embedded.member.MemberProfileImage;
-import com.plana.infli.domain.embedded.member.MemberStatus;
-import com.plana.infli.domain.type.MemberRole;
+import com.plana.infli.domain.embedded.member.CompanyCredentials;
+import com.plana.infli.domain.embedded.member.LoginCredentials;
+import com.plana.infli.domain.embedded.member.ProfileImage;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
+import com.plana.infli.domain.embedded.member.StudentCredentials;
+import com.plana.infli.domain.type.Role;
+import com.plana.infli.domain.type.VerificationStatus;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -39,78 +39,70 @@ public class Member extends BaseEntity {
     @Column(name = "member_id")
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
-    private String universityEmail;
-
-    @Nullable
-    @Embedded
-    private MemberName name;
-
-    @Embedded
-    private MemberStatus status;
-
-    @Nullable
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "company_id")
-    private Company company;
-
-    @Enumerated(STRING)
-    private MemberRole role;
-
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "university_id")
+    @JoinColumn(name = "university_id", nullable = false)
     private University university;
 
+    @Enumerated(STRING)
+    private Role role;
+
+    @Enumerated(STRING)
+    private VerificationStatus verificationStatus;
+
     @Embedded
-    private MemberProfileImage profileImage;
+    private LoginCredentials loginCredentials;
+
+    @Embedded
+    private ProfileImage profileImage;
+
+    @Embedded
+    private BasicCredentials basicCredentials;
+
+    @Embedded
+    @Nullable
+    private CompanyCredentials companyCredentials;
+
+    @Embedded
+    @Nullable
+    private StudentCredentials studentCredentials;
 
     @Builder
-    public Member(String username, @Nullable MemberName name, String encodedPassword,
-            @Nullable Company company, MemberRole role, University university,
-            MemberProfileImage profileImage, MemberStatus status) {
+    public Member(University university, Role role, VerificationStatus verificationStatus,
+            LoginCredentials loginCredentials, ProfileImage profileImage,
+            BasicCredentials basicCredentials, @Nullable CompanyCredentials companyCredentials,
+            @Nullable StudentCredentials studentCredentials) {
 
-        this.username = username;
-        this.name = name;
-        this.password = encodedPassword;
-        this.universityEmail = null;
-        this.company = company;
         this.university = university;
         this.role = role;
-        this.status = status != null ? status : defaultStatus();
-        this.profileImage = profileImage != null ? profileImage : defaultProfileImage();
+        this.verificationStatus = verificationStatus;
+        this.loginCredentials = loginCredentials;
+        this.profileImage = profileImage;
+        this.basicCredentials = basicCredentials;
+        this.companyCredentials = companyCredentials;
+        this.studentCredentials = studentCredentials;
+    }
+
+    public MemberEditor.MemberEditorBuilder toEditor() {
+        return MemberEditor.builder()
+                .verificationStatus(verificationStatus)
+                .loginCredentials(loginCredentials)
+                .profileImage(profileImage)
+                .basicCredentials(basicCredentials)
+                .companyCredentials(companyCredentials)
+                .studentCredentials(studentCredentials);
+    }
+
+    public void edit(MemberEditor memberEditor) {
+        this.verificationStatus = memberEditor.getVerificationStatus();
+        this.loginCredentials = memberEditor.getLoginCredentials();
+        this.profileImage = memberEditor.getProfileImage();
+        this.basicCredentials = memberEditor.getBasicCredentials();
+        this.companyCredentials = memberEditor.getCompanyCredentials();
+        this.studentCredentials = memberEditor.getStudentCredentials();
     }
 
     public static boolean isAdmin(Member member) {
         return member.role == ADMIN;
-    }
-
-    public void authenticateStudent() {
-        role = STUDENT;
-    }
-
-
-    public MemberEditor.MemberEditorBuilder toEditor() {
-        return MemberEditor.builder()
-                .name(name)
-                .password(password)
-                .universityEmail(universityEmail)
-                .role(role)
-                .status(status)
-                .profileImage(profileImage);
-    }
-
-    public void edit(MemberEditor memberEditor) {
-        this.password = memberEditor.getPassword();
-        this.name = memberEditor.getName();
-        this.role = memberEditor.getRole();
-        this.universityEmail = memberEditor.getUniversityEmail();
-        this.status = memberEditor.getStatus();
-        this.profileImage = memberEditor.getProfileImage();
     }
 }
 

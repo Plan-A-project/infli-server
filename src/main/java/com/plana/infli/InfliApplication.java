@@ -11,5 +11,4 @@ public class InfliApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(InfliApplication.class, args);
 	}
-
 }

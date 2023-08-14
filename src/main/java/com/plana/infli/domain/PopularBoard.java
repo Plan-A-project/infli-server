@@ -40,7 +40,7 @@ public class PopularBoard extends BaseEntity {
     private boolean isEnabled = true;
 
     @Builder
-    public PopularBoard(Member member, Board board, int sequence) {
+    private PopularBoard(Member member, Board board, int sequence) {
         this.member = member;
         this.board = board;
         this.sequence = sequence;

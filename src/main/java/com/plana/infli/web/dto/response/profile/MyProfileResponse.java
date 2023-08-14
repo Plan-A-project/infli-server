@@ -1,7 +1,7 @@
 package com.plana.infli.web.dto.response.profile;
 
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.type.MemberRole;
+import com.plana.infli.domain.type.Role;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,14 +10,15 @@ public class MyProfileResponse {
 
     private final String nickname;
 
-    private final MemberRole memberRole;
+    private final Role role;
+
 
     private final String email;
 
     @Builder
-    private MyProfileResponse(String nickname, MemberRole memberRole, String email) {
+    private MyProfileResponse(String nickname, Role role, String email) {
         this.nickname = nickname;
-        this.memberRole = memberRole;
+        this.role = role;
         this.email = email;
     }
 
@@ -26,8 +27,8 @@ public class MyProfileResponse {
     public static MyProfileResponse of(Member member) {
         return MyProfileResponse.builder()
                 .nickname(null)
-                .memberRole(member.getRole())
-                .email(member.getUsername())
+                .role(member.getRole())
+                .email(member.getStudentCredentials().getUniversityEmail())
                 .build();
     }
 }

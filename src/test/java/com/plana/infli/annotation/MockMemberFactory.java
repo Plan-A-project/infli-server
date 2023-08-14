@@ -1,8 +1,20 @@
 package com.plana.infli.annotation;
 
+import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
+import static com.plana.infli.domain.embedded.member.StudentCredentials.*;
+import static com.plana.infli.domain.type.Role.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
+
+import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.embedded.member.MemberName;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
+import com.plana.infli.domain.embedded.member.CompanyCredentials;
+import com.plana.infli.domain.embedded.member.LoginCredentials;
+import com.plana.infli.domain.embedded.member.ProfileImage;
+import com.plana.infli.domain.embedded.member.StudentCredentials;
+import com.plana.infli.domain.type.VerificationStatus;
+import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import java.util.List;
@@ -22,6 +34,8 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
 
     private final UniversityRepository universityRepository;
 
+    private final CompanyRepository companyRepository;
+
     private final PasswordEncoder encoder;
 
 
@@ -32,23 +46,45 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
                 .name("푸단대학교")
                 .build());
 
+        StudentCredentials studentCredentials = generateStudentInfo(withMockMember);
+        CompanyCredentials companyCredentials = generateCompanyInfo(withMockMember);
+
         Member member = Member.builder()
-                .username(withMockMember.username())
-                .encodedPassword("Test1234!")
-                .name(MemberName.of(withMockMember.nickname(), withMockMember.nickname()))
-                .role(withMockMember.role())
                 .university(university)
+                .role(withMockMember.role())
+                .verificationStatus(SUCCESS)
+                .loginCredentials(
+                        LoginCredentials.of(withMockMember.username(), encoder.encode("password")))
+                .profileImage(ProfileImage.ofDefaultProfileImage())
+                .basicCredentials(BasicCredentials.ofDefaultWithNickname(withMockMember.nickname()))
+                .companyCredentials(companyCredentials)
+                .studentCredentials(studentCredentials)
                 .build();
 
         Member savedMember = memberRepository.save(member);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                savedMember.getUsername(), null,
+                savedMember.getLoginCredentials().getUsername(), null,
                 List.of(new SimpleGrantedAuthority(savedMember.getRole().toString())));
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
-
         return context;
+    }
+
+
+    private CompanyCredentials generateCompanyInfo(WithMockMember withMockMember) {
+        if (withMockMember.role() == COMPANY) {
+            Company company = companyRepository.save(Company.create("카카오"));
+            return CompanyCredentials.ofWithCertificate(company, "aaa.com");
+        }
+        return null;
+    }
+
+    private StudentCredentials generateStudentInfo(WithMockMember withMockMember) {
+        if (withMockMember.role() == STUDENT) {
+            return StudentCredentials.ofWithEmail("이영진", "aaa@infli.com");
+        }
+        return null;
     }
 }

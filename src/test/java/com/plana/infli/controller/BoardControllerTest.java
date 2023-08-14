@@ -180,8 +180,8 @@ public class BoardControllerTest {
         resultActions.andExpect(status().isOk())
                 .andDo(print());
 
-        List<SinglePopularBoard> boards = boardService.loadEnabledPopularBoardsBy(member.getUsername())
-                .getBoards();
+        List<SinglePopularBoard> boards = boardService.loadEnabledPopularBoardsBy(
+                member.getLoginCredentials().getUsername()).getBoards();
 
         assertThat(boards).extracting("boardId").contains(
                 clubBoard.getId(),
@@ -205,7 +205,7 @@ public class BoardControllerTest {
         Board activityBoard = boardFactory.createActivityBoard(university);
         Board anonymousBoard = boardFactory.createAnonymousBoard(university);
 
-        boardService.createDefaultPopularBoards(member.getUsername());
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when
         ResultActions resultActions = mvc
@@ -239,7 +239,7 @@ public class BoardControllerTest {
         Board campusLifeBoard = boardFactory.createCampusLifeBoard(university);
         Board employmentBoard = boardFactory.createEmploymentBoard(university);
 
-        boardService.createDefaultPopularBoards(member.getUsername());
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when
         ResultActions resultActions = mvc
@@ -302,8 +302,9 @@ public class BoardControllerTest {
         resultActions.andExpect(status().isOk())
                 .andDo(print());
 
-        List<SinglePopularBoard> boards = boardService.loadEnabledPopularBoardsBy(member.getUsername())
-                .getBoards();
+        List<SinglePopularBoard> boards = boardService.loadEnabledPopularBoardsBy(
+                member.getLoginCredentials().getUsername()).getBoards();
+
         assertThat(boards).extracting("boardId", "boardName").containsExactly(
                 tuple(clubBoard.getId(), clubBoard.getBoardName()),
                 tuple(campusLifeBoard.getId(), campusLifeBoard.getBoardName()),
@@ -363,7 +364,7 @@ public class BoardControllerTest {
         Board clubBoard = boardFactory.createClubBoard(university);
         Board anonymousBoard = boardFactory.createAnonymousBoard(university);
         Board activityBoard = boardFactory.createActivityBoard(university);
-        boardService.createDefaultPopularBoards(member.getUsername());
+        boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         String json = om.writeValueAsString(ChangePopularBoardVisibilityRequest.builder()
                 .boardIds(
@@ -392,7 +393,7 @@ public class BoardControllerTest {
     }
 
     private Member findContextMember() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByUsername(email).get();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findActiveMemberBy(username).get();
     }
 }

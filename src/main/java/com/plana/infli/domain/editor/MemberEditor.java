@@ -1,89 +1,103 @@
 package com.plana.infli.domain.editor;
 
-import static com.plana.infli.domain.embedded.member.MemberStatus.*;
-import static com.plana.infli.domain.type.MemberRole.*;
+import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
+import static com.plana.infli.domain.embedded.member.BasicCredentials.*;
 
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.type.MemberRole;
-import com.plana.infli.domain.embedded.member.MemberName;
-import com.plana.infli.domain.embedded.member.MemberProfileImage;
-import com.plana.infli.domain.embedded.member.MemberStatus;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
+import com.plana.infli.domain.embedded.member.CompanyCredentials;
+import com.plana.infli.domain.embedded.member.LoginCredentials;
+import com.plana.infli.domain.embedded.member.StudentCredentials;
+import com.plana.infli.domain.embedded.member.ProfileImage;
+import com.plana.infli.domain.type.VerificationStatus;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class MemberEditor {
 
-    private final String nickname;
+    private final VerificationStatus verificationStatus;
 
-    private final String universityEmail;
+    private final LoginCredentials loginCredentials;
 
-    private final String password;
+    private final ProfileImage profileImage;
 
-    private final MemberRole role;
+    private final BasicCredentials basicCredentials;
 
-    private final MemberStatus status;
+    private final CompanyCredentials companyCredentials;
 
-    private final MemberName name;
-
-    private final MemberProfileImage profileImage;
+    private final StudentCredentials studentCredentials;
 
     @Builder
-    public MemberEditor(String nickname, String universityEmail,
-            String password, MemberRole role, MemberStatus status,
-            MemberName name, MemberProfileImage profileImage) {
+    private MemberEditor(VerificationStatus verificationStatus, LoginCredentials loginCredentials,
+            ProfileImage profileImage, BasicCredentials basicCredentials,
+            CompanyCredentials companyCredentials, StudentCredentials studentCredentials) {
 
-        this.nickname = nickname;
-        this.universityEmail = universityEmail;
-        this.password = password;
-        this.role = role;
-        this.status = status;
-        this.name = name;
+        this.verificationStatus = verificationStatus;
+        this.loginCredentials = loginCredentials;
         this.profileImage = profileImage;
+        this.basicCredentials = basicCredentials;
+        this.companyCredentials = companyCredentials;
+        this.studentCredentials = studentCredentials;
     }
 
     public static void editNickname(Member member, String newNickname) {
+
+        BasicCredentials newBasicCredentials = ofNewNickname(member.getBasicCredentials(),
+                newNickname);
+
         member.edit(member.toEditor()
-                .nickname(newNickname)
+                .basicCredentials(newBasicCredentials)
                 .build());
     }
 
     public static void editPassword(Member member, String newEncryptedPassword) {
+
+        LoginCredentials newLoginCredentials = ofNewPassword(member.getLoginCredentials(),
+                newEncryptedPassword);
+
         member.edit(member.toEditor()
-                .nickname(newEncryptedPassword)
+                .loginCredentials(newLoginCredentials)
                 .build());
     }
 
-    public static void editProfileImage(Member member, MemberProfileImage newProfileImage) {
+    public static void editProfileImage(Member member, ProfileImage newProfileImage) {
         member.edit(member.toEditor()
                 .profileImage(newProfileImage)
                 .build());
     }
 
     public static void unregister(Member member) {
-        boolean policyAccepted = member.getStatus().isPolicyAccepted();
+
+        BasicCredentials newBasicCredentials = ofDeleted(member.getBasicCredentials());
 
         member.edit(member.toEditor()
-                .status(ofDeleted(policyAccepted))
+                .basicCredentials(newBasicCredentials)
                 .build());
     }
 
     public static void acceptPolicy(Member member) {
+
+        BasicCredentials newBasicCredentials = ofPolicyAccepted(member.getBasicCredentials());
+
         member.edit(member.toEditor()
-                .status(ofPolicyAccepted())
+                .basicCredentials(newBasicCredentials)
                 .build());
     }
 
-    public static void authenticateAsStudent(Member member, String universityEmail) {
-        member.edit(member.toEditor()
-                .universityEmail(universityEmail)
-                .role(STUDENT)
-                .build());
-    }
-
-    public static void authenticateAsCompany(Member member) {
-        member.edit(member.toEditor()
-                .role(COMPANY)
-                .build());
-    }
+//    public static void verifyStudentMemberByEmail(Member member, String universityEmail) {
+//
+//
+//
+//        member.edit(member.toEditor()
+//                .universityEmail(universityEmail)
+//                .role(VERIFIED_STUDENT)
+//                .build());
+//    }
+//
+//    public static void authenticateAsCompany(Member member) {
+//        member.edit(member.toEditor()
+//                .role(VERIFIED_COMPANY)
+//                .build());
+//    }
 }
