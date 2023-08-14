@@ -8,7 +8,7 @@ import static com.plana.infli.domain.QCompany.*;
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QPost.*;
 import static com.plana.infli.domain.QPostLike.*;
-import static com.plana.infli.domain.type.MemberRole.*;
+import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder.popular;
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.type.MemberRole;
+import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
@@ -98,7 +98,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return jpaQueryFactory.select(
                         new QSinglePostResponse(
                                 post.board.boardName, post.board.id,
-                                post.postType.stringValue(), nicknameEq(),
+                                post.postType.stringValue(), writerEq(),
                                 post.id, post.title, post.content, post.createdAt,
                                 isMyPost(request.getMember()), isAdmin(request.getMember()),
                                 post.viewCount, post.likes.size(),
@@ -108,7 +108,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(post)
                 .where(post.eq(request.getPost()))
                 .innerJoin(post.member, member)
-                .leftJoin(post.member.company, company)
                 .fetchOne();
     }
 
@@ -121,17 +120,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(post.member.eq(findMember));
     }
 
-
-    private StringExpression nicknameEq() {
-
+    private StringExpression writerEq() {
         return new CaseBuilder()
-                .when(postWriterRoleEqual(COMPANY)).then(post.member.company.name)
-                .when(post.board.boardType.eq(ANONYMOUS)).then(nullExpression())
-                .otherwise(post.member.name.nickname);
-    }
-
-    private BooleanExpression postWriterRoleEqual(MemberRole memberRole) {
-        return post.member.role.eq(memberRole);
+                .when(post.board.boardType.eq(EMPLOYMENT))
+                .then(post.member.basicCredentials.nickname)
+                .when(post.board.boardType.eq(ANONYMOUS))
+                .then(nullExpression())
+                .otherwise(post.member.basicCredentials.nickname);
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {
@@ -166,7 +161,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .otherwise(nullExpression());
     }
 
-    private Expression<Boolean> isAdmin(Member member) {
+    private BooleanExpression isAdmin(Member member) {
         return Member.isAdmin(member) ? asBoolean(true) : asBoolean(false);
     }
 

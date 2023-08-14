@@ -4,10 +4,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.plana.infli.domain.EmailAuthentication;
+import com.plana.infli.domain.EmailVerification;
 
 public interface EmailAuthenticationRepository
-	extends JpaRepository<EmailAuthentication, Long>, EmailAuthenticationRepositoryCustom {
+	extends JpaRepository<EmailVerification, Long>, EmailAuthenticationRepositoryCustom {
 
-	Optional<EmailAuthentication> findByCode(String code);
+	Optional<EmailVerification> findByCode(String code);
 }

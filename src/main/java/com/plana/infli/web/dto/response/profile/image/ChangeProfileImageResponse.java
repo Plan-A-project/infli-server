@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.response.profile.image;
 
-import com.plana.infli.domain.embedded.member.MemberProfileImage;
+import com.plana.infli.domain.embedded.member.ProfileImage;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,7 +17,7 @@ public class ChangeProfileImageResponse {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public static ChangeProfileImageResponse of(MemberProfileImage profileImage) {
+    public static ChangeProfileImageResponse of(ProfileImage profileImage) {
         return ChangeProfileImageResponse.builder()
                 .originalUrl(profileImage.getOriginalUrl())
                 .thumbnailUrl(profileImage.getThumbnailUrl())

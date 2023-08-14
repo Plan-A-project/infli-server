@@ -26,9 +26,10 @@ public class UserDetailServiceImpl implements UserDetailsService {
 				.orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
 
 		return User.builder()
-			.username(member.getUsername())
-			.password(member.getPassword())
-			.roles(member.getRole().name())
-			.build();
+				.username(member.getLoginCredentials().getUsername())
+				.password(member.getLoginCredentials().getPassword())
+				.roles(member.getRole().name())
+				.build();
 	}
+
 }

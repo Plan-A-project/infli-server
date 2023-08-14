@@ -107,9 +107,9 @@ public class CommentLikeControllerTest {
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member member = findContextMember();
 
@@ -138,9 +138,9 @@ public class CommentLikeControllerTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
                 .postId(post.getId())
@@ -167,7 +167,7 @@ public class CommentLikeControllerTest {
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
                 .postId(post.getId())
@@ -194,9 +194,9 @@ public class CommentLikeControllerTest {
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
                 .postId(null)
@@ -224,9 +224,9 @@ public class CommentLikeControllerTest {
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member member = findContextMember();
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
@@ -256,11 +256,11 @@ public class CommentLikeControllerTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        Member member = memberFactory.createStudentMember("member", university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
@@ -289,9 +289,9 @@ public class CommentLikeControllerTest {
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member member = findContextMember();
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
@@ -321,9 +321,9 @@ public class CommentLikeControllerTest {
         University university = universityRepository.findByName("푸단대학교").get();
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
-                memberFactory.createStudentMember("postMember", university), board);
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
         Comment comment = commentFactory.createComment(
-                memberFactory.createStudentMember("commentMember", university), post);
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member member = findContextMember();
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
@@ -346,7 +346,7 @@ public class CommentLikeControllerTest {
     }
 
     private Member findContextMember() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return memberRepository.findByUsername(email).get();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return memberRepository.findActiveMemberBy(username).get();
     }
 }

@@ -23,6 +23,7 @@ public class Company extends BaseEntity {
     @Column(name = "company_id")
     private Long id;
 
+    @Column(nullable = false, unique = true)
     private String name;
 
     private boolean isDeleted;

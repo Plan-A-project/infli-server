@@ -17,10 +17,30 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
+    public boolean existsByUniversityEmail(String universityEmail) {
+        Integer fetchOne = jpaQueryFactory.selectOne()
+                .from(member)
+                .where(member.studentCredentials.universityEmail.eq(universityEmail))
+                .fetchFirst();
+
+        return fetchOne != null;
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        Integer fetchOne = jpaQueryFactory.selectOne()
+                .from(member)
+                .where(member.loginCredentials.username.eq(username))
+                .fetchFirst();
+
+        return fetchOne != null;
+    }
+
+    @Override
     public Optional<Member> findActiveMemberBy(String username) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
-                .where(member.username.eq(username))
-                .where(member.status.isDeleted.isFalse())
+                .where(member.loginCredentials.username.eq(username))
+                .where(member.basicCredentials.isDeleted.isFalse())
                 .fetchOne());
     }
 
@@ -28,7 +48,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     public boolean existsByNickname(String nickname) {
         Integer fetchOne = jpaQueryFactory.selectOne()
                 .from(member)
-                .where(member.name.nickname.eq(nickname))
+                .where(member.basicCredentials.nickname.eq(nickname))
                 .fetchFirst();
 
         return fetchOne != null;
@@ -38,8 +58,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     public Optional<Member> findActiveMemberWithUniversityBy(String username) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
                 .leftJoin(member.university, university).fetchJoin()
-                .where(member.username.eq(username))
-                .where(member.status.isDeleted.isFalse())
+                .where(member.loginCredentials.username.eq(username))
+                .where(member.basicCredentials.isDeleted.isFalse())
                 .fetchOne());
     }
+
 }

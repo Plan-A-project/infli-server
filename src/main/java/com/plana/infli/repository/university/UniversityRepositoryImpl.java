@@ -26,7 +26,7 @@ public class UniversityRepositoryImpl implements UniversityRepositoryCustom {
     public Optional<University> findByMemberUsername(String username) {
         return ofNullable(jpaQueryFactory.select(member.university)
                 .from(member)
-                .where(member.username.eq(username))
+                .where(member.loginCredentials.username.eq(username))
                 .fetchOne());
     }
 

@@ -10,27 +10,27 @@ import lombok.NoArgsConstructor;
 @Getter
 @Embeddable
 @NoArgsConstructor(access = PROTECTED)
-public class MemberProfileImage {
+public class ProfileImage {
 
     private String originalUrl;
 
     private String thumbnailUrl;
 
     @Builder
-    public MemberProfileImage(String originalUrl, String thumbnailUrl) {
+    private ProfileImage(String originalUrl, String thumbnailUrl) {
         this.originalUrl = originalUrl;
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public static MemberProfileImage defaultProfileImage() {
-        return MemberProfileImage.builder()
+    public static ProfileImage ofDefaultProfileImage() {
+        return ProfileImage.builder()
                 .originalUrl(null)
                 .thumbnailUrl(null)
                 .build();
     }
 
-    public static MemberProfileImage of(String originalUrl, String thumbnailUrl) {
-        return MemberProfileImage.builder()
+    public static ProfileImage of(String originalUrl, String thumbnailUrl) {
+        return ProfileImage.builder()
                 .originalUrl(originalUrl)
                 .thumbnailUrl(thumbnailUrl)
                 .build();

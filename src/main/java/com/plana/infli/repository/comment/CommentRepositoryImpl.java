@@ -161,9 +161,8 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     private Expression<String> nicknameEq(boolean isAnonymous) {
-        return isAnonymous ? nullExpression() : comment.member.name.nickname;
+        return isAnonymous ? nullExpression() : comment.member.basicCredentials.nickname;
     }
-
 
     @Override
     public Long findActiveCommentsCountIn(Post findPost) {

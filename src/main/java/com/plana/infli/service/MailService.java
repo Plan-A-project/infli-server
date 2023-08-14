@@ -1,15 +1,12 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.type.MemberRole.*;
 import static com.plana.infli.exception.custom.ConflictException.*;
 import static com.plana.infli.exception.custom.NotFoundException.AUTHENTICATION_NOT_FOUND;
 import static com.plana.infli.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
 import static java.time.LocalDateTime.*;
 
-import com.plana.infli.domain.EmailAuthentication;
+import com.plana.infli.domain.EmailVerification;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.type.MemberRole;
-import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.emailAuthentication.EmailAuthenticationRepository;
@@ -66,11 +63,11 @@ public class MailService {
     @Transactional
     public void authenticateMemberEmail(String secret) {
 
-        EmailAuthentication emailAuthentication = emailAuthenticationRepository
+        EmailVerification emailVerification = emailAuthenticationRepository
                 .findWithMemberBy(secret)
                 .orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
 
-        Member member = emailAuthentication.getMember();
+        Member member = emailVerification.getMember();
 
 //        if (member.getRole() != EMAIL_UNCERTIFIED_STUDENT) {
 //            throw new BadRequestException(        )
@@ -84,11 +81,11 @@ public class MailService {
 
         checkUniversityEmailDuplicate(request.getUniversityEmail());
 
-        EmailAuthentication emailAuthentication = request.toEntity(member, now());
+        EmailVerification emailVerification = request.toEntity(member, now());
 
-        emailAuthenticationRepository.save(emailAuthentication);
+        emailAuthenticationRepository.save(emailVerification);
 
-        SimpleMailMessage message = generateMail(emailAuthentication);
+        SimpleMailMessage message = generateMail(emailVerification);
 
         mailSender.send(message);
 //        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
@@ -116,14 +113,14 @@ public class MailService {
 //        mailSender.send(message);
     }
 
-    private SimpleMailMessage generateMail(EmailAuthentication emailAuthentication) {
+    private SimpleMailMessage generateMail(EmailVerification emailVerification) {
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(MESSAGE_FROM);
-        message.setTo(emailAuthentication.getUniversityEmail());
+        message.setTo(emailVerification.getUniversityEmail());
         message.setSubject("인플리 학생 인증 메일입니다");
         message.setText("안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
-                "http://localhost:8080/member/student/auth/" + emailAuthentication.getCode()
+                "http://localhost:8080/member/student/auth/" + emailVerification.getCode()
                 + "\n" +
                 "30분안에 인증하셔야 합니다.");
 
@@ -145,14 +142,14 @@ public class MailService {
     @Transactional
     public void authenticateStudent(String secret) {
 
-        EmailAuthentication emailAuthentication = emailAuthenticationRepository.findAvailableEmailAuthentication(
-                        secret)
-                .orElseThrow(
-                        () -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
-
-        Member member = emailAuthentication.getMember();
-
-        member.authenticateStudent();
+//        EmailVerification emailVerification = emailAuthenticationRepository.findAvailableEmailAuthentication(
+//                        secret)
+//                .orElseThrow(
+//                        () -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
+//
+//        Member member = emailVerification.getMember();
+//
+//        member.authenticateStudent();
     }
 
     @Transactional
@@ -178,8 +175,7 @@ public class MailService {
     }
 
     @Transactional
-    public void sendCompanyAuthenticationEmail(String email, MultipartFile multipartFile)
-            throws MessagingException, IOException {
+    public void sendCompanyAuthenticationEmail(String email, MultipartFile multipartFile) {
 
 //        Member member = memberRepository.findByEmail(email)
 //                .orElseThrow(() -> new NotFoundException(NotFoundException.MEMBER_NOT_FOUND));
