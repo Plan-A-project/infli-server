@@ -5,7 +5,6 @@ import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailRequest;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,34 +26,27 @@ public class MemberController {
     private final MailService mailService;
     
 
-    @PostMapping("/emails/verification")
+    @PostMapping("/verification/student/email")
     public void sendVerificationEmail(@AuthenticatedPrincipal String username,
             @RequestBody @Validated SendVerificationMailRequest request) {
         mailService.sendVerificationMail(request.toServiceRequest(username));
     }
 
-    @PostMapping("/company/auth/send")
-    public void receiveCompanyCertificateImage(@AuthenticatedPrincipal String username,
+    @GetMapping("/verification/student/email/{code}")
+    public void verifyStudentMemberEmail(@PathVariable String code) {
+        mailService.verifyStudentMemberEmail(code);
+    }
+
+    @PostMapping("/verification/student/certificate")
+    public void uploadEnrollmentCertificateImage(@AuthenticatedPrincipal String username,
+            @RequestParam MultipartFile file) {
+        memberService.uploadUniversityCertificateImage(username, file);
+    }
+
+    @PostMapping("/verification/company/certificate")
+    public void uploadCompanyCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
 
-        memberService.receiveCompanyCertificateImage(username, file);
-    }
-
-    @GetMapping("/email/auth/{secret}")
-    public ResponseEntity<Void> authenticateMemberEmail(@PathVariable String secret) {
-        mailService.authenticateMemberEmail(secret);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/company/auth/{secret}")
-    public ResponseEntity<Void> authenticateCompany(@PathVariable String secret) {
-        mailService.authenticateCompany(secret);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/student/auth/{secret}")
-    public ResponseEntity<Void> authenticateStudent(@PathVariable String secret) {
-        mailService.authenticateStudent(secret);
-        return ResponseEntity.ok().build();
+        memberService.uploadCompanyCertificateImage(username, file);
     }
 }

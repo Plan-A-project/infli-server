@@ -120,7 +120,9 @@ public class MemberInitializer implements CommandLineRunner {
                 .loginCredentials(LoginCredentials.of("company", encoder.encode("password")))
                 .profileImage(ofDefaultProfileImage())
                 .basicCredentials(ofDefaultWithNickname("company"))
-                .companyCredentials(CompanyCredentials.ofWithCertificate(company, "aaa.com"))
+                .companyCredentials(
+                        CompanyCredentials.ofWithCertificate(CompanyCredentials.ofDefault(company),
+                                "aaa.com"))
                 .studentCredentials(null)
                 .build());
 

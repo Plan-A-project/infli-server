@@ -47,7 +47,7 @@ public class StudentCredentials {
         return of(studentCredentials.realName, universityEmail, null);
     }
 
-    public static StudentCredentials ofWithCertificate(String realName, String certificateUrl) {
-        return of(realName, null, certificateUrl);
+    public static StudentCredentials ofWithCertificate(StudentCredentials studentCredentials, String certificateUrl) {
+        return of(studentCredentials.realName, null, certificateUrl);
     }
 }

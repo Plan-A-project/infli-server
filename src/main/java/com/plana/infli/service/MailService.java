@@ -1,23 +1,26 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.editor.MemberEditor.*;
+import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.exception.custom.BadRequestException.EMAIL_VERIFICATION_ALREADY_EXISTS;
+import static com.plana.infli.exception.custom.BadRequestException.EMAIL_VERIFICATION_CODE_EXPIRED;
+import static com.plana.infli.exception.custom.BadRequestException.INVALID_EMAIL_CODE;
+import static com.plana.infli.exception.custom.BadRequestException.INVALID_STUDENT_VERIFICATION_REQUEST;
 import static com.plana.infli.exception.custom.BadRequestException.INVALID_UNIVERSITY_EMAIL;
 import static com.plana.infli.exception.custom.ConflictException.*;
-import static com.plana.infli.exception.custom.NotFoundException.AUTHENTICATION_NOT_FOUND;
 import static com.plana.infli.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
 import static java.time.LocalDateTime.*;
 
 import com.plana.infli.domain.EmailVerification;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.editor.MemberEditor;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
-import com.plana.infli.repository.emailAuthentication.EmailAuthenticationRepository;
+import com.plana.infli.repository.emailVerification.EmailVerificationRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailServiceRequest;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -34,7 +37,7 @@ public class MailService {
 
     private final MemberRepository memberRepository;
 
-    private final EmailAuthenticationRepository emailAuthenticationRepository;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     private static final String MESSAGE_FROM = "no-reply@infli.co";
 
@@ -67,17 +70,35 @@ public class MailService {
     }
 
     @Transactional
-    public void authenticateMemberEmail(String secret) {
+    public void verifyStudentMemberEmail(String secret) {
 
-        EmailVerification emailVerification = emailAuthenticationRepository
-                .findWithMemberBy(secret)
-                .orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
-
+        EmailVerification emailVerification = findWithMemberBy(secret);
+        
         Member member = emailVerification.getMember();
 
-//        if (member.getRole() != EMAIL_UNCERTIFIED_STUDENT) {
-//            throw new BadRequestException(        )
-//        }
+        validateVerifyStudentMemberEmailRequest(member, emailVerification);
+
+        setVerificationStatusAsSuccess(member);
+    }
+
+    private EmailVerification findWithMemberBy(String secret) {
+        return emailVerificationRepository.findWithMemberBy(secret)
+                .orElseThrow(() -> new BadRequestException(INVALID_EMAIL_CODE));
+    }
+
+    private void validateVerifyStudentMemberEmailRequest(Member member,
+            EmailVerification emailVerification) {
+
+        if (member.getRole() != STUDENT || member.getVerificationStatus() != PENDING) {
+            setVerificationStatusAsFail(member);
+            throw new BadRequestException(INVALID_STUDENT_VERIFICATION_REQUEST);
+        }
+
+        LocalDateTime codeGeneratedTime = emailVerification.getCodeGeneratedTime();
+
+        if (codeGeneratedTime.plusMinutes(30).isBefore(now())) {
+            throw new BadRequestException(EMAIL_VERIFICATION_CODE_EXPIRED);
+        }
     }
 
     @Transactional
@@ -92,7 +113,7 @@ public class MailService {
 
         EmailVerification emailVerification = request.toEntity(member, now());
 
-        emailAuthenticationRepository.save(emailVerification);
+        emailVerificationRepository.save(emailVerification);
 
         SimpleMailMessage message = generateMail(emailVerification);
 

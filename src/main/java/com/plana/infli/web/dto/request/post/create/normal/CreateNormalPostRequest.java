@@ -24,7 +24,7 @@ public class CreateNormalPostRequest {
     private PostType postType;
 
     @Builder
-    public CreateNormalPostRequest(Long boardId,
+    private CreateNormalPostRequest(Long boardId,
             String title, String content, PostType postType) {
 
         this.boardId = boardId;
