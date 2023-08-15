@@ -115,53 +115,53 @@ public class MemberService {
 
     @Transactional
     public void uploadCompanyCertificateImage(String username, MultipartFile file) {
-//        Member member = findMemberBy(username);
-//
-//        validateUploadCompanyCertificateRequest(member, file);
-//
-//        String directoryPath = "member/member_" + member.getId() + "/certificate/company";
-//
-//        String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
-//
-//        setVerificationStatusAsPendingByCompanyCertificate(member, imageUrl);
+        Member member = findMemberBy(username);
+
+        validateUploadCompanyCertificateRequest(member, file);
+
+        String directoryPath = "member/member_" + member.getId() + "/certificate/company";
+
+        String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
+
+        setVerificationStatusAsPendingByCompanyCertificate(member, imageUrl);
     }
 
-//    private void validateUploadCompanyCertificateRequest(Member member, MultipartFile file) {
-//        if (file.isEmpty()) {
-//            throw new BadRequestException(IMAGE_IS_EMPTY);
-//        }
-//
-//        if (member.getVerificationStatus() == SUCCESS) {
-//            throw new BadRequestException(COMPANY_VERIFICATION_ALREADY_EXISTS);
-//        }
-//    }
-//
-//    private Member findMemberBy(String username) {
-//        return memberRepository.findActiveMemberBy(username)
-//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-//    }
+    private void validateUploadCompanyCertificateRequest(Member member, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BadRequestException(IMAGE_IS_EMPTY);
+        }
+
+        if (member.getVerificationStatus() == SUCCESS) {
+            throw new BadRequestException(COMPANY_VERIFICATION_ALREADY_EXISTS);
+        }
+    }
+
+    private Member findMemberBy(String username) {
+        return memberRepository.findActiveMemberBy(username)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
 
     @Transactional
     public void uploadUniversityCertificateImage(String username, MultipartFile file) {
 
-//        Member member = findMemberBy(username);
-//
-//        validateUploadUniversityCertificateRequest(member, file);
-//
-//        String directoryPath = "member/member_" + member.getId() + "/certificate/student";
-//
-//        String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
-//
-//        setVerificationStatusAsPendingByUniversityCertificate(member, imageUrl);
+        Member member = findMemberBy(username);
+
+        validateUploadUniversityCertificateRequest(member, file);
+
+        String directoryPath = "member/member_" + member.getId() + "/certificate/student";
+
+        String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
+
+        setVerificationStatusAsPendingByUniversityCertificate(member, imageUrl);
     }
 
-//    private void validateUploadUniversityCertificateRequest(Member member, MultipartFile file) {
-//        if (file.isEmpty()) {
-//            throw new BadRequestException(IMAGE_IS_EMPTY);
-//        }
-//
-//        if (member.getVerificationStatus() == SUCCESS) {
-//            throw new BadRequestException(COMPANY_VERIFICATION_ALREADY_EXISTS);
-//        }
-//    }
+    private void validateUploadUniversityCertificateRequest(Member member, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BadRequestException(IMAGE_IS_EMPTY);
+        }
+
+        if (member.getVerificationStatus() == SUCCESS) {
+            throw new BadRequestException(COMPANY_VERIFICATION_ALREADY_EXISTS);
+        }
+    }
 }
