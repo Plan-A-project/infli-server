@@ -12,6 +12,8 @@ import com.plana.infli.domain.QUniversity;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.type.VerificationStatus;
+import com.plana.infli.web.dto.response.member.verification.company.CompanyVerificationImage;
+import com.plana.infli.web.dto.response.member.verification.company.QCompanyVerificationImage;
 import com.plana.infli.web.dto.response.member.verification.student.QStudentVerificationImage;
 import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -85,6 +87,23 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .where(member.university.eq(university))
                 .where(member.basicCredentials.isDeleted.isFalse())
                 .where(member.role.eq(STUDENT))
+                .where(member.verificationStatus.eq(PENDING))
+                .offset((page - 1) * 20L)
+                .limit(20)
+                .fetch();
+    }
+
+    @Override
+    public List<CompanyVerificationImage> loadCompanyVerificationImages(University university,
+            int page) {
+
+        return jpaQueryFactory
+                .select(new QCompanyVerificationImage(member.id,member.companyCredentials.companyCertificateUrl, member.companyCredentials.company.name,
+                        member.createdAt))
+                .from(member)
+                .where(member.university.eq(university))
+                .where(member.basicCredentials.isDeleted.isFalse())
+                .where(member.role.eq(COMPANY))
                 .where(member.verificationStatus.eq(PENDING))
                 .offset((page - 1) * 20L)
                 .limit(20)

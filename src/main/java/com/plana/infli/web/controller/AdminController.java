@@ -4,6 +4,7 @@ import static com.plana.infli.web.dto.response.ApiResponse.ok;
 
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.response.ApiResponse;
+import com.plana.infli.web.dto.response.member.verification.company.LoadCompanyVerificationsResponse;
 import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,9 @@ public class AdminController {
 
 
     @GetMapping("/verification/student/certificate}")
-    public ApiResponse<LoadStudentVerificationsResponse> loadStudentVerificationRequest(
+    public ApiResponse<LoadStudentVerificationsResponse> loadStudentVerificationRequestImages(
             @AuthenticatedPrincipal String username, @RequestParam int page) {
-        return ok(memberService.loadStudentVerificationRequest(username, page));
+        return ok(memberService.loadStudentVerificationRequestImages(username, page));
     }
 
     @PostMapping("/verification/certificate/certificate/{memberId}")
@@ -34,6 +35,12 @@ public class AdminController {
 
         memberService.setMemberVerificationStatusAsSuccess(username, memberId);
         return ok();
+    }
+
+    @GetMapping("/verification/company/certificate}")
+    public ApiResponse<LoadCompanyVerificationsResponse> loadCompanyVerificationRequestImages(
+            @AuthenticatedPrincipal String username, @RequestParam int page) {
+        return ok(memberService.loadCompanyVerificationRequestImages(username, page));
     }
 
     @PostMapping("/verification/company/certificate/{memberId}")
