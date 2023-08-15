@@ -1,6 +1,7 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.Company.*;
+import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.exception.custom.BadRequestException.COMPANY_VERIFICATION_ALREADY_EXISTS;
 import static com.plana.infli.exception.custom.BadRequestException.IMAGE_IS_EMPTY;
@@ -11,8 +12,6 @@ import static com.plana.infli.exception.custom.NotFoundException.*;
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.editor.MemberEditor;
-import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -115,19 +114,19 @@ public class MemberService {
     }
 
     @Transactional
-    public void receiveCompanyCertificateImage(String username, MultipartFile file) {
+    public void uploadCompanyCertificateImage(String username, MultipartFile file) {
 //        Member member = findMemberBy(username);
 //
-//        validateReceiveCompanyCertificateRequest(member, file);
+//        validateUploadCompanyCertificateRequest(member, file);
 //
 //        String directoryPath = "member/member_" + member.getId() + "/certificate/company";
 //
 //        String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
 //
-//        MemberEditor.
+//        setVerificationStatusAsPendingByCompanyCertificate(member, imageUrl);
     }
 
-//    private void validateReceiveCompanyCertificateRequest(Member member, MultipartFile file) {
+//    private void validateUploadCompanyCertificateRequest(Member member, MultipartFile file) {
 //        if (file.isEmpty()) {
 //            throw new BadRequestException(IMAGE_IS_EMPTY);
 //        }
@@ -140,5 +139,29 @@ public class MemberService {
 //    private Member findMemberBy(String username) {
 //        return memberRepository.findActiveMemberBy(username)
 //                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+//    }
+
+    @Transactional
+    public void uploadUniversityCertificateImage(String username, MultipartFile file) {
+
+//        Member member = findMemberBy(username);
+//
+//        validateUploadUniversityCertificateRequest(member, file);
+//
+//        String directoryPath = "member/member_" + member.getId() + "/certificate/student";
+//
+//        String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
+//
+//        setVerificationStatusAsPendingByUniversityCertificate(member, imageUrl);
+    }
+
+//    private void validateUploadUniversityCertificateRequest(Member member, MultipartFile file) {
+//        if (file.isEmpty()) {
+//            throw new BadRequestException(IMAGE_IS_EMPTY);
+//        }
+//
+//        if (member.getVerificationStatus() == SUCCESS) {
+//            throw new BadRequestException(COMPANY_VERIFICATION_ALREADY_EXISTS);
+//        }
 //    }
 }

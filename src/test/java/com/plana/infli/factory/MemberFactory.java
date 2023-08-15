@@ -65,14 +65,15 @@ public class MemberFactory {
 
     private CompanyCredentials generateCompanyCredentials(Company company) {
         if (company != null) {
-            return CompanyCredentials.ofWithCertificate(company, "aaa.com");
+            return CompanyCredentials.ofWithCertificate(CompanyCredentials.ofDefault(company),
+                    "aaa.com");
         }
         return null;
     }
 
     private StudentCredentials generateStudentCredentials(Role role) {
         if (role == STUDENT) {
-            return ofWithCertificate("이영진", "aaa.com");
+            return ofWithCertificate(ofDefault("이영진"), "aaa.com");
         }
         return null;
     }

@@ -42,6 +42,13 @@ public class BadRequestException extends DefaultException{
 
     public static final String COMPANY_VERIFICATION_ALREADY_EXISTS = "기업 인증을 완료했습니다";
 
+    public static final String INVALID_EMAIL_CODE = "유효하지 않은 이메일 코드 입니다";
+
+    public static final String INVALID_STUDENT_VERIFICATION_REQUEST = "유효하지 않은 이메일 인증 요청 입니다";
+
+    public static final String EMAIL_VERIFICATION_CODE_EXPIRED = "이메일 인증 코드가 만료되었습니다";
+
+
     public BadRequestException(String message) {
         super(message);
     }

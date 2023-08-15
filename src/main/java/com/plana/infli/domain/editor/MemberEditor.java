@@ -100,7 +100,19 @@ public class MemberEditor {
     public static void setVerificationStatusAsPendingByCompanyCertificate(Member member,
             String imageUrl) {
 
-        CompanyCredentials newCompanyCredentials = CompanyCredentials.ofWithEmail(
+        CompanyCredentials newCompanyCredentials = CompanyCredentials.ofWithCertificate(
+                member.getCompanyCredentials(), imageUrl);
+
+        member.edit(member.toEditor()
+                .verificationStatus(PENDING)
+                .companyCredentials(newCompanyCredentials)
+                .build());
+    }
+
+    public static void setVerificationStatusAsPendingByUniversityCertificate(Member member,
+            String imageUrl) {
+
+        StudentCredentials newStudentCredentials = StudentCredentials.ofWithCertificate(
                 member.getStudentCredentials(), imageUrl);
 
         member.edit(member.toEditor()
@@ -109,9 +121,15 @@ public class MemberEditor {
                 .build());
     }
 
-//    public static void authenticateAsCompany(Member member) {
-//        member.edit(member.toEditor()
-//                .role(VERIFIED_COMPANY)
-//                .build());
-//    }
+    public static void setVerificationStatusAsFail(Member member) {
+        member.edit(member.toEditor()
+                .verificationStatus(FAILED)
+                .build());
+    }
+
+    public static void setVerificationStatusAsSuccess(Member member) {
+        member.edit(member.toEditor()
+                .verificationStatus(SUCCESS)
+                .build());
+    }
 }

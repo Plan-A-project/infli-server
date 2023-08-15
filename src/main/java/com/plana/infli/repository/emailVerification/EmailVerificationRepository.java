@@ -1,4 +1,4 @@
-package com.plana.infli.repository.emailAuthentication;
+package com.plana.infli.repository.emailVerification;
 
 import java.util.Optional;
 
@@ -6,8 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.plana.infli.domain.EmailVerification;
 
-public interface EmailAuthenticationRepository
-	extends JpaRepository<EmailVerification, Long>, EmailAuthenticationRepositoryCustom {
+public interface EmailVerificationRepository
+	extends JpaRepository<EmailVerification, Long>, EmailVerificationRepositoryCustom {
 
 	Optional<EmailVerification> findByCode(String code);
 }
