@@ -41,11 +41,13 @@ public class StudentCredentials {
     }
 
 
-    public static StudentCredentials ofWithEmail(String realName, String universityEmail) {
-        return of(realName, universityEmail, null);
+    public static StudentCredentials ofWithEmail(StudentCredentials studentCredentials,
+            String universityEmail) {
+
+        return of(studentCredentials.realName, universityEmail, null);
     }
 
-    public static StudentCredentials ofWithCertificate(String realName, String certificateUrl) {
-        return of(realName, null, certificateUrl);
+    public static StudentCredentials ofWithCertificate(StudentCredentials studentCredentials, String certificateUrl) {
+        return of(studentCredentials.realName, null, certificateUrl);
     }
 }

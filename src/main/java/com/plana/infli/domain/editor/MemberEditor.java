@@ -2,6 +2,7 @@ package com.plana.infli.domain.editor;
 
 import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
 import static com.plana.infli.domain.embedded.member.BasicCredentials.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.BasicCredentials;
@@ -85,19 +86,50 @@ public class MemberEditor {
                 .build());
     }
 
-//    public static void verifyStudentMemberByEmail(Member member, String universityEmail) {
-//
-//
-//
-//        member.edit(member.toEditor()
-//                .universityEmail(universityEmail)
-//                .role(VERIFIED_STUDENT)
-//                .build());
-//    }
-//
-//    public static void authenticateAsCompany(Member member) {
-//        member.edit(member.toEditor()
-//                .role(VERIFIED_COMPANY)
-//                .build());
-//    }
+    public static void setVerificationStatusAsPendingByUniversityEmail(Member member, String universityEmail) {
+
+        StudentCredentials newStudentCredentials = StudentCredentials.ofWithEmail(
+                member.getStudentCredentials(), universityEmail);
+
+        member.edit(member.toEditor()
+                .verificationStatus(PENDING)
+                .studentCredentials(newStudentCredentials)
+                .build());
+    }
+
+    public static void setVerificationStatusAsPendingByCompanyCertificate(Member member,
+            String imageUrl) {
+
+        CompanyCredentials newCompanyCredentials = CompanyCredentials.ofWithCertificate(
+                member.getCompanyCredentials(), imageUrl);
+
+        member.edit(member.toEditor()
+                .verificationStatus(PENDING)
+                .companyCredentials(newCompanyCredentials)
+                .build());
+    }
+
+    public static void setVerificationStatusAsPendingByUniversityCertificate(Member member,
+            String imageUrl) {
+
+        StudentCredentials newStudentCredentials = StudentCredentials.ofWithCertificate(
+                member.getStudentCredentials(), imageUrl);
+
+        member.edit(member.toEditor()
+                .verificationStatus(PENDING)
+                .studentCredentials(newStudentCredentials)
+                .build());
+    }
+
+    public static void setVerificationStatusAsFail(Member member) {
+        member.edit(member.toEditor()
+                .verificationStatus(FAILED)
+                .build());
+    }
+
+    public static void setVerificationStatusAsSuccess(Member member) {
+        member.edit(member.toEditor()
+                .verificationStatus(SUCCESS)
+                .build());
+    }
 }

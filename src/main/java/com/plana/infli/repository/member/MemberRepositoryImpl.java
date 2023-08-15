@@ -2,12 +2,22 @@ package com.plana.infli.repository.member;
 
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QUniversity.*;
+import static com.plana.infli.domain.type.Role.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 import static java.util.Optional.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.QMember;
 import com.plana.infli.domain.QUniversity;
+import com.plana.infli.domain.University;
+import com.plana.infli.domain.type.Role;
+import com.plana.infli.domain.type.VerificationStatus;
+import com.plana.infli.web.dto.response.member.verification.company.CompanyVerificationImage;
+import com.plana.infli.web.dto.response.member.verification.company.QCompanyVerificationImage;
+import com.plana.infli.web.dto.response.member.verification.student.QStudentVerificationImage;
+import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
@@ -17,10 +27,11 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public boolean existsByUniversityEmail(String universityEmail) {
+    public boolean existsByVerifiedUniversityEmail(String universityEmail) {
         Integer fetchOne = jpaQueryFactory.selectOne()
                 .from(member)
                 .where(member.studentCredentials.universityEmail.eq(universityEmail))
+                .where(member.verificationStatus.eq(SUCCESS))
                 .fetchFirst();
 
         return fetchOne != null;
@@ -63,4 +74,47 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .fetchOne());
     }
 
+    @Override
+    public List<StudentVerificationImage> loadStudentVerificationImages(University university,
+            int page) {
+
+        return jpaQueryFactory
+                .select(new QStudentVerificationImage(member.id,
+                        member.studentCredentials.universityCertificateUrl,
+                        member.studentCredentials.realName, member.university.name,
+                        member.createdAt))
+                .from(member)
+                .where(member.university.eq(university))
+                .where(member.basicCredentials.isDeleted.isFalse())
+                .where(member.role.eq(STUDENT))
+                .where(member.verificationStatus.eq(PENDING))
+                .offset((page - 1) * 20L)
+                .limit(20)
+                .fetch();
+    }
+
+    @Override
+    public List<CompanyVerificationImage> loadCompanyVerificationImages(University university,
+            int page) {
+
+        return jpaQueryFactory
+                .select(new QCompanyVerificationImage(member.id,member.companyCredentials.companyCertificateUrl, member.companyCredentials.company.name,
+                        member.createdAt))
+                .from(member)
+                .where(member.university.eq(university))
+                .where(member.basicCredentials.isDeleted.isFalse())
+                .where(member.role.eq(COMPANY))
+                .where(member.verificationStatus.eq(PENDING))
+                .offset((page - 1) * 20L)
+                .limit(20)
+                .fetch();
+    }
+
+    @Override
+    public Optional<Member> findActiveMemberBy(Long memberId) {
+        return ofNullable(jpaQueryFactory.selectFrom(member)
+                .where(member.basicCredentials.isDeleted.isFalse())
+                .where(member.id.eq(memberId))
+                .fetchOne());
+    }
 }

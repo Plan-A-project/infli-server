@@ -16,8 +16,6 @@ public class NotFoundException extends DefaultException {
 
 	public static final String FILE_NOT_FOUND = "파일을 찾을수 없습니다";
 
-	public static final String AUTHENTICATION_NOT_FOUND = "유효한 인증을 찾을 수 없습니다.";
-
 
 	public NotFoundException(String message) {
 		super(message);

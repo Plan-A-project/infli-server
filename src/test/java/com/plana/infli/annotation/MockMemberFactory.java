@@ -76,14 +76,15 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
     private CompanyCredentials generateCompanyInfo(WithMockMember withMockMember) {
         if (withMockMember.role() == COMPANY) {
             Company company = companyRepository.save(Company.create("카카오"));
-            return CompanyCredentials.ofWithCertificate(company, "aaa.com");
+            return CompanyCredentials.ofWithCertificate(CompanyCredentials.ofDefault(company), "aaa.com");
         }
         return null;
     }
 
     private StudentCredentials generateStudentInfo(WithMockMember withMockMember) {
         if (withMockMember.role() == STUDENT) {
-            return StudentCredentials.ofWithEmail("이영진", "aaa@infli.com");
+
+            return ofWithEmail(ofDefault("이영진"), "aaa@infli.com");
         }
         return null;
     }

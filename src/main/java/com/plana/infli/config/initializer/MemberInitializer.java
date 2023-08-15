@@ -71,7 +71,7 @@ public class MemberInitializer implements CommandLineRunner {
                 .profileImage(ofDefaultProfileImage())
                 .basicCredentials(ofDefaultWithNickname("student"))
                 .companyCredentials(null)
-                .studentCredentials(ofWithEmail("이영진", "aaa@fudan.com"))
+                .studentCredentials(ofWithEmail(ofDefault("이영진"), "aaa@infli.com"))
                 .build());
 
         acceptPolicy(member);
@@ -120,7 +120,9 @@ public class MemberInitializer implements CommandLineRunner {
                 .loginCredentials(LoginCredentials.of("company", encoder.encode("password")))
                 .profileImage(ofDefaultProfileImage())
                 .basicCredentials(ofDefaultWithNickname("company"))
-                .companyCredentials(CompanyCredentials.ofWithCertificate(company, "aaa.com"))
+                .companyCredentials(
+                        CompanyCredentials.ofWithCertificate(CompanyCredentials.ofDefault(company),
+                                "aaa.com"))
                 .studentCredentials(null)
                 .build());
 

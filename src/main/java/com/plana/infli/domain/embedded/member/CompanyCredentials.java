@@ -41,9 +41,9 @@ public class CompanyCredentials {
         return of(company, null);
     }
 
-    public static CompanyCredentials ofWithCertificate(Company company,
+    public static CompanyCredentials ofWithCertificate(CompanyCredentials companyCredentials,
             String companyCertificateUrl) {
 
-        return of(company, companyCertificateUrl);
+        return of(companyCredentials.company, companyCertificateUrl);
     }
 }

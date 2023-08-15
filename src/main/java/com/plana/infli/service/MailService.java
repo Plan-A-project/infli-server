@@ -1,19 +1,26 @@
 package com.plana.infli.service;
 
+import static com.plana.infli.domain.editor.MemberEditor.*;
+import static com.plana.infli.domain.type.Role.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
+import static com.plana.infli.exception.custom.BadRequestException.EMAIL_VERIFICATION_ALREADY_EXISTS;
+import static com.plana.infli.exception.custom.BadRequestException.EMAIL_VERIFICATION_CODE_EXPIRED;
+import static com.plana.infli.exception.custom.BadRequestException.INVALID_EMAIL_CODE;
+import static com.plana.infli.exception.custom.BadRequestException.INVALID_STUDENT_VERIFICATION_REQUEST;
+import static com.plana.infli.exception.custom.BadRequestException.INVALID_UNIVERSITY_EMAIL;
 import static com.plana.infli.exception.custom.ConflictException.*;
-import static com.plana.infli.exception.custom.NotFoundException.AUTHENTICATION_NOT_FOUND;
 import static com.plana.infli.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
 import static java.time.LocalDateTime.*;
 
 import com.plana.infli.domain.EmailVerification;
 import com.plana.infli.domain.Member;
+import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
-import com.plana.infli.repository.emailAuthentication.EmailAuthenticationRepository;
+import com.plana.infli.repository.emailVerification.EmailVerificationRepository;
 import com.plana.infli.repository.member.MemberRepository;
-import com.plana.infli.web.dto.request.member.email.SendEmailAuthenticationServiceRequest;
-import jakarta.mail.MessagingException;
-import java.io.IOException;
+import com.plana.infli.web.dto.request.member.email.SendVerificationMailServiceRequest;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
@@ -30,9 +37,11 @@ public class MailService {
 
     private final MemberRepository memberRepository;
 
-    private final EmailAuthenticationRepository emailAuthenticationRepository;
+    private final EmailVerificationRepository emailVerificationRepository;
 
     private static final String MESSAGE_FROM = "no-reply@infli.co";
+
+    private static final String EMAIL_SUFFIX = "@fudan.edu.cn";
 
     @Transactional
     public void sendMemberAuthenticationEmail(String email) {
@@ -61,56 +70,71 @@ public class MailService {
     }
 
     @Transactional
-    public void authenticateMemberEmail(String secret) {
+    public void verifyStudentMemberEmail(String secret) {
 
-        EmailVerification emailVerification = emailAuthenticationRepository
-                .findWithMemberBy(secret)
-                .orElseThrow(() -> new NotFoundException(AUTHENTICATION_NOT_FOUND));
-
+        EmailVerification emailVerification = findWithMemberBy(secret);
+        
         Member member = emailVerification.getMember();
 
-//        if (member.getRole() != EMAIL_UNCERTIFIED_STUDENT) {
-//            throw new BadRequestException(        )
-//        }
+        validateVerifyStudentMemberEmailRequest(member, emailVerification);
+
+        setVerificationStatusAsSuccess(member);
+    }
+
+    private EmailVerification findWithMemberBy(String secret) {
+        return emailVerificationRepository.findWithMemberBy(secret)
+                .orElseThrow(() -> new BadRequestException(INVALID_EMAIL_CODE));
+    }
+
+    private void validateVerifyStudentMemberEmailRequest(Member member,
+            EmailVerification emailVerification) {
+
+        if (member.getRole() != STUDENT || member.getVerificationStatus() != PENDING) {
+            setVerificationStatusAsFail(member);
+            throw new BadRequestException(INVALID_STUDENT_VERIFICATION_REQUEST);
+        }
+
+        LocalDateTime codeGeneratedTime = emailVerification.getCodeGeneratedTime();
+
+        if (codeGeneratedTime.plusMinutes(30).isBefore(now())) {
+            throw new BadRequestException(EMAIL_VERIFICATION_CODE_EXPIRED);
+        }
     }
 
     @Transactional
-    public void sendStudentAuthenticationEmail(SendEmailAuthenticationServiceRequest request) {
+    // TODO 탈퇴후 동일한 대학 이메일로 가입하려는 경우 고려해야함
+
+    //TODO 학생 회원만 업로그 가능한지 검증 필요
+    public void sendVerificationMail(SendVerificationMailServiceRequest request) {
 
         Member member = findMemberBy(request.getUsername());
 
-        checkUniversityEmailDuplicate(request.getUniversityEmail());
+        validateSendMailRequest(request.getUniversityEmail(), member);
 
         EmailVerification emailVerification = request.toEntity(member, now());
 
-        emailAuthenticationRepository.save(emailVerification);
+        emailVerificationRepository.save(emailVerification);
 
         SimpleMailMessage message = generateMail(emailVerification);
 
         mailSender.send(message);
-//        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-//
-//        mailSender.send(SimpleMailMessage );
-//
-//
-//        EmailAuthentication emailAuthentication = create(member, now());
-//
-//        MimeMessage message = mailSender.createMimeMessage();
-//
-////        MimeMessageHelper helper = new MimeMessageHelper(
-//                message,
-//        )
-//        String subject = "INFLI 학생 회원 인증 메일";
-//        String secret = emailAuthentication.getSecret();
-//        String text = "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
-//                "http://localhost:8080/member/student/auth/" + secret + "\n" +
-//                "30분안에 인증하셔야 합니다.";
-//
-//        message.setTo(member.getEmail());
-//        message.setSubject(subject);
-//        message.setText(text);
-//
-//        mailSender.send(message);
+
+        setVerificationStatusAsPendingByUniversityEmail(member,
+                emailVerification.getUniversityEmail());
+    }
+
+    private void validateSendMailRequest(String universityEmail, Member member) {
+        if (universityEmail.endsWith(EMAIL_SUFFIX) == false) {
+            throw new BadRequestException(INVALID_UNIVERSITY_EMAIL);
+        }
+
+        if (member.getVerificationStatus() == SUCCESS) {
+            throw new BadRequestException(EMAIL_VERIFICATION_ALREADY_EXISTS);
+        }
+
+        if (memberRepository.existsByVerifiedUniversityEmail(universityEmail)) {
+            throw new ConflictException(DUPLICATED_UNIVERSITY_EMAIL);
+        }
     }
 
     private SimpleMailMessage generateMail(EmailVerification emailVerification) {
@@ -125,12 +149,6 @@ public class MailService {
                 "30분안에 인증하셔야 합니다.");
 
         return message;
-    }
-
-    private void checkUniversityEmailDuplicate(String universityEmail) {
-        if (memberRepository.existsByUniversityEmail(universityEmail)) {
-            throw new ConflictException(DUPLICATED_UNIVERSITY_EMAIL);
-        }
     }
 
     private Member findMemberBy(String email) {
