@@ -191,16 +191,16 @@ public class MemberService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-//    public void setStudentVerificationStatusAsSuccess(String username, Long memberId) {
-//        Member admin = findMemberBy(username);
-//
-//        if (isAdmin(admin) == false) {
-//            throw new AuthorizationFailedException();
-//        }
-//
-//        Member member = memberRepository.findActiveMemberBy(memberId)
-//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-//
-//        setVerificationStatusAsSuccess(member);
-//    }
+    public void setStudentVerificationStatusAsSuccess(String username, Long memberId) {
+        Member admin = findMemberBy(username);
+
+        if (isAdmin(admin) == false) {
+            throw new AuthorizationFailedException();
+        }
+
+        Member member = memberRepository.findActiveMemberBy(memberId)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+
+        setVerificationStatusAsSuccess(member);
+    }
 }
