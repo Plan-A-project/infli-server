@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private final MemberService memberService;
 
 
-    @GetMapping("/verification/student/certificate}")
+    @GetMapping("/verification/student/certificate")
     public ApiResponse<LoadStudentVerificationsResponse> loadStudentVerificationRequestImages(
             @AuthenticatedPrincipal String username, @RequestParam int page) {
         return ok(memberService.loadStudentVerificationRequestImages(username, page));
@@ -37,7 +37,7 @@ public class AdminController {
         return ok();
     }
 
-    @GetMapping("/verification/company/certificate}")
+    @GetMapping("/verification/company/certificate")
     public ApiResponse<LoadCompanyVerificationsResponse> loadCompanyVerificationRequestImages(
             @AuthenticatedPrincipal String username, @RequestParam int page) {
         return ok(memberService.loadCompanyVerificationRequestImages(username, page));
