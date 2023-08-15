@@ -1,6 +1,9 @@
 package com.plana.infli.repository.member;
 
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.University;
+import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberRepositoryCustom {
@@ -14,5 +17,9 @@ public interface MemberRepositoryCustom {
     boolean existsByNickname(String nickname);
 
     Optional<Member> findActiveMemberWithUniversityBy(String username);
+
+    List<StudentVerificationImage> loadStudentVerificationImages(University university, int page);
+
+    Optional<Member> findActiveMemberBy(Long memberId);
 
 }
