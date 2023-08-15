@@ -13,7 +13,6 @@ import static com.plana.infli.exception.custom.NotFoundException.*;
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.editor.MemberEditor;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
@@ -191,7 +190,8 @@ public class MemberService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-    public void setStudentVerificationStatusAsSuccess(String username, Long memberId) {
+    @Transactional
+    public void setMemberVerificationStatusAsSuccess(String username, Long memberId) {
         Member admin = findMemberBy(username);
 
         if (isAdmin(admin) == false) {
