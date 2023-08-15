@@ -28,13 +28,13 @@ public class AdminController {
         return ok(memberService.loadStudentVerificationRequest(username, page));
     }
 
-//    @PostMapping("/verification/student/certificate/{memberId}")
-//    public ApiResponse<Void> setStudentVerificationStatusAsSuccess(@AuthenticatedPrincipal String username,
-//            @PathVariable Long memberId) {
-//
-//        memberService.setStudentVerificationStatusAsSuccess(username, memberId);
-//        return ok();
-//    }
+    @PostMapping("/verification/student/certificate/{memberId}")
+    public ApiResponse<Void> setStudentVerificationStatusAsSuccess(@AuthenticatedPrincipal String username,
+            @PathVariable Long memberId) {
+
+        memberService.setStudentVerificationStatusAsSuccess(username, memberId);
+        return ok();
+    }
 
 //    @PostMapping("/verification/company/certificate/{memberId}")
 //    public ApiResponse<Void> setCompanyVerificationStatusAsSuccess(@AuthenticatedPrincipal String username,
