@@ -1,6 +1,7 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.Company.*;
+import static com.plana.infli.domain.Member.*;
 import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.exception.custom.BadRequestException.COMPANY_VERIFICATION_ALREADY_EXISTS;
@@ -12,6 +13,8 @@ import static com.plana.infli.exception.custom.NotFoundException.*;
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.editor.MemberEditor;
+import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
@@ -21,6 +24,9 @@ import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.utils.S3Uploader;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberServiceRequest;
+import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
+import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -164,4 +170,37 @@ public class MemberService {
             throw new BadRequestException(COMPANY_VERIFICATION_ALREADY_EXISTS);
         }
     }
+
+    public LoadStudentVerificationsResponse loadStudentVerificationRequest(String username,
+            int page) {
+
+        Member admin = findWithUniversityBy(username);
+
+        if (isAdmin(admin) == false) {
+            throw new AuthorizationFailedException();
+        }
+
+        List<StudentVerificationImage> verificationImages = memberRepository.loadStudentVerificationImages(
+                admin.getUniversity(), page);
+
+        return LoadStudentVerificationsResponse.of(20, page, verificationImages);
+    }
+
+    private Member findWithUniversityBy(String username) {
+        return memberRepository.findActiveMemberWithUniversityBy(username)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
+
+//    public void setStudentVerificationStatusAsSuccess(String username, Long memberId) {
+//        Member admin = findMemberBy(username);
+//
+//        if (isAdmin(admin) == false) {
+//            throw new AuthorizationFailedException();
+//        }
+//
+//        Member member = memberRepository.findActiveMemberBy(memberId)
+//                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+//
+//        setVerificationStatusAsSuccess(member);
+//    }
 }

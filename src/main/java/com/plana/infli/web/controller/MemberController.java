@@ -1,8 +1,12 @@
 package com.plana.infli.web.controller;
 
+import static com.plana.infli.web.dto.response.ApiResponse.*;
+
 import com.plana.infli.service.MailService;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailRequest;
+import com.plana.infli.web.dto.response.ApiResponse;
+import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
