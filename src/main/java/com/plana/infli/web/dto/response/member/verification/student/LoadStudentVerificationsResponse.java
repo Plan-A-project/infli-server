@@ -1,5 +1,6 @@
 package com.plana.infli.web.dto.response.member.verification.student;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,7 +21,8 @@ public class LoadStudentVerificationsResponse {
 
         this.sizeRequest = sizeRequest;
         this.currentPage = currentPage;
-        this.studentVerifications = studentVerifications;
+        this.studentVerifications = studentVerifications != null ?
+                studentVerifications : new ArrayList<>();
     }
 
     public static LoadStudentVerificationsResponse of(int sizeRequest, int currentPage,
