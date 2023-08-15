@@ -23,8 +23,11 @@ import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.utils.S3Uploader;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberServiceRequest;
+import com.plana.infli.web.dto.response.member.verification.company.CompanyVerificationImage;
+import com.plana.infli.web.dto.response.member.verification.company.LoadCompanyVerificationsResponse;
 import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
+import jakarta.mail.util.LineOutputStream;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -170,7 +173,7 @@ public class MemberService {
         }
     }
 
-    public LoadStudentVerificationsResponse loadStudentVerificationRequest(String username,
+    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(String username,
             int page) {
 
         Member admin = findWithUniversityBy(username);
@@ -203,4 +206,20 @@ public class MemberService {
 
         setVerificationStatusAsSuccess(member);
     }
+
+    public LoadCompanyVerificationsResponse loadCompanyVerificationRequestImages(String username,
+            int page) {
+
+        Member admin = findWithUniversityBy(username);
+
+        if (isAdmin(admin) == false) {
+            throw new AuthorizationFailedException();
+        }
+
+        List<CompanyVerificationImage> verificationImages = memberRepository.loadCompanyVerificationImages(
+                admin.getUniversity(), page);
+
+        return LoadCompanyVerificationsResponse.of(20, page, verificationImages);
+    }
+
 }
