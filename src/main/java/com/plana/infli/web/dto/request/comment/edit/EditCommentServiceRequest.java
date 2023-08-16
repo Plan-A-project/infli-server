@@ -8,18 +8,15 @@ public class EditCommentServiceRequest {
 
     private final String username;
 
-    private final Long postId;
-
     private final Long commentId;
 
     private final String content;
 
     @Builder
-    private EditCommentServiceRequest(String username, Long postId,
+    private EditCommentServiceRequest(String username,
             Long commentId, String content) {
 
         this.username = username;
-        this.postId = postId;
         this.commentId = commentId;
         this.content = content;
     }

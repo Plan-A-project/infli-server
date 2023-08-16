@@ -1,5 +1,6 @@
 package com.plana.infli.repository.member;
 
+import static com.plana.infli.domain.QCompany.*;
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QUniversity.*;
 import static com.plana.infli.domain.type.Role.*;
@@ -7,6 +8,7 @@ import static com.plana.infli.domain.type.VerificationStatus.*;
 import static java.util.Optional.*;
 
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.QCompany;
 import com.plana.infli.domain.QMember;
 import com.plana.infli.domain.QUniversity;
 import com.plana.infli.domain.University;
@@ -75,6 +77,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     }
 
     @Override
+    public Optional<Member> findActiveMemberWithUniversityBy(Long memberId) {
+        return ofNullable(jpaQueryFactory.selectFrom(member)
+                .leftJoin(member.university, university).fetchJoin()
+                .where(member.id.eq(memberId))
+                .where(member.basicCredentials.isDeleted.isFalse())
+                .fetchOne());
+    }
+
+    @Override
     public List<StudentVerificationImage> loadStudentVerificationImages(University university,
             int page) {
 
@@ -115,6 +126,15 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
         return ofNullable(jpaQueryFactory.selectFrom(member)
                 .where(member.basicCredentials.isDeleted.isFalse())
                 .where(member.id.eq(memberId))
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<Member> findActiveMemberWithCompanyBy(String username) {
+        return ofNullable(jpaQueryFactory.selectFrom(member)
+                .leftJoin(member.companyCredentials.company, company).fetchJoin()
+                .where(member.basicCredentials.isDeleted.isFalse())
+                .where(member.loginCredentials.username.eq(username))
                 .fetchOne());
     }
 }

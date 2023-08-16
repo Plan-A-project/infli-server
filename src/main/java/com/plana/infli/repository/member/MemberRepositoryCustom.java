@@ -19,9 +19,14 @@ public interface MemberRepositoryCustom {
 
     Optional<Member> findActiveMemberWithUniversityBy(String username);
 
+    Optional<Member> findActiveMemberWithUniversityBy(Long memberId);
+
     List<StudentVerificationImage> loadStudentVerificationImages(University university, int page);
 
     List<CompanyVerificationImage> loadCompanyVerificationImages(University university, int page);
 
     Optional<Member> findActiveMemberBy(Long memberId);
+
+    Optional<Member> findActiveMemberWithCompanyBy(String username);
+
 }

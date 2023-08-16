@@ -1,5 +1,6 @@
 package com.plana.infli.web.dto.response.comment.view.mycomment;
 
+import com.plana.infli.web.dto.request.comment.view.CommentQueryRequest;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,13 +26,12 @@ public class MyCommentsResponse {
         this.comments = comments;
     }
 
-    public static MyCommentsResponse loadMyCommentsResponse(
-            PageRequest pageRequest, List<MyComment> comments) {
+    public static MyCommentsResponse of(CommentQueryRequest request, List<MyComment> comments) {
 
         return MyCommentsResponse.builder()
-                .sizeRequest(pageRequest.getPageSize())
+                .sizeRequest(request.getSize())
                 .actualSize(comments != null ? comments.size() : 0)
-                .currentPage(pageRequest.getPageNumber())
+                .currentPage(request.getPage())
                 .comments(comments)
                 .build();
     }

@@ -1,23 +1,21 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.editor.MemberEditor.*;
+import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.ConflictException.DUPLICATED_NICKNAME;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.ProfileImage;
+import com.plana.infli.domain.type.Role;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.service.aop.upload.Upload;
 import com.plana.infli.utils.S3Uploader;
-import com.plana.infli.web.dto.request.setting.modify.nickname.ModifyNicknameServiceRequest;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordServiceRequest;
-import com.plana.infli.web.dto.request.setting.unregister.UnregisterMemberServiceRequest;
-import com.plana.infli.web.dto.request.setting.validate.nickname.ValidateNewNicknameServiceRequest;
-import com.plana.infli.web.dto.request.setting.validate.password.AuthenticatePasswordServiceRequest;
 import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;
 import com.plana.infli.web.dto.response.profile.image.ChangeProfileImageResponse;
@@ -50,40 +48,38 @@ public class SettingService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-    public boolean isAvailableNewNickname(ValidateNewNicknameServiceRequest request) {
-        checkDuplicate(request.getNewNickname());
-        return true;
-    }
+    public void checkIsAvailableNewNickname(String newNickname) {
+        if (newNickname.matches("^[ㄱ-ㅎ가-힣A-Za-z0-9-_]{2,8}$") == false) {
+            throw new BadRequestException("닉네임은 2~8자리여야 합니다. 한글, 영어, 숫자 조합 가능.");
+        }
 
-    private void checkDuplicate(String newNickname) {
         if (memberRepository.existsByNickname(newNickname)) {
             throw new ConflictException(DUPLICATED_NICKNAME);
         }
     }
 
-
     @Transactional
-    public void changeNickname(ModifyNicknameServiceRequest request) {
-        Member member = findMemberBy(request.getUsername());
+    public void changeNickname(String username, String newNickname) {
 
-        checkDuplicate(request.getNewNickname());
+        Member member = findMemberBy(username);
 
-        editNickname(member, request.getNewNickname());
+        checkIsAvailableNewNickname(newNickname);
+
+        editNickname(member, newNickname);
     }
 
-    //TODO
-    public void authenticatePassword(AuthenticatePasswordServiceRequest request) {
+    public void verifyCurrentPassword(String username, String currentPassword) {
 
-        Member member = findMemberBy(request.getUsername());
+        Member member = findMemberBy(username);
 
-        checkPasswordMatches(member, request.getPassword());
+        checkPasswordMatches(member, currentPassword);
     }
 
-    private void checkPasswordMatches(Member member, String newPassword) {
+    private void checkPasswordMatches(Member member, String password) {
 
-        String currentPassword = member.getLoginCredentials().getPassword();
+        if (passwordEncoder.matches(
+                password, member.getLoginCredentials().getPassword()) == false) {
 
-        if (passwordEncoder.matches(newPassword, currentPassword) == false) {
             throw new BadRequestException(PASSWORD_NOT_MATCH);
         }
     }
@@ -99,7 +95,6 @@ public class SettingService {
 
         editPassword(member, encryptedPassword);
     }
-
 
 
     private void validateModifyPasswordRequest(Member member,
@@ -145,31 +140,43 @@ public class SettingService {
     }
 
     @Transactional
-    public void unregisterMember(UnregisterMemberServiceRequest request) {
-        Member member = findMemberBy(request.getAuthenticatedEmail());
+    public void unregisterMember(String username, String password) {
+        Member member = findMemberBy(username);
 
-        validateUnregisterRequest(member, request);
+        validateUnregisterRequest(password, member);
 
         unregister(member);
     }
 
-    //TODO
-    private void validateUnregisterRequest(Member member, UnregisterMemberServiceRequest request) {
-        checkPasswordMatches(member, request.getPassword());
+    private void validateUnregisterRequest(String password, Member member) {
 
-        if (emailAndNameMatches(member, request) == false) {
-            throw new BadRequestException(INVALID_MEMBER_INFO);
+        if (isAllowedRoleToUnregister(member.getRole()) == false) {
+            throw new BadRequestException(UNREGISTER_NOT_ALLOWED);
         }
+
+        checkPasswordMatches(member, password);
     }
 
-    //TODO 회원탈퇴시 기업회원과 일반 회원 구분해야됨
-    private boolean emailAndNameMatches(Member member, UnregisterMemberServiceRequest request) {
-        return member.getStudentCredentials().getRealName().equals(request.getName()) &&
-                member.getLoginCredentials().getUsername().equals(request.getEmail());
-    }
 
     public MyProfileToUnregisterResponse loadProfileToUnregister(String username) {
-        return MyProfileToUnregisterResponse.of(findMemberBy(username));
+
+        Member member = findMemberWithCompanyBy(username);
+
+        if (isAllowedRoleToUnregister(member.getRole())) {
+            return MyProfileToUnregisterResponse.of(member);
+        }
+
+        throw new BadRequestException(UNREGISTER_NOT_ALLOWED);
+    }
+
+    private boolean isAllowedRoleToUnregister(Role role) {
+        return role == STUDENT || role == COMPANY;
+    }
+
+
+    private Member findMemberWithCompanyBy(String username) {
+        return memberRepository.findActiveMemberWithCompanyBy(username)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
 }

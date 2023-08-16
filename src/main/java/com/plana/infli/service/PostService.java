@@ -70,23 +70,7 @@ public class PostService {
 
     private final S3Uploader s3Uploader;
 
-    public boolean checkMemberAcceptedWritePolicy(String username) {
-        BasicCredentials basicCredentials = findMemberBy(username).getBasicCredentials();
 
-        return basicCredentials.isPolicyAccepted();
-    }
-
-    @Transactional
-    public void acceptWritePolicy(String username) {
-        Member member = findMemberBy(username);
-
-        acceptPolicy(member);
-    }
-
-    private Member findMemberBy(String username) {
-        return memberRepository.findActiveMemberBy(username)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
-    }
 
     @Transactional
     public Long createNormalPost(CreateNormalPostServiceRequest request) {
@@ -218,6 +202,11 @@ public class PostService {
         });
 
         return PostImageUploadResponse.of(thumbnailImageURL, originalImageUrls);
+    }
+
+    private Member findMemberBy(String username) {
+        return memberRepository.findActiveMemberBy(username)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
     private void checkThisMemberIsPostWriter(Member member, Post post) {
@@ -391,7 +380,7 @@ public class PostService {
 
         validateTypes(request.getType(), board.getBoardType());
 
-        PostQueryRequest queryRequest = postsByBoard(board, member, request, 20);
+        PostQueryRequest queryRequest = postsByBoard(board, member, request);
 
         List<BoardPost> posts = postRepository.loadPostsByBoard(queryRequest);
 
