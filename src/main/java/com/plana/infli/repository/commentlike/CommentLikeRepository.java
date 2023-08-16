@@ -11,8 +11,6 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long>,
 
     boolean existsByMemberAndComment(Member member, Comment comment);
 
-//    Optional<CommentLike> findByCommentAndMember(Comment comment, Member member);
-
     @EntityGraph(attributePaths = {"comment", "member"})
     Optional<CommentLike> findWithCommentAndMemberById(Long id);
 }

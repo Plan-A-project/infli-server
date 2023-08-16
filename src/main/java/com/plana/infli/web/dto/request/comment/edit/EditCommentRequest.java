@@ -10,9 +10,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class EditCommentRequest {
 
-    @NotNull(message = "글 번호가 입력되지 않았습니다")
-    private Long postId;
-
     @NotNull(message = "수정할 댓글번호가 입력되지 않았습니다")
     private Long commentId;
 
@@ -20,8 +17,7 @@ public class EditCommentRequest {
     private String content;
 
     @Builder
-    private EditCommentRequest(Long postId, Long commentId, String content) {
-        this.postId = postId;
+    private EditCommentRequest(Long commentId, String content) {
         this.commentId = commentId;
         this.content = content;
     }
@@ -30,7 +26,6 @@ public class EditCommentRequest {
 
         return EditCommentServiceRequest.builder()
                 .username(username)
-                .postId(postId)
                 .commentId(commentId)
                 .content(content)
                 .build();

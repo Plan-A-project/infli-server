@@ -29,5 +29,4 @@ public interface PostRepositoryCustom {
 
     //테스트 케이스용
     Optional<Post> findActivePostWithBoardAndMemberBy(Long id);
-
 }

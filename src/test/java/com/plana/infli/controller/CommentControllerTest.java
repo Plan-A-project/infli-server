@@ -125,7 +125,7 @@ public class CommentControllerTest {
 
         //then
         Comment comment = commentRepository.findAll().get(0);
-        resultActions.andExpect(status().isOk())
+        resultActions.andExpect(status().isCreated())
                 .andExpect(jsonPath("$.commentId").value(comment.getId()))
                 .andExpect(jsonPath("$.identifierNumber").value(1))
                 .andDo(print());
@@ -158,7 +158,7 @@ public class CommentControllerTest {
                 .with(csrf()));
 
         //then
-        resultActions.andExpect(status().isOk())
+        resultActions.andExpect(status().isCreated())
                 .andDo(print());
         Comment comment = commentRepository.findAll().get(1);
         assertThat(comment).isNotNull();
@@ -409,7 +409,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
-                .postId(post.getId())
                 .build());
 
         //when
@@ -445,7 +444,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(comment.getId())
                 .content("수정된 대댓글입니다")
-                .postId(post.getId())
                 .build());
 
         //when
@@ -475,7 +473,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(null)
                 .content("수정된 댓글입니다")
-                .postId(post.getId())
                 .build());
 
         //when
@@ -506,7 +503,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(comment.getId())
                 .content(null)
-                .postId(post.getId())
                 .build());
 
         //when
@@ -537,7 +533,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(comment.getId())
                 .content("")
-                .postId(post.getId())
                 .build());
 
         //when
@@ -572,7 +567,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(comment.getId())
                 .content(null)
-                .postId(post.getId())
                 .build());
 
         //when
@@ -607,7 +601,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(comment.getId())
                 .content("")
-                .postId(post.getId())
                 .build());
 
         //when
@@ -622,71 +615,6 @@ public class CommentControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("댓글 내용 수정시 글 ID 번호는  필수다")
-    @WithMockMember
-    @Test
-    void editCommentWithoutPostId() throws Exception {
-        //given
-        University university = universityRepository.findByName("푸단대학교").get();
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-
-        Member member = findContextMember();
-        Comment comment = commentFactory.createComment(member, post);
-
-        String request = om.writeValueAsString(EditCommentRequest.builder()
-                .commentId(comment.getId())
-                .content("수정된 댓글입니다")
-                .postId(null)
-                .build());
-
-        //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
-
-        //then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.postId").value("글 번호가 입력되지 않았습니다"))
-                .andDo(print());
-    }
-
-    @DisplayName("대댓글 내용 수정시 글 ID 번호는 필수다")
-    @WithMockMember
-    @Test
-    void editChildCommentWithoutPostID() throws Exception {
-        //given
-        University university = universityRepository.findByName("푸단대학교").get();
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-
-        Comment parentComment = commentFactory.createComment(
-                memberFactory.createVerifiedStudentMember("commentMember", university), post);
-
-        Member member = findContextMember();
-        Comment comment = commentRepository.save(
-                commentFactory.createChildComment(member, post, parentComment));
-
-        String request = om.writeValueAsString(EditCommentRequest.builder()
-                .commentId(comment.getId())
-                .content("수정된 댓글입니다")
-                .postId(null)
-                .build());
-
-        //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
-
-        //then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.postId").value("글 번호가 입력되지 않았습니다"))
-                .andDo(print());
-    }
 
     @DisplayName("로그인 하지 않은 상태로 댓글을 수정할수 없다")
     @Test
@@ -703,7 +631,6 @@ public class CommentControllerTest {
         String request = om.writeValueAsString(EditCommentRequest.builder()
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
-                .postId(null)
                 .build());
 
         //when
@@ -840,17 +767,14 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/comments")
-                        .param("id", valueOf(post.getId()))
+                get("/api/posts/{postId}/comments", post.getId())
                         .param("page", "1")
                         .with(csrf()));
 
         //then
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.postId").value(post.getId()))
                 .andExpect(jsonPath("$.anonymousBoard").value(true))
                 .andExpect(jsonPath("$.sizeRequest").value(100))
-                .andExpect(jsonPath("$.actualSize").value(4))
                 .andExpect(jsonPath("$.comments.size()").value(4))
                 .andExpect(jsonPath("$.comments[0].id").value(comment1.getId()))
                 .andExpect(jsonPath("$.comments[1].id").value(childComment1.getId()))
@@ -862,19 +786,15 @@ public class CommentControllerTest {
     @WithMockMember
     @Test
     void viewCommentsInPostWithoutPostId() throws Exception {
-        //given
-        University university = universityRepository.findByName("푸단대학교").get();
-
         //when
         ResultActions resultActions = mvc.perform(
                 get("/api/posts/comments")
-                        .param("id", (String) null)
                         .param("page", "1")
                         .with(csrf()));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.id").value("글 번호가 입력되지 않았습니다"))
+                .andExpect(jsonPath("$.validation.postId").value("필요한 파라미터 타입 : Long"))
                 .andDo(print());
     }
 
@@ -890,8 +810,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/comments")
-                        .param("id", post.getId().toString())
+                get("/api/posts/{postId}/comments", post.getId())
                         .param("page", "1")
                         .with(csrf()));
 
@@ -950,7 +869,6 @@ public class CommentControllerTest {
         //then
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.commentId").value(comment.getId()))
-                .andExpect(jsonPath("$.postId").value(post.getId()))
                 .andExpect(jsonPath("$.content").value("내용입니다"))
                 .andDo(print());
     }

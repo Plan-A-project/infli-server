@@ -23,7 +23,6 @@ public class CreateCommentResponse {
     }
 
     public static CreateCommentResponse of(Comment comment) {
-
         return CreateCommentResponse.builder()
                 .commentId(comment.getId())
                 .identifierNumber(comment.getIdentifierNumber())

@@ -82,8 +82,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetchOne());
     }
 
-
-
     @Override
     public Optional<Post> findActivePostWithMemberBy(Long id) {
         return ofNullable(jpaQueryFactory
@@ -122,11 +120,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private StringExpression writerEq() {
         return new CaseBuilder()
-                .when(post.board.boardType.eq(EMPLOYMENT))
+                .when(postIsNotAnonymous())
                 .then(post.member.basicCredentials.nickname)
-                .when(post.board.boardType.eq(ANONYMOUS))
-                .then(nullExpression())
-                .otherwise(post.member.basicCredentials.nickname);
+                .otherwise(nullExpression());
+    }
+
+    private static BooleanExpression postIsNotAnonymous() {
+        return post.board.boardType.in(List.of(EMPLOYMENT, ACTIVITY, CLUB, CAMPUS_LIFE));
     }
 
     private BooleanExpression pressedLikeOnThisPost(Member member) {

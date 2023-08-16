@@ -10,11 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ModifyPasswordRequest {
 
+    @NotEmpty(message = "기존 비밀번호를 입력해주세요")
     private String currentPassword;
 
     @NotEmpty(message = "새 비밀번호를 입력해주세요")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{6,16}$",
-        message = "비밀번호는 6~16자리수여야 합니다. 영문 대소문자, 숫자, 특수문자를 1개 이상 포함해야 합니다.")
     private String newPassword;
 
     @NotEmpty(message = "새 비밀번호 확인을 입력해주세요")

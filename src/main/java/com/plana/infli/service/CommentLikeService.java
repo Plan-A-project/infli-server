@@ -18,8 +18,6 @@ import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.web.dto.request.commentlike.cancel.CancelCommentLikeServiceRequest;
-import com.plana.infli.web.dto.request.commentlike.create.CreateCommentLikeServiceRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -42,17 +40,15 @@ public class CommentLikeService {
     private final UniversityRepository universityRepository;
 
     @Transactional
-    public Long createCommentLike(CreateCommentLikeServiceRequest request) {
+    public void createCommentLike(String username, Long commentId) {
 
-        Member member = findMemberBy(request.getUsername());
+        Member member = findMemberBy(username);
 
-        Post post = findPostBy(request.getPostId());
+        Comment comment = findCommentWithPostBy(commentId);
 
-        Comment comment = findCommentWithPostBy(request.getCommentId());
+        validateCreateRequest(comment, member);
 
-        validateCreateRequest(comment, post, member);
-
-        return commentLikeRepository.save(create(comment, member)).getId();
+        commentLikeRepository.save(create(comment, member));
     }
 
     private Comment findCommentWithPostBy(Long commentId) {
@@ -60,10 +56,6 @@ public class CommentLikeService {
                 .orElseThrow(() -> new NotFoundException(COMMENT_NOT_FOUND));
     }
 
-    private Post findPostBy(Long postId) {
-        return postRepository.findActivePostBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
-    }
 
     private Member findMemberBy(String username) {
         return memberRepository.findActiveMemberBy(username)
@@ -71,9 +63,13 @@ public class CommentLikeService {
     }
 
 
-    private void validateCreateRequest(Comment comment, Post post, Member member) {
+    private void validateCreateRequest(Comment comment, Member member) {
 
-        checkCommentIsInThisPost(comment, post);
+        Post post = comment.getPost();
+
+        if (post.isDeleted()) {
+            throw new NotFoundException(POST_NOT_FOUND);
+        }
 
         if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
             throw new AuthorizationFailedException();
@@ -84,26 +80,26 @@ public class CommentLikeService {
         }
     }
 
-    private void checkCommentIsInThisPost(Comment comment, Post post) {
-        if (comment.getPost().equals(post) == false) {
-            throw new NotFoundException(COMMENT_NOT_FOUND);
-        }
-    }
-
     @Transactional
-    public void cancelCommentLike(CancelCommentLikeServiceRequest request) {
+    public void cancelCommentLike(String username, Long commentId) {
 
-        Member member = findMemberBy(request.getUsername());
+        Member member = findMemberBy(username);
 
-        Post post = findPostBy(request.getPostId());
+        Comment comment = findCommentWithPostBy(commentId);
 
-        Comment comment = findCommentWithPostBy(request.getCommentId());
-
-        checkCommentIsInThisPost(comment, post);
+        validateCancelCommentLikeRequest(comment);
 
         CommentLike commentLike = findCommentLikeBy(comment, member);
 
         commentLikeRepository.delete(commentLike);
+    }
+
+    private static void validateCancelCommentLikeRequest(Comment comment) {
+        Post post = comment.getPost();
+
+        if (post.isDeleted()) {
+            throw new NotFoundException(POST_NOT_FOUND);
+        }
     }
 
     private CommentLike findCommentLikeBy(Comment comment, Member member) {

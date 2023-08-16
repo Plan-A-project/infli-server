@@ -6,6 +6,7 @@ import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.exception.custom.BadRequestException.COMPANY_VERIFICATION_ALREADY_EXISTS;
 import static com.plana.infli.exception.custom.BadRequestException.IMAGE_IS_EMPTY;
+import static com.plana.infli.exception.custom.BadRequestException.MEMBER_VERIFICATION_STATUS_IS_NOT_PENDING;
 import static com.plana.infli.exception.custom.BadRequestException.NOT_MATCHES_PASSWORD_CONFIRM;
 import static com.plana.infli.exception.custom.ConflictException.*;
 import static com.plana.infli.exception.custom.NotFoundException.*;
@@ -13,6 +14,8 @@ import static com.plana.infli.exception.custom.NotFoundException.*;
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.editor.MemberEditor;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
 import com.plana.infli.exception.custom.ConflictException;
@@ -27,7 +30,6 @@ import com.plana.infli.web.dto.response.member.verification.company.CompanyVerif
 import com.plana.infli.web.dto.response.member.verification.company.LoadCompanyVerificationsResponse;
 import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
-import jakarta.mail.util.LineOutputStream;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -173,8 +175,8 @@ public class MemberService {
         }
     }
 
-    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(String username,
-            int page) {
+    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(
+            String username, int page) {
 
         Member admin = findWithUniversityBy(username);
 
@@ -193,18 +195,33 @@ public class MemberService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
+    private Member findWithUniversityBy(Long memberId) {
+        return memberRepository.findActiveMemberWithUniversityBy(memberId)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+    }
+
     @Transactional
     public void setMemberVerificationStatusAsSuccess(String username, Long memberId) {
-        Member admin = findMemberBy(username);
+        Member admin = findWithUniversityBy(username);
 
-        if (isAdmin(admin) == false) {
-            throw new AuthorizationFailedException();
-        }
+        Member member = findWithUniversityBy(memberId);
 
-        Member member = memberRepository.findActiveMemberBy(memberId)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
+        checkIsInSameUniversity(admin, member);
+        checkVerificationStatusIsPending(member);
 
         setVerificationStatusAsSuccess(member);
+    }
+
+    private void checkVerificationStatusIsPending(Member member) {
+        if (member.getVerificationStatus() != PENDING) {
+            throw new BadRequestException(MEMBER_VERIFICATION_STATUS_IS_NOT_PENDING);
+        }
+    }
+
+    private void checkIsInSameUniversity(Member admin, Member member) {
+        if (admin.getUniversity().equals(member.getUniversity()) == false) {
+            throw new AuthorizationFailedException();
+        }
     }
 
     public LoadCompanyVerificationsResponse loadCompanyVerificationRequestImages(String username,
@@ -222,4 +239,16 @@ public class MemberService {
         return LoadCompanyVerificationsResponse.of(20, page, verificationImages);
     }
 
+    public boolean checkMemberAcceptedPolicy(String username) {
+        BasicCredentials basicCredentials = findMemberBy(username).getBasicCredentials();
+
+        return basicCredentials.isPolicyAccepted();
+    }
+
+    @Transactional
+    public void acceptPolicy(String username) {
+        Member member = findMemberBy(username);
+
+        MemberEditor.acceptPolicy(member);
+    }
 }

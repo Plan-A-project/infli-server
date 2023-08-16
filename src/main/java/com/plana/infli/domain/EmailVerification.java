@@ -56,34 +56,5 @@ public class EmailVerification extends BaseEntity {
                 .codeGeneratedTime(codeGeneratedTIme)
                 .build();
     }
-
-//    public static EmailAuthentication createEmailAuthentication(Member member) {
-//        EmailAuthentication emailAuthentication = new EmailAuthentication();
-//        emailAuthentication.secret = java.util.UUID.randomUUID().toString();
-//        emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
-//        emailAuthentication.member = member;
-//
-//        return emailAuthentication;
-//    }
-//
-//    public static EmailAuthentication createStudentAuthentication(Member member,
-//            String studentEmail) {
-//        EmailAuthentication emailAuthentication = new EmailAuthentication();
-//        emailAuthentication.secret = java.util.UUID.randomUUID().toString();
-//        emailAuthentication.expirationTime = LocalDateTime.now().plusMinutes(30);
-//        emailAuthentication.member = member;
-//        emailAuthentication.email = studentEmail;
-//
-//        return emailAuthentication;
-//    }
-//
-//    public static EmailAuthentication createCompanyAuthentication(Member member) {
-//        EmailAuthentication emailAuthentication = new EmailAuthentication();
-//        emailAuthentication.secret = UUID.randomUUID().toString();
-//        emailAuthentication.expirationTime = LocalDateTime.now().plusDays(30);
-//        emailAuthentication.member = member;
-//
-//        return emailAuthentication;
-//    }
 }
 

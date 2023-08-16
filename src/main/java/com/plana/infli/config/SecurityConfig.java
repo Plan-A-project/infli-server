@@ -67,18 +67,20 @@ public class SecurityConfig {
         .addFilterAfter(jwtAuthenticationFilter(), JwtExceptionHandlerFilter.class);
 
     http
-        .authorizeHttpRequests((auth) -> auth
-            .requestMatchers("/error").permitAll()
-            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .requestMatchers("/api/auth/**").permitAll()
-            .requestMatchers("/member/email/auth/**").permitAll()
-            .requestMatchers("/member/student/auth/**").permitAll()
-            .requestMatchers("/member/company/auth/**").permitAll()
-            .requestMatchers("/member/email/auth/send").authenticated()
-            .requestMatchers("/member/student/auth/send").authenticated()
-            .requestMatchers("/member/company/auth/send").authenticated()
-            .anyRequest().authenticated()
-        );
+            .authorizeHttpRequests((auth) -> auth
+                    .requestMatchers("/error").permitAll()
+                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
+                    .permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/member/email/auth/**").permitAll()
+                    .requestMatchers("/member/student/auth/**").permitAll()
+                    .requestMatchers("/member/company/auth/**").permitAll()
+                    .requestMatchers("/member/email/auth/send").authenticated()
+                    .requestMatchers("/member/student/auth/send").authenticated()
+                    .requestMatchers("/member/company/auth/send").authenticated()
+                    .anyRequest().authenticated()
+            );
 
     return http.build();
   }

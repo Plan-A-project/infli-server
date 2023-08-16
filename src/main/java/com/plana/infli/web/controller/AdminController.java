@@ -1,12 +1,11 @@
 package com.plana.infli.web.controller;
 
-import static com.plana.infli.web.dto.response.ApiResponse.ok;
 
 import com.plana.infli.service.MemberService;
-import com.plana.infli.web.dto.response.ApiResponse;
 import com.plana.infli.web.dto.response.member.verification.company.LoadCompanyVerificationsResponse;
 import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,32 +21,24 @@ public class AdminController {
 
     private final MemberService memberService;
 
-
-    @GetMapping("/verification/student/certificate")
-    public ApiResponse<LoadStudentVerificationsResponse> loadStudentVerificationRequestImages(
+    @GetMapping("/verification/certificate/student")
+    @Operation(summary = "학생 인증을 요청한 회원 목록 조회")
+    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(
             @AuthenticatedPrincipal String username, @RequestParam int page) {
-        return ok(memberService.loadStudentVerificationRequestImages(username, page));
+        return memberService.loadStudentVerificationRequestImages(username, page);
     }
 
-    @PostMapping("/verification/certificate/certificate/{memberId}")
-    public ApiResponse<Void> setStudentVerificationStatusAsSuccess(@AuthenticatedPrincipal String username,
-            @PathVariable Long memberId) {
-
-        memberService.setMemberVerificationStatusAsSuccess(username, memberId);
-        return ok();
-    }
-
-    @GetMapping("/verification/company/certificate")
-    public ApiResponse<LoadCompanyVerificationsResponse> loadCompanyVerificationRequestImages(
+    @GetMapping("/verification/certificate/company")
+    @Operation(summary = "기업 인증을 요청한 회원 목록 조회")
+    public LoadCompanyVerificationsResponse loadCompanyVerificationRequestImages(
             @AuthenticatedPrincipal String username, @RequestParam int page) {
-        return ok(memberService.loadCompanyVerificationRequestImages(username, page));
+        return memberService.loadCompanyVerificationRequestImages(username, page);
     }
 
-    @PostMapping("/verification/company/certificate/{memberId}")
-    public ApiResponse<Void> setCompanyVerificationStatusAsSuccess(@AuthenticatedPrincipal String username,
+    @PostMapping("/verification/certificate/members/{memberId}")
+    @Operation(summary = "인증 요청 관리자가 승인")
+    public void setVerificationStatusAsSuccess(@AuthenticatedPrincipal String username,
             @PathVariable Long memberId) {
-
         memberService.setMemberVerificationStatusAsSuccess(username, memberId);
-        return ok();
     }
 }

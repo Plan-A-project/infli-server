@@ -26,7 +26,6 @@ import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
 import com.plana.infli.web.dto.request.comment.edit.EditCommentServiceRequest;
-import com.plana.infli.web.dto.request.comment.view.post.LoadCommentsInPostServiceRequest;
 import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyCommentsResponse;
@@ -824,7 +823,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -873,7 +871,6 @@ class CommentServiceTest {
 
                             EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                                     .username(member.getLoginCredentials().getUsername())
-                                    .postId(post.getId())
                                     .commentId(comment.getId())
                                     .content("수정된 댓글입니다")
                                     .build();
@@ -904,7 +901,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("하".repeat(500))
                 .build();
@@ -932,7 +928,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("하".repeat(501))
                 .build();
@@ -959,7 +954,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username("aaa")
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -988,7 +982,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1017,7 +1010,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1042,7 +1034,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(999L)
                 .content("수정된 댓글입니다")
                 .build();
@@ -1071,7 +1062,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1099,7 +1089,6 @@ class CommentServiceTest {
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1108,60 +1097,6 @@ class CommentServiceTest {
         assertThatThrownBy(() -> commentService.editCommentContent(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
-
-    }
-
-    @DisplayName("요청값으로 전달된 글 ID 번호와, 댓글 ID 번호를 통해 DB 에서 조회한 글 ID 번호는 동일해야 한다")
-    @Test
-    void postIdByRequestAndPostIdByCommentIdMustBeEqual() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post anotherPost = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember1", university), board);
-
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember2", university), board);
-        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
-        Comment comment = commentFactory.createComment(member, post);
-
-        EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .postId(anotherPost.getId())
-                .commentId(comment.getId())
-                .content("수정된 댓글입니다")
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.editCommentContent(request))
-                .isInstanceOf(NotFoundException.class)
-                .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
-    }
-
-    @DisplayName("존재하지 않는 글에 대한 댓글 수정 요청을 할수 없다")
-    @Test
-    void postIdByRequestAndPostIdByCommentIdMustBeEqual2() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-
-        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
-
-        Comment comment = commentFactory.createComment(member, post);
-
-        EditCommentServiceRequest request = EditCommentServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .postId(999L)
-                .commentId(comment.getId())
-                .content("수정된 댓글입니다")
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.editCommentContent(request))
-                .isInstanceOf(NotFoundException.class)
-                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
 
     }
 
@@ -1182,17 +1117,16 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(comment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
         assertThatThrownBy(() -> commentService.editCommentContent(request))
-                .isInstanceOf(NotFoundException.class)
-                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
-
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("삭제된 글에 작성된 댓글을 수정할수 없습니다");
     }
+
 
     /**
      * 대댓글 수정
@@ -1215,7 +1149,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1249,7 +1182,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username("aaa")
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1279,7 +1211,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("하".repeat(500))
                 .build();
@@ -1311,7 +1242,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("하".repeat(501))
                 .build();
@@ -1344,7 +1274,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1375,7 +1304,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1409,7 +1337,6 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1442,7 +1369,6 @@ class CommentServiceTest {
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
@@ -1476,15 +1402,14 @@ class CommentServiceTest {
 
         EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
                 .commentId(childComment.getId())
                 .content("수정된 댓글입니다")
                 .build();
 
         //when //then
         assertThatThrownBy(() -> commentService.editCommentContent(request))
-                .isInstanceOf(NotFoundException.class)
-                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("삭제된 글에 작성된 댓글을 수정할수 없습니다");
 
     }
 
@@ -1805,23 +1730,14 @@ class CommentServiceTest {
 
                 dynamicTest("해당 글에 작성된 댓글을 조회한다",
                         () -> {
-                            //given
-
-                            LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member1.getLoginCredentials().getUsername())
-                                    .id(post.getId())
-                                    .page(1)
-                                    .build();
-
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request);
+                                    member1.getLoginCredentials().getUsername(), post.getId(), 1);
 
                             //then
-                            assertThat(response).extracting("postId", "isAnonymousBoard",
-                                            "sizeRequest", "actualSize", "currentPage",
-                                            "isAdmin")
-                                    .contains(post.getId(), true, 100, 3, 1, false);
+                            assertThat(response).extracting("isAnonymousBoard",
+                                            "sizeRequest", "currentPage", "isAdmin")
+                                    .containsExactly(true, 100, 1, false);
 
                             assertThat(response.getComments()).hasSize(3)
                                     .extracting("nickname", "profileImageUrl", "isDeleted",
@@ -1848,14 +1764,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).isEmpty();
@@ -1876,14 +1787,9 @@ class CommentServiceTest {
         Comment comment1 = commentFactory.createComment(member1, post);
         Comment comment2 = commentFactory.createComment(member2, post);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member1.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member1.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(2)
@@ -1911,19 +1817,12 @@ class CommentServiceTest {
             commentFactory.createComment(member, post);
         });
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
-        assertThat(response)
-                .extracting("sizeRequest", "actualSize")
-                .contains(100, 100);
+        assertThat(response.getComments().size()).isEqualTo(100);
     }
 
     @DisplayName("내가 작성한 댓글은 isMyComment 컬럼의 값이 true 다")
@@ -1939,14 +1838,9 @@ class CommentServiceTest {
 
         Comment comment = commentFactory.createComment(member, post);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -1967,14 +1861,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -1997,14 +1886,9 @@ class CommentServiceTest {
 
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2025,14 +1909,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2057,7 +1936,6 @@ class CommentServiceTest {
                             EditCommentServiceRequest request = EditCommentServiceRequest.builder()
                                     .username(commentMember.getLoginCredentials().getUsername())
                                     .commentId(comment.getId())
-                                    .postId(post.getId())
                                     .content("수정후 댓글")
                                     .build();
 
@@ -2071,15 +1949,9 @@ class CommentServiceTest {
                             Member member = memberFactory.createVerifiedStudentMember("nickname",
                                     university);
 
-                            LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member.getLoginCredentials().getUsername())
-                                    .id(post.getId())
-                                    .page(1)
-                                    .build();
-
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request);
+                                    member.getLoginCredentials().getUsername(), post.getId(), 1);
 
                             //then
                             assertThat(response.getComments()).hasSize(1)
@@ -2102,14 +1974,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2129,14 +1996,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2156,14 +2018,9 @@ class CommentServiceTest {
 
         Comment comment = commentFactory.createComment(member, post);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1)
@@ -2184,14 +2041,9 @@ class CommentServiceTest {
 
         Member admin = memberFactory.createAdminMember(university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(admin.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                admin.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.isAdmin()).isTrue();
@@ -2205,17 +2057,12 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(999L)
-                .page(1)
-                .build();
-
         //when //then
-        assertThatThrownBy(() -> commentService.loadCommentsInPost(request))
+        assertThatThrownBy(
+                () -> commentService.loadCommentsInPost(member.getLoginCredentials().getUsername(),
+                        -1L, 1))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
-
     }
 
     @DisplayName("삭제된 글에 작성된 댓글을 조회할수 없다")
@@ -2231,14 +2078,11 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
 
         //when //then
-        assertThatThrownBy(() -> commentService.loadCommentsInPost(request))
+        assertThatThrownBy(
+                () -> commentService.loadCommentsInPost(member.getLoginCredentials().getUsername(),
+                        post.getId(), 1))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
 
@@ -2259,14 +2103,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(0)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 0);
 
         //then
         assertThat(response.getCurrentPage()).isEqualTo(1);
@@ -2286,14 +2125,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(-1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), -1);
 
         //then
         assertThat(response.getCurrentPage()).isEqualTo(1);
@@ -2315,14 +2149,9 @@ class CommentServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments().size()).isZero();
@@ -2387,14 +2216,9 @@ class CommentServiceTest {
                         .parentCommentId(parentComment2.getCommentId())
                         .build());
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(6)
@@ -2430,14 +2254,9 @@ class CommentServiceTest {
 
         commentRepository.delete(childComment);
 
-        LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .id(post.getId())
-                .page(1)
-                .build();
-
         //when
-        PostCommentsResponse response = commentService.loadCommentsInPost(request);
+        PostCommentsResponse response = commentService.loadCommentsInPost(
+                member.getLoginCredentials().getUsername(), post.getId(), 1);
 
         //then
         assertThat(response.getComments()).hasSize(1);
@@ -2466,15 +2285,9 @@ class CommentServiceTest {
                             //given
                             commentRepository.delete(parentComment);
 
-                            LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member.getLoginCredentials().getUsername())
-                                    .id(post.getId())
-                                    .page(1)
-                                    .build();
-
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request);
+                                    member.getLoginCredentials().getUsername(), post.getId(), 1);
 
                             //then
                             assertThat(response.getComments()).hasSize(2)
@@ -2490,15 +2303,9 @@ class CommentServiceTest {
                             //given
                             commentRepository.delete(childComment);
 
-                            LoadCommentsInPostServiceRequest request = LoadCommentsInPostServiceRequest.builder()
-                                    .username(member.getLoginCredentials().getUsername())
-                                    .id(post.getId())
-                                    .page(1)
-                                    .build();
-
                             //when
                             PostCommentsResponse response = commentService.loadCommentsInPost(
-                                    request);
+                                    member.getLoginCredentials().getUsername(), post.getId(), 1);
 
                             //then
                             assertThat(response.getComments()).hasSize(0);
@@ -2535,12 +2342,11 @@ class CommentServiceTest {
                 member.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response).extracting("commentId", "postId", "isAnonymousBoard", "nickname",
-                        "profileImageUrl", "content", "likesCount")
-                .contains(comment.getId(), post.getId(), false,
-                        member.getBasicCredentials().getNickname(),
-                        member.getProfileImage().getThumbnailUrl(), comment.getContent(), 10);
-
+        assertThat(response).extracting("commentId", "nickname",
+                        "profileImageUrl", "identifierNumber", "content", "likesCount")
+                .containsExactly(comment.getId(), member.getBasicCredentials().getNickname(),
+                        member.getProfileImage().getOriginalUrl(),
+                        comment.getIdentifierNumber(), comment.getContent(), 10);
     }
 
     @DisplayName("익명글의 베스트 댓글은 nickname 과 profileImageUrl 컬럼의 값이 null 이다")
@@ -2565,7 +2371,6 @@ class CommentServiceTest {
                 member.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.isAnonymousBoard()).isTrue();
         assertThat(response.getNickname()).isNull();
         assertThat(response.getProfileImageUrl()).isNull();
     }

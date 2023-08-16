@@ -15,7 +15,6 @@ import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.postlike.PostLikeRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,13 +32,13 @@ public class PostLikeService {
     private final UniversityRepository universityRepository;
 
     @Transactional
-    public void createPostLike(String username, Long postId) {
+    public void pressPostLike(String username, Long postId) {
 
         Member member = findMemberBy(username);
 
         Post post = findPostBy(postId);
 
-        validateCreateRequest(member, post);
+        validatePressPostLikeRequest(member, post);
 
         postLikeRepository.save(create(post, member));
     }
@@ -54,7 +53,7 @@ public class PostLikeService {
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
-    private void validateCreateRequest(Member member, Post post) {
+    private void validatePressPostLikeRequest(Member member, Post post) {
         if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
             throw new AuthorizationFailedException();
         }

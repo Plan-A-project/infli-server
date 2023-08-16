@@ -59,12 +59,12 @@ public class PostQueryRequest {
     }
 
     public static PostQueryRequest postsByBoard(Board board, Member member,
-            LoadPostsByBoardServiceRequest request, int size) {
+            LoadPostsByBoardServiceRequest request) {
 
         return PostQueryRequest.builder()
                 .board(board)
                 .member(member)
-                .size(size)
+                .size(request.getSize())
                 .page(request.getPage())
                 .viewOrder(request.getOrder())
                 .type(request.getType())
