@@ -5,6 +5,7 @@ import static com.plana.infli.domain.QComment.comment;
 import static com.plana.infli.domain.QCommentLike.*;
 import static com.plana.infli.domain.QMember.member;
 import static com.plana.infli.domain.QPost.post;
+import static com.plana.infli.domain.type.BoardType.*;
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static com.querydsl.core.types.dsl.Expressions.booleanPath;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
@@ -14,6 +15,7 @@ import static java.util.Optional.*;
 import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
+import com.plana.infli.web.dto.request.comment.view.CommentQueryRequest;
 import com.plana.infli.web.dto.response.comment.view.BestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.QBestCommentResponse;
 import com.plana.infli.web.dto.response.comment.view.mycomment.MyComment;
@@ -22,6 +24,9 @@ import com.plana.infli.web.dto.response.comment.view.post.PostComment;
 import com.plana.infli.web.dto.response.comment.view.post.QPostComment;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.SimpleExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -36,31 +41,29 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
 
     @Override
-    public List<PostComment> findCommentsInPost(Post findPost, Member findMember,
-            PageRequest pageRequest) {
-
-        boolean isAnonymous = isAnonymous(findPost.getBoard());
+    public List<PostComment> findCommentsInPost(CommentQueryRequest request) {
 
         return jpaQueryFactory
                 .select(new QPostComment(comment.id,
-                        nicknameEq(isAnonymous),
-                        profileImageUrlEq(isAnonymous),
+                        nicknameEq(),
+                        profileImageUrlEq(),
                         comment.status.isDeleted, comment.identifierNumber,
                         comment.createdAt, comment.content,
-                        isMyComment(findMember),
+                        isMyComment(request.getMember()),
                         comment.commentLikes.size(),
-                        comment.id.in(myCommentLikesInThisPost(findPost, findMember)),
+                        comment.id.in(
+                                myCommentLikesInThisPost(request.getPost(), request.getMember())),
                         comment.parentComment.isNull(), comment.status.isEdited,
-                        isMyComment(findPost.getMember())))
+                        comment.member.eq(request.getPost().getMember())))
                 .from(comment)
                 .innerJoin(comment.member, member)
                 .innerJoin(comment.post, post)
-                .where(comment.post.eq(findPost))
+                .where(comment.post.eq(request.getPost()))
                 .where(commentIsNotDeleted()
                         .or(commentIsDeletedButChildCommentExists()))
                 .orderBy(comment.root.id.asc(), comment.id.asc())
-                .offset((long) (pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
-                .limit(pageRequest.getPageSize())
+                .offset(request.getOffset())
+                .limit(request.getSize())
                 .fetch();
     }
 
@@ -93,13 +96,8 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     @Override
     public BestCommentResponse findBestCommentIn(Post findPost) {
 
-        boolean isAnonymous = isAnonymous(findPost.getBoard());
-
         return jpaQueryFactory
-                .select(new QBestCommentResponse(comment.id, comment.post.id,
-                        constant(isAnonymous),
-                        nicknameEq(isAnonymous),
-                        profileImageUrlEq(isAnonymous),
+                .select(new QBestCommentResponse(comment.id, nicknameEq(), profileImageUrlEq(),
                         comment.identifierNumber, comment.createdAt,
                         comment.content, comment.commentLikes.size()))
                 .from(comment)
@@ -113,18 +111,18 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     @Override
-    public List<MyComment> findMyComments(Member findMember, PageRequest pageRequest) {
+    public List<MyComment> findMyComments(CommentQueryRequest request) {
         return jpaQueryFactory
                 .select(new QMyComment(comment.id, comment.post.id,
                         comment.content, comment.createdAt))
                 .from(comment)
                 .innerJoin(comment.member, member)
                 .innerJoin(comment.post, post)
-                .where(comment.member.eq(findMember))
+                .where(comment.member.eq(request.getMember()))
                 .where(commentIsNotDeleted())
                 .orderBy(comment.id.desc())
-                .offset((long) (pageRequest.getPageNumber() - 1) * pageRequest.getPageSize())
-                .limit(pageRequest.getPageSize())
+                .offset(request.getOffset())
+                .limit(request.getSize())
                 .fetch();
     }
 
@@ -156,12 +154,23 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetchOne());
     }
 
-    private Expression<String> profileImageUrlEq(boolean isAnonymous) {
-        return isAnonymous ? nullExpression() : comment.member.profileImage.thumbnailUrl;
+
+    private StringExpression profileImageUrlEq() {
+        return new CaseBuilder()
+                .when(commentIsNotAnonymous())
+                .then(comment.member.profileImage.thumbnailUrl)
+                .otherwise(nullExpression());
     }
 
-    private Expression<String> nicknameEq(boolean isAnonymous) {
-        return isAnonymous ? nullExpression() : comment.member.basicCredentials.nickname;
+    private BooleanExpression commentIsNotAnonymous() {
+        return comment.post.board.boardType
+                .in(List.of(EMPLOYMENT, ACTIVITY, CLUB, CAMPUS_LIFE));
+    }
+
+    private StringExpression nicknameEq() {
+        return new CaseBuilder()
+                .when(commentIsNotAnonymous()).then(comment.member.basicCredentials.nickname)
+                .otherwise(nullExpression());
     }
 
     @Override

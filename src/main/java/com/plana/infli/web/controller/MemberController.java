@@ -1,13 +1,10 @@
 package com.plana.infli.web.controller;
 
-import static com.plana.infli.web.dto.response.ApiResponse.*;
-
 import com.plana.infli.service.MailService;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailRequest;
-import com.plana.infli.web.dto.response.ApiResponse;
-import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,11 +21,22 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class MemberController {
 
-
     private final MemberService memberService;
 
     private final MailService mailService;
-    
+
+
+    @GetMapping("/policy")
+    @Operation(summary = "글 작성 이용 규칙 동의 여부 확인")
+    public boolean checkMemberAcceptedWritePolicy(@AuthenticatedPrincipal String username) {
+        return memberService.checkMemberAcceptedPolicy(username);
+    }
+
+    @PostMapping("/policy")
+    @Operation(summary = "글 작성 이용 규칙 동의함")
+    public void acceptWritePolicy(@AuthenticatedPrincipal String username) {
+        memberService.acceptPolicy(username);
+    }
 
     @PostMapping("/verification/student/email")
     public void sendVerificationEmail(@AuthenticatedPrincipal String username,
@@ -50,7 +58,6 @@ public class MemberController {
     @PostMapping("/verification/company/certificate")
     public void uploadCompanyCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
-
         memberService.uploadCompanyCertificateImage(username, file);
     }
 }

@@ -10,25 +10,22 @@ public class MyProfileResponse {
 
     private final String nickname;
 
+    private final String username;
+
     private final Role role;
 
-
-    private final String email;
-
     @Builder
-    private MyProfileResponse(String nickname, Role role, String email) {
+    private MyProfileResponse(String nickname, String username, Role role) {
         this.nickname = nickname;
+        this.username = username;
         this.role = role;
-        this.email = email;
     }
 
-    //TODO 기업 회원인 경우
-    // null 해결 해야됨
     public static MyProfileResponse of(Member member) {
         return MyProfileResponse.builder()
-                .nickname(null)
+                .nickname(member.getBasicCredentials().getNickname())
+                .username(member.getLoginCredentials().getUsername())
                 .role(member.getRole())
-                .email(member.getStudentCredentials().getUniversityEmail())
                 .build();
     }
 }

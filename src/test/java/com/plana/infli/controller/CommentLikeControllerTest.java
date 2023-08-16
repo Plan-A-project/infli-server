@@ -33,8 +33,6 @@ import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.web.dto.request.commentlike.cancel.CancelCommentLikeRequest;
-import com.plana.infli.web.dto.request.commentlike.create.CreateCommentLikeRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,7 +43,6 @@ import org.springframework.test.web.servlet.ResultActions;
 
 @MockMvcTest
 public class CommentLikeControllerTest {
-
 
     @Autowired
     protected MockMvc mvc;
@@ -113,21 +110,13 @@ public class CommentLikeControllerTest {
 
         Member member = findContextMember();
 
-        String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
-                .postId(post.getId())
-                .commentId(comment.getId())
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                post("/api/comments/{commentId}/likes", comment.getId())
+                        .with(csrf()));
 
         //then
-        CommentLike like = commentLikeRepository.findByCommentAndMember(comment, member).get();
-        resultActions.andExpect(status().isOk())
-                .andExpect(content().string(valueOf(like.getId())))
+        resultActions.andExpect(status().isCreated())
                 .andDo(print());
     }
 
@@ -142,16 +131,10 @@ public class CommentLikeControllerTest {
         Comment comment = commentFactory.createComment(
                 memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
-                .postId(post.getId())
-                .commentId(comment.getId())
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                post("/api/comments/{commentId}/likes", comment.getId())
+                        .with(csrf()));
 
         //then
         resultActions.andExpect(status().isUnauthorized())
@@ -169,52 +152,17 @@ public class CommentLikeControllerTest {
         Post post = postFactory.createNormalPost(
                 memberFactory.createVerifiedStudentMember("postMember", university), board);
 
-        String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
-                .postId(post.getId())
-                .commentId(null)
-                .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(post("/api/comments/{commentId}/likes", " ")
+                        .with(csrf()))
+                .andExpect(jsonPath("$.message").value("Path Variable 값이 입력되지 않았습니다"))
+                .andExpect(jsonPath("$.validation.commentId").value("Long"));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.commentId").value("댓글 번호가 입력되지 않았습니다"))
                 .andDo(print());
     }
-
-    @DisplayName("댓글 좋아요 요청시 댓글이 작성된 글의 Id 번호는 필수다")
-    @WithMockMember
-    @Test
-    void postIdIsMandatory() throws Exception {
-        //given
-        University university = universityRepository.findByName("푸단대학교").get();
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-        Comment comment = commentFactory.createComment(
-                memberFactory.createVerifiedStudentMember("commentMember", university), post);
-
-        String request = om.writeValueAsString(CreateCommentLikeRequest.builder()
-                .postId(null)
-                .commentId(comment.getId())
-                .build());
-
-        //when
-        ResultActions resultActions = mvc.perform(post("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
-
-        //then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.postId").value("글 번호가 입력되지 않았습니다"))
-                .andDo(print());
-    }
-
 
     @DisplayName("댓글 좋아요 취소")
     @WithMockMember
@@ -231,16 +179,10 @@ public class CommentLikeControllerTest {
         Member member = findContextMember();
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
-        String request = om.writeValueAsString(CancelCommentLikeRequest.builder()
-                .postId(post.getId())
-                .commentId(comment.getId())
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                delete("/api/comments/{commentId}/likes", comment.getId())
+                        .with(csrf()));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -264,16 +206,10 @@ public class CommentLikeControllerTest {
 
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
-        String request = om.writeValueAsString(CancelCommentLikeRequest.builder()
-                .postId(post.getId())
-                .commentId(comment.getId())
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                delete("/api/comments/{commentId}/likes", comment.getId())
+                        .with(csrf()));
 
         //then
         resultActions.andExpect(status().isUnauthorized())
@@ -296,54 +232,16 @@ public class CommentLikeControllerTest {
         Member member = findContextMember();
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
-        String request = om.writeValueAsString(CancelCommentLikeRequest.builder()
-                .postId(post.getId())
-                .commentId(null)
-                .build());
-
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
+        ResultActions resultActions = mvc.perform(
+                delete("/api/comments/{commentId}/likes", "")
+                        .with(csrf()));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.commentId").value("댓글 번호가 입력되지 않았습니다"))
                 .andDo(print());
     }
 
-    @DisplayName("댓글 좋아요 취소 요청시 댓글이 작성된 글의 Id 번호는 필수다")
-    @WithMockMember
-    @Test
-    void cancelCommentLikeWithoutPostId() throws Exception {
-        //given
-        University university = universityRepository.findByName("푸단대학교").get();
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-        Comment comment = commentFactory.createComment(
-                memberFactory.createVerifiedStudentMember("commentMember", university), post);
-
-        Member member = findContextMember();
-        CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
-
-        String request = om.writeValueAsString(CancelCommentLikeRequest.builder()
-                .postId(null)
-                .commentId(comment.getId())
-                .build());
-
-        //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments/likes")
-                .contentType(APPLICATION_JSON)
-                .content(request)
-                .with(csrf()));
-
-        //then
-        resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.validation.postId").value("글 번호가 입력되지 않았습니다"))
-                .andDo(print());
-    }
 
     private Member findContextMember() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();

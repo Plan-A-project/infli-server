@@ -19,13 +19,18 @@ public class LoadPostsByBoardServiceRequest {
 
     private final PostViewOrder order;
 
+    private final Integer size;
+
     @Builder
-    public LoadPostsByBoardServiceRequest(String username, Long boardId,
-            PostType type, Integer page, PostViewOrder order) {
+    private LoadPostsByBoardServiceRequest(String username, Long boardId,
+            PostType type, Integer page, PostViewOrder order, Integer size) {
+
         this.username = username;
         this.boardId = boardId;
         this.type = type;
         this.page = page;
         this.order = order;
+        this.size = size;
     }
+
 }

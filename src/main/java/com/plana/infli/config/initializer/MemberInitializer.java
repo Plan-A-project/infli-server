@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"dev", "local"})
+@Profile({"dev"})
 @Order(1)
 @Transactional
 @Getter
@@ -52,7 +52,8 @@ public class MemberInitializer implements CommandLineRunner {
         university = universityRepository.findByName("푸단대학교")
                 .orElseGet(() -> universityRepository.save(create("푸단대학교")));
 
-        createVerifiedStudentMember();
+        createVerifiedStudentMember("student1");
+        createVerifiedStudentMember("student2");
         createUnVerifiedStudentMember();
 
         createMemberWithRole(ADMIN);
@@ -62,12 +63,12 @@ public class MemberInitializer implements CommandLineRunner {
         createUnVerifiedCompanyMember();
     }
 
-    private void createVerifiedStudentMember() {
+    private void createVerifiedStudentMember(String username) {
         Member member = memberRepository.save(Member.builder()
                 .university(university)
                 .role(STUDENT)
                 .verificationStatus(SUCCESS)
-                .loginCredentials(LoginCredentials.of("student", encoder.encode("password")))
+                .loginCredentials(LoginCredentials.of(username, encoder.encode("password")))
                 .profileImage(ofDefaultProfileImage())
                 .basicCredentials(ofDefaultWithNickname("student"))
                 .companyCredentials(null)

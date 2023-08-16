@@ -23,8 +23,6 @@ import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
-import com.plana.infli.web.dto.request.commentlike.cancel.CancelCommentLikeServiceRequest;
-import com.plana.infli.web.dto.request.commentlike.create.CreateCommentLikeServiceRequest;
 import java.util.Collection;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -105,19 +103,13 @@ public class CommentLikeServiceTest {
                 memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
-        CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
 
         //when
-        Long commentLikeId = commentLikeService.createCommentLike(request);
+        commentLikeService.createCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId());
 
         //then
-        CommentLike like = commentLikeRepository.findWithCommentAndMemberById(commentLikeId).get();
-        assertThat(like.getComment().getId()).isEqualTo(comment.getId());
-        assertThat(like.getMember().getId()).isEqualTo(member.getId());
+        assertThat(commentLikeRepository.existsByMemberAndComment(member, comment)).isTrue();
     }
 
 
@@ -133,14 +125,8 @@ public class CommentLikeServiceTest {
         Comment comment = commentFactory.createComment(
                 memberFactory.createVerifiedStudentMember("commentMember", university), post);
 
-        CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username("aaaa")
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
-
         //when //then
-        assertThatThrownBy(() -> commentLikeService.createCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.createCommentLike("aaa", comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
 
@@ -161,14 +147,10 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createVerifiedStudentMember("member", university);
         memberRepository.delete(member);
 
-        CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
 
         //when //then
-        assertThatThrownBy(() -> commentLikeService.createCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.createCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
 
@@ -184,14 +166,10 @@ public class CommentLikeServiceTest {
                 memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
-        CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(99L)
-                .postId(post.getId())
-                .build();
 
         //when //then
-        assertThatThrownBy(() -> commentLikeService.createCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.createCommentLike(
+                member.getLoginCredentials().getUsername(), -1L))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
@@ -212,14 +190,11 @@ public class CommentLikeServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
         commentRepository.delete(comment);
-        CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(99L)
-                .postId(post.getId())
-                .build();
 
         //when //then
-        assertThatThrownBy(() -> commentLikeService.createCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.createCommentLike(
+                member.getLoginCredentials().getUsername(),
+                comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
@@ -240,14 +215,10 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
-        CreateCommentLikeServiceRequest request = CreateCommentLikeServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
 
         //when //then
-        assertThatThrownBy(() -> commentLikeService.createCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.createCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
 
@@ -273,15 +244,9 @@ public class CommentLikeServiceTest {
 
         CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
 
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                .builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
-
         //when
-        commentLikeService.cancelCommentLike(request);
+        commentLikeService.cancelCommentLike(member.getLoginCredentials().getUsername(),
+                comment.getId());
 
         //then
         assertThat(commentLikeRepository.count()).isZero();
@@ -301,14 +266,9 @@ public class CommentLikeServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
 
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
-
         //when //then
-        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("해당 댓글에 좋아요를 누르지 않았습니다");
 
@@ -333,28 +293,15 @@ public class CommentLikeServiceTest {
         return List.of(
                 dynamicTest("좋아요 취소 실행",
                         () -> {
-                            CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                                    .builder()
-                                    .username(member.getLoginCredentials().getUsername())
-                                    .commentId(comment.getId())
-                                    .postId(post.getId())
-                                    .build();
-
-                            commentLikeService.cancelCommentLike(request);
+                            commentLikeService.cancelCommentLike(
+                                    member.getLoginCredentials().getUsername(), comment.getId());
                         }),
 
                 dynamicTest("다시한번 좋아요 취소할 경우 예외 발생",
                         () -> {
-                            //given
-                            CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                                    .builder()
-                                    .username(member.getLoginCredentials().getUsername())
-                                    .commentId(comment.getId())
-                                    .postId(post.getId())
-                                    .build();
-
                             //when //then
-                            assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
+                            assertThatThrownBy(() -> commentLikeService.cancelCommentLike(
+                                    member.getLoginCredentials().getUsername(), comment.getId()))
                                     .isInstanceOf(BadRequestException.class)
                                     .message().isEqualTo("해당 댓글에 좋아요를 누르지 않았습니다");
 
@@ -380,15 +327,9 @@ public class CommentLikeServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
 
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                .builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
-
         //when //then
-        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("해당 댓글에 좋아요를 누르지 않았습니다");
 
@@ -412,21 +353,15 @@ public class CommentLikeServiceTest {
 
         commentRepository.delete(comment);
 
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                .builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
-
         //when //then
-        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
 
     }
 
-    @DisplayName("댓글 좋아요 취소 - 댓글이 작성된 글이 취소된 경우 댓글 좋아요 취소를 할수 없다")
+    @DisplayName("댓글 좋아요 취소 - 댓글이 작성된 글이 삭제된 경우 댓글 좋아요 취소를 할수 없다")
     @Test
     void cancelCommentLikeWhenPostIsDeleted() {
 
@@ -444,15 +379,9 @@ public class CommentLikeServiceTest {
 
         postService.deletePost(post.getId(), postMember.getLoginCredentials().getUsername());
 
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                .builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
-
         //when //then
-        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
 
@@ -475,15 +404,8 @@ public class CommentLikeServiceTest {
         Member member = memberFactory.createVerifiedStudentMember("member", university);
         commentLikeFactory.createCommentLike(member, comment);
 
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                .builder()
-                .username("aaa")
-                .commentId(comment.getId())
-                .postId(post.getId())
-                .build();
-
         //when //then
-        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.cancelCommentLike("aaa", comment.getId()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
 
@@ -499,46 +421,12 @@ public class CommentLikeServiceTest {
                 memberFactory.createVerifiedStudentMember("postMember", university), board);
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                .builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(999L)
-                .postId(post.getId())
-                .build();
 
         //when //then
-        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
+        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(
+                member.getLoginCredentials().getUsername(), -1L))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("댓글이 존재하지 않거나 삭제되었습니다");
-
-    }
-
-    @DisplayName("댓글 좋아요 취소 요청시 입력된 글의 Id 번호와 댓글이 작성된 글의 Id 번호는 일치해야 한다")
-    @Test
-    void postIdsMustMatch() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createCampusLifeBoard(university);
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-
-        Comment comment = commentFactory.createComment(
-                memberFactory.createVerifiedStudentMember("commentMember", university), post);
-
-        Member member = memberFactory.createVerifiedStudentMember("member", university);
-        commentLikeFactory.createCommentLike(member, comment);
-
-        CancelCommentLikeServiceRequest request = CancelCommentLikeServiceRequest
-                .builder()
-                .username(member.getLoginCredentials().getUsername())
-                .commentId(comment.getId())
-                .postId(999L)
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentLikeService.cancelCommentLike(request))
-                .isInstanceOf(NotFoundException.class)
-                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
 
     }
 }

@@ -20,12 +20,17 @@ public class LoadPostsByBoardRequest {
     @NotNull(message = "최신순, 인기순 여부를 선택해주세요")
     private PostViewOrder order;
 
+    @NotNull(message = "페이지당 글 갯수를 선택해주세요")
+    private Integer size;
+
     @Builder
-    public LoadPostsByBoardRequest(PostType type, Integer page, PostViewOrder order) {
+    public LoadPostsByBoardRequest(PostType type, Integer page, PostViewOrder order, Integer size) {
         this.type = type;
         this.page = page;
         this.order = order;
+        this.size = size;
     }
+
 
     public LoadPostsByBoardServiceRequest toServiceRequest(Long boardId, String username) {
         return LoadPostsByBoardServiceRequest.builder()
@@ -34,6 +39,8 @@ public class LoadPostsByBoardRequest {
                 .type(type)
                 .order(order)
                 .page(page)
+                .size(size)
                 .build();
     }
+
 }

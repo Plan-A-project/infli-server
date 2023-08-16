@@ -1,10 +1,6 @@
 package com.plana.infli.web.controller;
 
 import com.plana.infli.service.SettingService;
-import com.plana.infli.web.dto.request.setting.unregister.UnregisterMemberRequest;
-import com.plana.infli.web.dto.request.setting.modify.nickname.ModifyNicknameRequest;
-import com.plana.infli.web.dto.request.setting.validate.nickname.ValidateNewNicknameRequest;
-import com.plana.infli.web.dto.request.setting.validate.password.AuthenticatePasswordRequest;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordRequest;
 import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;
@@ -28,80 +24,64 @@ public class SettingController {
 
     private final SettingService settingService;
 
-    /**
-     * 내 정보 조회
-     * */
-    @Operation(description = "회원 정보 조회")
     @GetMapping("/profiles")
+    @Operation(summary = "회원 정보 조회")
     public MyProfileResponse loadMyProfile(@AuthenticatedPrincipal String username) {
         return settingService.loadMyProfile(username);
     }
 
+    @GetMapping("/nickname/validate")
+    @Operation(summary = "닉네임 중복 여부 확인")
+    public String checkIsAvailableNickname(@RequestBody String newNickname) {
 
-    /**
-     * 닉네임 변경
-     */
-    @Operation(description = "사용 가능한 닉네임인지 여부 확인")
-    @GetMapping("/validate/nickname")
-    public boolean isAvailableNickname(@AuthenticatedPrincipal String username,
-            @RequestBody @Validated ValidateNewNicknameRequest request) {
-        return settingService.isAvailableNewNickname(request.toServiceRequest(username));
+        settingService.checkIsAvailableNewNickname(newNickname);
+        return "사용 가능한 닉네임";
     }
 
-    @Operation(description = "회원 닉네임 변경")
-    @PostMapping("/modify/nickname")
-    public void changeNickname(@AuthenticatedPrincipal String username,
-            @RequestBody @Validated ModifyNicknameRequest request) {
-        settingService.changeNickname(request.toServiceRequest(username));
+    @PostMapping("/nickname")
+    @Operation(summary = "회원 닉네임 변경")
+    public String changeNickname(@AuthenticatedPrincipal String username,
+            @RequestBody String newNickname) {
+
+        settingService.changeNickname(username, newNickname);
+        return "닉네임 변경 완료";
     }
 
+    @PostMapping("/password/validate")
+    @Operation(summary = "기존 비밀번호 검증")
+    public void verifyCurrentPassword(@AuthenticatedPrincipal String username,
+            @RequestBody String currentPassword) {
 
-    /**
-     * 비빌번호 변경 또는 탈퇴시 비밀번호 확인
-     */
-    @Operation(description = "비밀번호 확인 - 비밀번호 변경/탈퇴 시")
-    @PostMapping("/validate/password")
-    public void authenticatePassword(@AuthenticatedPrincipal String username,
-            @RequestBody @Validated AuthenticatePasswordRequest request) {
-
-        settingService.authenticatePassword(request.toServiceRequest(username));
+        settingService.verifyCurrentPassword(username, currentPassword);
     }
 
-    /**
-     * 비밀번호 변경
-     */
-    @Operation(description = "회원 비밀번호 변경")
-    @PostMapping("/modify/password")
+    @PostMapping("/password")
+    @Operation(summary = "비밀번호 변경")
     public void modifyPassword(@AuthenticatedPrincipal String username,
             @RequestBody @Validated ModifyPasswordRequest request) {
+
         settingService.changePassword(request.toServiceRequest(username));
     }
 
-
-    /**
-     * 프로필 사진 변경
-     */
-    @Operation(description = "회원 프로필 사진 변경")
-    @PostMapping("/modify/profileImage")
+    @PostMapping("/profileImage")
+    @Operation(summary = "회원 프로필 사진 변경")
     public ChangeProfileImageResponse changeProfileImage(@AuthenticatedPrincipal String username,
             @RequestParam("file") MultipartFile profileImage) {
         return settingService.changeProfileImage(username, profileImage);
     }
 
-    /**
-     * 탈퇴하기
-     */
-    @Operation(description = "탈퇴를 요청한 회원의 이름과 이메일 조회")
-    @GetMapping("/unregister")
-    public MyProfileToUnregisterResponse loadProfileToUnregister(@AuthenticatedPrincipal String username) {
+    @GetMapping("/unregister/profile")
+    @Operation(summary = "탈퇴를 요청한 회원의 이름과 이메일 조회")
+    public MyProfileToUnregisterResponse loadProfileToUnregister(
+            @AuthenticatedPrincipal String username) {
+
         return settingService.loadProfileToUnregister(username);
     }
 
-    //TODO
-    @Operation(description = "회원 탈퇴")
     @PostMapping("/unregister")
-    public void unregister(@AuthenticatedPrincipal String username,
-            @RequestBody @Validated UnregisterMemberRequest request) {
-        settingService.unregisterMember(request.toServiceRequest(username));
+    @Operation(summary = "회원 탈퇴")
+    public void unregister(@AuthenticatedPrincipal String username, @RequestBody String password) {
+
+        settingService.unregisterMember(username, password);
     }
 }

@@ -48,6 +48,12 @@ public class BadRequestException extends DefaultException{
 
     public static final String EMAIL_VERIFICATION_CODE_EXPIRED = "이메일 인증 코드가 만료되었습니다";
 
+    public static final String EDIT_COMMENT_IN_DELETED_POST_NOT_ALLOWED = "삭제된 글에 작성된 댓글을 수정할수 없습니다";
+
+    public static final String UNREGISTER_NOT_ALLOWED = "회원 탈퇴를 할수 없는 계정입니다";
+
+    public static final String MEMBER_VERIFICATION_STATUS_IS_NOT_PENDING = "인증 상태가 승인 대기중이 아닙니다";
+
 
     public BadRequestException(String message) {
         super(message);

@@ -1,5 +1,7 @@
 package com.plana.infli.web.dto.response.profile;
 
+import static com.plana.infli.domain.type.Role.*;
+
 import com.plana.infli.domain.Member;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,20 +11,33 @@ public class MyProfileToUnregisterResponse {
 
     private final String username;
 
-    private final String name;
+    private final String realName;
+
+    private final String companyName;
 
     @Builder
-    public MyProfileToUnregisterResponse(String username, String realName) {
+    private MyProfileToUnregisterResponse(String username, String realName, String companyName) {
         this.username = username;
-        this.name = realName;
+        this.realName = realName;
+        this.companyName = companyName;
     }
 
-    //TODO 회원 탈퇴시 학생 회원과 기업 회원 구분해야됨
     public static MyProfileToUnregisterResponse of(Member member) {
+
         return MyProfileToUnregisterResponse.builder()
                 .username(member.getLoginCredentials().getUsername())
-                .realName(member.getStudentCredentials().getRealName())
+                .realName(loadRealName(member))
+                .companyName(loadCompanyName(member))
                 .build();
     }
 
+    private static String loadCompanyName(Member member) {
+        return member.getRole() == COMPANY ?
+                member.getCompanyCredentials().getCompany().getName() : null;
+    }
+
+    private static String loadRealName(Member member) {
+        return member.getRole() == STUDENT ?
+                member.getStudentCredentials().getRealName() : null;
+    }
 }
