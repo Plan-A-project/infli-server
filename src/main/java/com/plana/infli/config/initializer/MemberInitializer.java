@@ -70,7 +70,7 @@ public class MemberInitializer implements CommandLineRunner {
                 .verificationStatus(SUCCESS)
                 .loginCredentials(LoginCredentials.of(username, encoder.encode("password")))
                 .profileImage(ofDefaultProfileImage())
-                .basicCredentials(ofDefaultWithNickname("student"))
+                .basicCredentials(ofDefaultWithNickname(username))
                 .companyCredentials(null)
                 .studentCredentials(ofWithEmail(ofDefault("이영진"), "aaa@infli.com"))
                 .build());
