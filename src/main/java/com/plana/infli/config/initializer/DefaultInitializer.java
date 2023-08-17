@@ -35,14 +35,12 @@ public class DefaultInitializer implements CommandLineRunner {
         university = universityRepository.findByName(FUDAN)
                 .orElseGet(() -> universityRepository.save(University.create(FUDAN)));
 
-
         createBoardWithType(EMPLOYMENT);
         createBoardWithType(ACTIVITY);
         createBoardWithType(CLUB);
         createBoardWithType(ANONYMOUS);
         createBoardWithType(CAMPUS_LIFE);
     }
-
 
     private void createBoardWithType(BoardType boardType) {
         if (boardRepository.existsByBoardTypeAndUniversity(boardType, university) == false) {

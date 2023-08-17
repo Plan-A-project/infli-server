@@ -129,7 +129,7 @@ public class MemberService {
 
         validateUploadCompanyCertificateRequest(member, file);
 
-        String directoryPath = "member/member_" + member.getId() + "/certificate/company";
+        String directoryPath = "members/" + member.getId() + "/certificate/company";
 
         String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
 
@@ -158,7 +158,7 @@ public class MemberService {
 
         validateUploadUniversityCertificateRequest(member, file);
 
-        String directoryPath = "member/member_" + member.getId() + "/certificate/student";
+        String directoryPath = "members/" + member.getId() + "/certificate/student";
 
         String imageUrl = s3Uploader.uploadAsOriginalImage(file, directoryPath);
 
