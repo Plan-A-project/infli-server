@@ -72,6 +72,7 @@ dependencies {
     // thumbnail 생성기
     implementation group: 'net.coobird', name: 'thumbnailator', version: '0.4.20'
 
+    implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.9.3'
 }
 
 dependencyManagement {
