@@ -9,14 +9,13 @@ phases:
     commands:
       #ECR Public Gallery Login
       - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-
       - echo Logging in to Amazon ECR...
       - aws --version
       - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
       - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.us-west-2.amazonaws.com/{ECR_REPO_NAME}
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
-      - docker run -p 6379:6379 redis
+      - docker run -d -p 6379:6379 redis
   build:
     commands:
       - echo Build started on `date`
