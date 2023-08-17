@@ -38,3 +38,4 @@ out/
 .vscode/
 /src/main/generated/
 /src/main/resources/application-local.yml
+sendgrid.env

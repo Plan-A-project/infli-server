@@ -190,7 +190,7 @@ public class PostService {
 
         checkThisMemberIsPostWriter(member, post);
 
-        String directoryPath = "post/post_" + post.getId();
+        String directoryPath = "posts/" + post.getId();
 
         String thumbnailImageURL = s3Uploader.uploadAsThumbnailImage(multipartFiles.get(0),
                 directoryPath);

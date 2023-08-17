@@ -126,7 +126,7 @@ public class SettingService {
 
         Member member = findMemberBy(username);
 
-        String path = "member/member_" + member.getId();
+        String path = "members/" + member.getId();
 
         String originalUrl = s3Uploader.uploadAsOriginalImage(multipartFile, path);
 
