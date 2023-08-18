@@ -1,4 +1,4 @@
-package com.plana.infli.config;
+package com.plana.infli.infra.config;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;

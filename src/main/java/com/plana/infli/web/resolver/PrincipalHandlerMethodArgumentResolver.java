@@ -24,19 +24,10 @@ public class PrincipalHandlerMethodArgumentResolver implements HandlerMethodArgu
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-		NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
+
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-		Object principal = null;
-
-		if (authentication != null) {
-			principal = authentication.getPrincipal();
-		}
-
-		if (principal == null || principal.getClass() != String.class) {
-			return null;
-		}
-
-		return principal;
+		return authentication.getName();
 	}
 }

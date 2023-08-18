@@ -55,6 +55,7 @@ public class SettingController {
         settingService.verifyCurrentPassword(username, currentPassword);
     }
 
+    //TODO username, 비밀번호, 닉네임 정규표현식 검증 필요 
     @PostMapping("/password")
     @Operation(summary = "비밀번호 변경")
     public void modifyPassword(@AuthenticatedPrincipal String username,
