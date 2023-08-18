@@ -1,4 +1,4 @@
-package com.plana.infli.config.initializer;
+package com.plana.infli.infra.initializer;
 
 import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.domain.embedded.member.BasicCredentials.*;

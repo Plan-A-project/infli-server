@@ -2,7 +2,6 @@ package com.plana.infli.web.controller;
 
 import static org.springframework.http.HttpStatus.*;
 
-import com.plana.infli.service.AuthService;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberRequest;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final MemberService memberService;
-
-    private final AuthService authService;
 
     @PostMapping("/signup/student")
     @ResponseStatus(CREATED)
@@ -50,11 +46,5 @@ public class AuthController {
     public String validateNickname(@PathVariable String nickname) {
         memberService.checkNicknameDuplicate(nickname);
         return "사용 가능한 닉네임 입니다";
-    }
-
-    @PostMapping("/reissue")
-    public ResponseEntity<Void> reissueRefreshToken(
-            @RequestHeader("Refresh-Token") String refreshToken) {
-        return ResponseEntity.ok().headers(authService.reissue(refreshToken)).build();
     }
 }

@@ -75,9 +75,7 @@ public class S3Uploader {
     }
 
     private void validateUploadedFile(MultipartFile multipartFile) {
-        if (multipartFile == null ||
-                multipartFile.isEmpty() ||
-                multipartFile.getOriginalFilename() == null) {
+        if (multipartFile.isEmpty() || multipartFile.getOriginalFilename() == null) {
             throw new BadRequestException(IMAGE_IS_EMPTY);
         }
     }
