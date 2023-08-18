@@ -1,4 +1,4 @@
-package com.plana.infli.config.initializer;
+package com.plana.infli.infra.initializer;
 
 import static com.plana.infli.domain.Company.*;
 import static com.plana.infli.domain.editor.MemberEditor.acceptPolicy;

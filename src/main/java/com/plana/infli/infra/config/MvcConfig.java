@@ -1,4 +1,4 @@
-package com.plana.infli.config;
+package com.plana.infli.infra.config;
 
 import java.util.List;
 
