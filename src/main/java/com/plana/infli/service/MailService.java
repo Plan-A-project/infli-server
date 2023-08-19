@@ -31,17 +31,17 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.mail.MailSender;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class MailService {
 
-    private final MailSender mailSender;
+    @Value("${SENDGRID_API_KEY}")
+    private String SENDGRID_API_KEY;
 
     private final MemberRepository memberRepository;
 

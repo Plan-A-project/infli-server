@@ -1,5 +1,10 @@
 package com.plana.infli.infra.security.config;
 
+import static java.util.Arrays.*;
+import static java.util.List.*;
+
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -114,6 +119,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(of("http://localhost:3000"));
         configuration.addAllowedOrigin("*");
         configuration.addAllowedMethod("*");
         configuration.addExposedHeader("*");

@@ -767,8 +767,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/{postId}/comments", post.getId())
-                        .param("page", "1")
+                get("/api/posts/{postId}/comments?page={page}", post.getId(), 1)
                         .with(csrf()));
 
         //then

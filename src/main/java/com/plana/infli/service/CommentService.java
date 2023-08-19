@@ -234,8 +234,8 @@ public class CommentService {
 
         Post post = findPostWithMemberBy(postId);
 
-        CommentQueryRequest request = CommentQueryRequest.of(post, member,
-                COMMENT_SIZE_PER_PAGE, page);
+        CommentQueryRequest request = CommentQueryRequest.of(post, member, COMMENT_SIZE_PER_PAGE,
+                page);
 
         List<PostComment> comments = commentRepository.findCommentsInPost(request);
 

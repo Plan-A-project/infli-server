@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/settings")
+@RequestMapping("/api/setting")
 @RequiredArgsConstructor
 public class SettingController {
 
     private final SettingService settingService;
 
-    @GetMapping("/profiles")
+    @GetMapping("/profile")
     @Operation(summary = "회원 정보 조회")
     public MyProfileResponse loadMyProfile(@AuthenticatedPrincipal String username) {
         return settingService.loadMyProfile(username);
@@ -64,7 +64,7 @@ public class SettingController {
         settingService.changePassword(request.toServiceRequest(username));
     }
 
-    @PostMapping("/profileImage")
+    @PostMapping("/profile/image")
     @Operation(summary = "회원 프로필 사진 변경")
     public ChangeProfileImageResponse changeProfileImage(@AuthenticatedPrincipal String username,
             @RequestParam("file") MultipartFile profileImage) {
