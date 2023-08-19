@@ -4,7 +4,7 @@ import static com.amazonaws.services.s3.model.CannedAccessControlList.*;
 import static com.plana.infli.exception.custom.BadRequestException.IMAGE_IS_EMPTY;
 import static org.springframework.util.StringUtils.*;
 
-import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.plana.infli.exception.custom.BadRequestException;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 @Service
 public class S3Uploader {
 
-    private final AmazonS3Client amazonS3Client;
+    private final AmazonS3 amazonS3;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -45,11 +45,11 @@ public class S3Uploader {
 
         file.delete();
 
-        return amazonS3Client.getUrl(bucket, fullPathName).toString();
+        return amazonS3.getUrl(bucket, fullPathName).toString();
     }
 
     private void uploadToS3(File file, String fullPathName) {
-        amazonS3Client.putObject(
+        amazonS3.putObject(
                 new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
     }
 
@@ -71,7 +71,7 @@ public class S3Uploader {
         originalFile.delete();
         thumbnailFile.delete();
 
-        return amazonS3Client.getUrl(bucket, fullPathName).toString();
+        return amazonS3.getUrl(bucket, fullPathName).toString();
     }
 
     private void validateUploadedFile(MultipartFile multipartFile) {
