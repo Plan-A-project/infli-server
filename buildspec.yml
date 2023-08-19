@@ -16,6 +16,7 @@ phases:
       - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/infli-back
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - docker run -d -p 6379:6379 redis
   build:
     commands:
       - echo Build started on `date`
