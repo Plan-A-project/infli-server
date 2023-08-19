@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     ECR_REPO_NAME: infli-back
-    ENCRYPT_KEY: ${ENCRYPT_KEY}
+    ENCRYPT_KEY: ${ENCRYPT_KEY:qweasd}
 phases:
   pre_build:
     commands:
@@ -20,7 +20,7 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - ./gradlew build
+      - ENCRYPT_KEY=${ENCRYPT_KEY} ./gradlew build
       - echo Building the Docker image...
       - docker build -t infli-back:latest .
       - docker tag infli-back:latest ${REPOSITORY_URI}:${IMAGE_TAG}
