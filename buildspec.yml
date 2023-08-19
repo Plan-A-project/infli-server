@@ -3,7 +3,7 @@ version: 0.2
 env:
   variables:
     ECR_REPO_NAME: infli-back
-    ENCRYPT_KEY: ${ENCRYPT_KEY:qweasd}
+    KEY: ${ENCRYPT_KEY}
 phases:
   pre_build:
     commands:
@@ -16,11 +16,10 @@ phases:
       - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/infli-back
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
-      - docker run -d -p 6379:6379 redis
   build:
     commands:
       - echo Build started on `date`
-      - ENCRYPT_KEY=${ENCRYPT_KEY} ./gradlew build
+      - ENCRYPT_KEY=$KEY ./gradlew build
       - echo Building the Docker image...
       - docker build -t infli-back:latest .
       - docker tag infli-back:latest ${REPOSITORY_URI}:${IMAGE_TAG}
