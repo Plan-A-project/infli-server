@@ -109,7 +109,7 @@ public class MailService {
     @SneakyThrows({IOException.class})
     private void sendMail(Mail mail) {
 
-        SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+        SendGrid sg = new SendGrid(SENDGRID_API_KEY);
         Request sendRequest = new Request();
         sendRequest.setMethod(Method.POST);
         sendRequest.setEndpoint("mail/send");
