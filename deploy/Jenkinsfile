@@ -1,3 +1,10 @@
+// stage names
+def SET_VARIABLE = 'SET VARIABLE'
+def GITHUB_CHECKOUT = 'GITHUB CHECKOUT'
+def BUILD = 'BUILD'
+def BUILD_PUSH_DOCKER_IMAGE = 'BUILD & PUSH DOCKER IMAGE'
+def DEPLOY_TO_SERVER = 'DEPLOY TO SERVER'
+
 pipeline {
 
     agent any
@@ -13,7 +20,7 @@ pipeline {
     }
 
     stages {
-        stage('Set Variables') {
+        stage(SET_VARIABLE) {
             steps {
                 echo 'Set Variables'
                 script {
@@ -31,20 +38,36 @@ pipeline {
                     SSH_HOST_CREDENTIAL_ID = env.BRANCH_NAME.equals('main') ? 'PROD_SSH_HOST' : 'DEV_SSH_HOST'
                     SSH_PORT_CREDENTIAL_ID = env.BRANCH_NAME.equals('main') ? 'PROD_SSH_PORT' : 'DEV_SSH_PORT'
 
+                    // DISCORD
+                    DISCORD_TITLE = 'INFLI BACKEND JENKINS JOB'
+                    DISCORD_WEB_HOOK = env.BRANCH_NAME.equals('main') ? 'PROD_DISCORD_WEB_HOOK' : 'DEVELOP_DISCORD_WEB_HOOK'
                 }
 
             }
+            post {
+                success {
+                    sendDiscordStart()
+                }
+            }
         }
 
-        stage('Git Checkout') {
+        stage(GITHUB_CHECKOUT) {
             steps {
                 echo 'Checkout Remote Repository'
                 git branch: "${env.BRANCH_NAME}",
                 url: 'https://github.com/Plan-A-project/infli-server.git'
             }
+            post {
+                success {
+                    sendDiscordSuccess(GITHUB_CHECKOUT)
+                }
+                failure {
+                    sendDiscordFailed(GITHUB_CHECKOUT)
+                }
+            }
         }
 
-        stage('Build') {
+        stage(BUILD) {
 
             steps {
                 echo 'Build With gradlew'
@@ -53,9 +76,17 @@ pipeline {
                     ./gradlew clean build -x test
                 '''
             }
+            post {
+                success {
+                    sendDiscordSuccess(BUILD)
+                }
+                failure {
+                    sendDiscordFailed(BUILD)
+                }
+            }
         }
 
-        stage('Build & Push Docker Image') {
+        stage(BUILD_PUSH_DOCKER_IMAGE) {
             steps {
                 echo 'Build & Push Docker Image'
                 withCredentials([usernamePassword(
@@ -78,9 +109,17 @@ pipeline {
                     """, returnStatus: true)
                 }
             }
+            post {
+                success {
+                    sendDiscordSuccess(BUILD_PUSH_DOCKER_IMAGE)
+                }
+                failure {
+                    sendDiscordFailed(BUILD_PUSH_DOCKER_IMAGE)
+                }
+            }
         }
 
-        stage('Deploy to Server') {
+        stage(DEPLOY_TO_SERVER) {
             steps {
                 echo 'Deploy to Server'
                 withCredentials([
@@ -121,7 +160,57 @@ pipeline {
                     }
                 }
             }
+            post {
+                success {
+                    sendDiscordSuccess(DEPLOY_TO_SERVER)
+                }
+                failure {
+                    sendDiscordFailed(DEPLOY_TO_SERVER)
+                }
+            }
         }
 
     }
+}
+
+void sendDiscordStart() {
+    withCredentials([string(credentialsId: "${DISCORD_WEB_HOOK}", variable: 'WEB_HOOK')]) {
+        discordSend (
+                title: DISCORD_TITLE,
+                description: "${OPERATION_ENV} 환경 배포 파이프 라인 시작",
+                footer: "===============================================================\n" +
+                        "\n" +
+                        "배포 파이프라인이 시작되었습니다.\n" +
+                        "${env.JOB_NAME}(#${env.BUILD_NUMBER})\n",
+                link: env.BUILD_URL,
+                result: currentBuild.currentResult,
+                webhookURL: WEB_HOOK
+        )
+    }
+}
+
+void sendDiscordSuccess(String stage) {
+    withCredentials([string(credentialsId: "${DISCORD_WEB_HOOK}", variable: 'WEB_HOOK')]) {
+        discordSend (
+                title: DISCORD_TITLE,
+                description: stage,
+                footer: stage + "를 성공했습니다.",
+                result: currentBuild.currentResult,
+                webhookURL: WEB_HOOK
+        )
+    }
+}
+
+void sendDiscordFailed(String stage) {
+    withCredentials([string(credentialsId: "${DISCORD_WEB_HOOK}", variable: 'WEB_HOOK')]) {
+        discordSend (
+                title: DISCORD_TITLE,
+                description: stage,
+                footer: stage + "를 실패했습니다.\n" +
+                        "===============================================================\n",
+                result: currentBuild.currentResult,
+                webhookURL: WEB_HOOK
+        )
+    }
+    echo stage + " Failed"
 }
