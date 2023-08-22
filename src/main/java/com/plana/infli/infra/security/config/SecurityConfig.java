@@ -22,6 +22,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -83,6 +84,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
 
                 .logout((logout) -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/api/logout", "POST"))
                         .deleteCookies("JSESSIONID", "remember-me")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)

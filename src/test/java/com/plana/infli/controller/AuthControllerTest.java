@@ -2,7 +2,9 @@ package com.plana.infli.controller;
 
 import static java.lang.String.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.springframework.http.MediaType.*;
+import static org.springframework.security.core.context.SecurityContextHolder.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
@@ -16,7 +18,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.plana.infli.annotation.MockMvcTest;
+import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.Post;
 import com.plana.infli.domain.University;
 import com.plana.infli.factory.MemberFactory;
 import com.plana.infli.factory.UniversityFactory;
@@ -25,20 +29,27 @@ import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.MemberService;
+import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberRequest;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberServiceRequest;
+import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -1677,4 +1688,99 @@ public class AuthControllerTest {
                 .andExpect(content().string("지원되지 않는 로그인 방식입니다."))
                 .andExpect(unauthenticated());
     }
+
+    @DisplayName("로그아웃 - 성공")
+    @TestFactory
+    Collection<DynamicTest> successfulLogout() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        return List.of(
+                dynamicTest("로그인 성공",
+                        () -> {
+                            //given
+                            String json = om.writeValueAsString(Login.builder()
+                                    .username("infli")
+                                    .password("password1234!")
+                                    .build());
+                            //when
+                            ResultActions resultActions = mvc.perform(
+                                    post("/api/login")
+                                            .content(json)
+                                            .contentType(APPLICATION_JSON));
+
+                            //then
+                            resultActions.andExpect(status().isOk())
+                                    .andExpect(authenticated().withUsername("infli"));
+                        }),
+
+                dynamicTest("로그아웃 요청",
+                        () -> {
+                            //when
+                            ResultActions resultActions = mvc.perform(
+                                    post("/api/logout"));
+
+                            //then
+                            resultActions.andExpect(status().isOk())
+                                    .andExpect(unauthenticated());
+
+                            assertThat(getContext().getAuthentication()).isNull();
+                        })
+        );
+    }
+
+    @DisplayName("로그아웃 실패 - HTTP GET 방식으로 로그아웃을 할수 없다")
+    @TestFactory
+    Collection<DynamicTest> invalidGETLogoutRequest() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        return List.of(
+                dynamicTest("로그인 성공",
+                        () -> {
+                            //given
+                            String json = om.writeValueAsString(Login.builder()
+                                    .username("infli")
+                                    .password("password1234!")
+                                    .build());
+                            //when
+                            ResultActions resultActions = mvc.perform(
+                                    post("/api/login")
+                                            .content(json)
+                                            .contentType(APPLICATION_JSON));
+
+                            //then
+                            resultActions.andExpect(status().isOk())
+                                    .andExpect(authenticated().withUsername("infli"));
+                        }),
+
+                dynamicTest("로그아웃 요청",
+                        () -> {
+                            //when
+                            ResultActions resultActions = mvc.perform(
+                                    get("/api/logout"));
+
+                            //then
+                            resultActions.andExpect(status().isUnauthorized())
+                                    .andDo(print());
+                        })
+        );
+    }
+
 }
