@@ -4,10 +4,13 @@ import static java.lang.String.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -17,13 +20,17 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
 import com.plana.infli.factory.MemberFactory;
 import com.plana.infli.factory.UniversityFactory;
+import com.plana.infli.infra.security.filter.CustomLoginProcessingFilter.Login;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberRequest;
+import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberServiceRequest;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpSession;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -1419,5 +1426,255 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("이미 존재하는 닉네임입니다."));
+    }
+
+
+    @DisplayName("로그인 성공 - 학생 회원 로그인")
+    @Test
+    void login() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        String json = om.writeValueAsString(Login.builder()
+                .username("infli")
+                .password("password1234!")
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(authenticated().withUsername("infli"));
+    }
+
+    @DisplayName("로그인 성공 - 기업 회원 로그인")
+    @Test
+    void CompanyMemberLoginSuccess() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsCompanyMember(CreateCompanyMemberServiceRequest.builder()
+                .username("infli")
+                .nickname("jin8743")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .universityId(university.getId())
+                .companyName("카카오")
+                .build());
+
+        String json = om.writeValueAsString(Login.builder()
+                .username("infli")
+                .password("password1234!")
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(authenticated().withUsername("infli"));
+    }
+
+    @DisplayName("로그인 실패 - 잘못된 아이디")
+    @Test
+    void invalidUsername() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        String json = om.writeValueAsString(Login.builder()
+                .username("aaa")
+                .password("password1234!")
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("아이디 또는 비밀번호를 잘못 입력했습니다."))
+                .andExpect(unauthenticated());
+    }
+
+    @DisplayName("로그인 실패 - 잘못된 아이디2")
+    @Test
+    void invalidUsername2() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        String json = om.writeValueAsString(Login.builder()
+                .username(null)
+                .password("password1234!")
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("아이디와 비밀번호는 공백일수 없습니다."))
+                .andExpect(unauthenticated());
+    }
+
+    @DisplayName("로그인 실패 - 잘못된 비밀번호")
+    @Test
+    void invalidPassword() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        String json = om.writeValueAsString(Login.builder()
+                .username("infli")
+                .password("123456")
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("아이디 또는 비밀번호를 잘못 입력했습니다."))
+                .andExpect(unauthenticated());
+    }
+
+    @DisplayName("로그인 실패 - 잘못된 비밀번호2")
+    @Test
+    void invalidPassword2() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        String json = om.writeValueAsString(Login.builder()
+                .username("infli")
+                .password(null)
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("아이디와 비밀번호는 공백일수 없습니다."))
+                .andExpect(unauthenticated());
+    }
+
+    @DisplayName("로그인 실패 - 탈퇴한 회원의 계정으로 로그인 할수 없다")
+    @Test
+    void loginByUnregisteredMember() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Long memberId = memberService.signupAsStudentMember(
+                CreateStudentMemberServiceRequest.builder()
+                        .username("infli")
+                        .realName("이영진")
+                        .password("password1234!")
+                        .passwordConfirm("password1234!")
+                        .nickname("jin8743")
+                        .universityId(university.getId())
+                        .build());
+
+        memberRepository.deleteById(memberId);
+
+        String json = om.writeValueAsString(Login.builder()
+                .username("infli")
+                .password("password1234!")
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                post("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("아이디 또는 비밀번호를 잘못 입력했습니다."))
+                .andExpect(unauthenticated());
+    }
+
+    @DisplayName("로그인 실패 - HTTP GET 으로 요청한 경우")
+    @Test
+    void invalidLoginGETRequest() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        memberService.signupAsStudentMember(CreateStudentMemberServiceRequest.builder()
+                .username("infli")
+                .realName("이영진")
+                .password("password1234!")
+                .passwordConfirm("password1234!")
+                .nickname("jin8743")
+                .universityId(university.getId())
+                .build());
+
+        String json = om.writeValueAsString(Login.builder()
+                .username("infli")
+                .password(null)
+                .build());
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/api/login")
+                        .content(json)
+                        .contentType(APPLICATION_JSON));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("지원되지 않는 로그인 방식입니다."))
+                .andExpect(unauthenticated());
     }
 }
