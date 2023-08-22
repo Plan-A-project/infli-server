@@ -2,8 +2,6 @@ package com.plana.infli.exception.custom;
 
 public class ConflictException extends DefaultException {
 
-	public static final String DUPLICATED_BOARDNAME = "이미 존재하는 게시판 이름입니다.";
-
 	public static final String DUPLICATED_USERNAME = "이미 사용중인 ID 입니다";
 
 	public static final String DUPLICATED_NICKNAME = "이미 존재하는 닉네임입니다.";
