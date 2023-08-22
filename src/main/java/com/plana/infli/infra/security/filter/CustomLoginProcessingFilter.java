@@ -7,6 +7,7 @@ import com.plana.infli.infra.security.token.CustomAuthenticationToken;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -50,13 +51,14 @@ public class CustomLoginProcessingFilter extends AbstractAuthenticationProcessin
 
     @Getter
     @NoArgsConstructor
-    private static class Login {
+    public static class Login {
 
         private String username;
 
         private String password;
 
-        public Login(String username, String password) {
+        @Builder
+        private Login(String username, String password) {
             this.username = username;
             this.password = password;
         }
