@@ -53,7 +53,10 @@ public class Board extends BaseEntity {
     }
 
     public static Board create(BoardType boardType, University university) {
-        return new Board(boardType, university);
+        return Board.builder()
+                .boardType(boardType)
+                .university(university)
+                .build();
     }
 
     public static boolean isAnonymous(Board board) {

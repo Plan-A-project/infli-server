@@ -84,7 +84,7 @@ clean {
 //Querydsl Q Class 생성 위치
 def generated = 'src/main/generated'
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.getGeneratedSourceOutputDirectory().set(file(generated))
 }
 

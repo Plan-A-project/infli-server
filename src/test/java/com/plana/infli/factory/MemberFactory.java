@@ -39,22 +39,16 @@ public class MemberFactory {
     private Member of(String nickname, University university, Role role, Company company,
             VerificationStatus verificationStatus, boolean hasAcceptedPolicy) {
 
-        LoginCredentials loginCredentials = LoginCredentials.of(randomUUID().toString(),
-                encoder.encode("password"));
-        ProfileImage profileImage = ofDefaultProfileImage();
-        BasicCredentials basicCredentials = ofDefaultWithNickname(nickname);
-        CompanyCredentials companyCredentials = generateCompanyCredentials(company);
-        StudentCredentials studentCredentials = generateStudentCredentials(role);
-
         Member member = Member.builder()
                 .university(university)
                 .role(role)
                 .verificationStatus(verificationStatus)
-                .loginCredentials(loginCredentials)
-                .profileImage(profileImage)
-                .basicCredentials(basicCredentials)
-                .companyCredentials(companyCredentials)
-                .studentCredentials(studentCredentials)
+                .loginCredentials(LoginCredentials.of(randomUUID().toString(),
+                        encoder.encode("password")))
+                .profileImage(ofDefaultProfileImage())
+                .basicCredentials(ofDefaultWithNickname(nickname))
+                .companyCredentials(generateCompanyCredentials(company))
+                .studentCredentials(generateStudentCredentials(role))
                 .build();
 
         if (hasAcceptedPolicy) {
@@ -126,6 +120,17 @@ public class MemberFactory {
         String nickname = randomUUID().toString().substring(0, 10);
 
         Member member = of(nickname, university, role, company, SUCCESS, false);
+
+        return memberRepository.save(member);
+    }
+
+    public Member createStudentCouncilMember(University university) {
+
+        Company company = createCompany(STUDENT_COUNCIL);
+
+        String nickname = randomUUID().toString().substring(0, 10);
+
+        Member member = of(nickname, university, STUDENT_COUNCIL, company, SUCCESS, true);
 
         return memberRepository.save(member);
     }

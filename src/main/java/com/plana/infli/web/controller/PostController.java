@@ -31,8 +31,6 @@ public class PostController {
 
     private final PostService postService;
 
-
-
     @GetMapping("/boards/{boardId}/permissions")
     @Operation(summary = "특정 게시판에 글 작성 권한이 있는지 여부 확인")
     public boolean checkMemberHasWritePermission(@AuthenticatedPrincipal String username,
@@ -104,13 +102,13 @@ public class PostController {
 
     @GetMapping("/members/posts")
     @Operation(summary = "내가 작성한 글 목록 조회")
-    public MyPostsResponse loadMyPosts(@RequestParam(defaultValue = "1") Integer page,
-            @AuthenticatedPrincipal String username) {
+    public MyPostsResponse loadMyPosts(@AuthenticatedPrincipal String username,
+            @RequestParam Integer page) {
 
         return postService.loadMyPosts(username, page);
     }
 
-    @GetMapping("/boards/{boardId}/posts")
+    @GetMapping("/boards/{boardId}")
     @Operation(summary = "특정 게시판에 작성된 글 목록 조회")
     public BoardPostsResponse loadsPostsByBoard(@AuthenticatedPrincipal String username,
             @PathVariable Long boardId, @Validated LoadPostsByBoardRequest request) {
@@ -125,5 +123,4 @@ public class PostController {
 
         return postService.searchPostsByKeyword(request.toServiceRequest(username));
     }
-
 }

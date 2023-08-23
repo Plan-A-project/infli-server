@@ -112,22 +112,23 @@ public class PostServiceTest {
     /**
      * 모집글 작성
      */
-    public static Stream<Arguments> possibleCombinationToWriteRecruitmentPost() {
+    public static Stream<Arguments> allowedRoleToWriteRecruitmentPost() {
 
         return Stream.of(
-                Arguments.of(ACTIVITY, STUDENT),
-                Arguments.of(ACTIVITY, ADMIN),
-                Arguments.of(ACTIVITY, COMPANY),
+                Arguments.of(STUDENT, ACTIVITY),
+                Arguments.of(ADMIN, ACTIVITY),
+                Arguments.of(COMPANY, ACTIVITY),
 
-                Arguments.of(EMPLOYMENT, COMPANY),
-                Arguments.of(EMPLOYMENT, ADMIN)
+                Arguments.of(COMPANY, EMPLOYMENT),
+                Arguments.of(ADMIN, EMPLOYMENT)
         );
     }
 
     @DisplayName("모집 글 작성 성공 - 회원 유형, 게시판 유형에 따른 케이스 분류")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void SUCCESS_writeRecruitmentPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void SUCCESS_writeRecruitmentPost(Role role, BoardType boardType) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -161,20 +162,20 @@ public class PostServiceTest {
     }
 
 
-    public static Stream<Arguments> FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnRecruitment() {
+    public static Stream<Arguments> notAllowedRoleToWriteRecruitmentPost() {
 
         return Stream.of(
-                Arguments.of(ACTIVITY, STUDENT_COUNCIL),
+                Arguments.of(STUDENT_COUNCIL, ACTIVITY),
 
-                Arguments.of(EMPLOYMENT, STUDENT),
-                Arguments.of(EMPLOYMENT, STUDENT_COUNCIL)
+                Arguments.of(STUDENT, EMPLOYMENT),
+                Arguments.of(STUDENT_COUNCIL, EMPLOYMENT)
         );
     }
 
     @DisplayName("모집 글 작성 실패 - 해당 게시판에 모집글 작성 권한이 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnRecruitment")
-    void FAIL_writeRecruitmentPost(BoardType boardType, Role role) {
+    @MethodSource("notAllowedRoleToWriteRecruitmentPost")
+    void FAIL_writeRecruitmentPost(Role role, BoardType boardType) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -196,34 +197,80 @@ public class PostServiceTest {
                 .message().isEqualTo("해당 권한이 없습니다");
     }
 
-
-    public static Stream<Arguments> possibleCombinationsToWriteNormalPost() {
+    public static Stream<Arguments> invalidBoardTypeToWriteRecruitmentPost() {
 
         return Stream.of(
-                Arguments.of(ACTIVITY, STUDENT),
-                Arguments.of(ACTIVITY, ADMIN),
-                Arguments.of(ACTIVITY, COMPANY),
-
-                Arguments.of(EMPLOYMENT, COMPANY),
-                Arguments.of(EMPLOYMENT, ADMIN),
-                Arguments.of(EMPLOYMENT, STUDENT),
-
-                Arguments.of(ANONYMOUS, STUDENT),
-                Arguments.of(ANONYMOUS, ADMIN),
-
                 Arguments.of(CLUB, STUDENT),
+                Arguments.of(CLUB, COMPANY),
+                Arguments.of(CLUB, STUDENT_COUNCIL),
                 Arguments.of(CLUB, ADMIN),
 
+                Arguments.of(ANONYMOUS, STUDENT),
+                Arguments.of(ANONYMOUS, COMPANY),
+                Arguments.of(ANONYMOUS, STUDENT_COUNCIL),
+                Arguments.of(ANONYMOUS, ADMIN),
+
                 Arguments.of(CAMPUS_LIFE, STUDENT),
+                Arguments.of(CAMPUS_LIFE, COMPANY),
                 Arguments.of(CAMPUS_LIFE, STUDENT_COUNCIL),
                 Arguments.of(CAMPUS_LIFE, ADMIN)
         );
     }
 
+    @DisplayName("모집 글 작성 실패 - 모집글을 작성할수 없는 게시판인 경우")
+    @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
+    @MethodSource("invalidBoardTypeToWriteRecruitmentPost")
+    void FAIL_invalidBoardTypeToWriteRecruitmentPost(BoardType boardType, Role role) {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createByBoardType(university, boardType);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
+
+        CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .title("제목입니다")
+                .content("내용입니다")
+                .recruitmentCompanyName("카카오")
+                .recruitmentStartDate(of(2023, 8, 1, 0, 0))
+                .recruitmentEndDate(now())
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.createRecruitmentPost(request))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("채용글을 작성할수 있는 게시판이 아닙니다");
+    }
+
+
+    public static Stream<Arguments> allowedRoleToWriteNormalPost() {
+
+        return Stream.of(
+                Arguments.of(STUDENT, ACTIVITY),
+                Arguments.of(ADMIN, ACTIVITY),
+                Arguments.of(COMPANY, ACTIVITY),
+
+                Arguments.of(STUDENT, EMPLOYMENT),
+                Arguments.of(ADMIN, EMPLOYMENT),
+                Arguments.of(COMPANY, EMPLOYMENT),
+
+                Arguments.of(STUDENT, ANONYMOUS),
+                Arguments.of(ADMIN, ANONYMOUS),
+
+                Arguments.of(STUDENT, CLUB),
+                Arguments.of(ADMIN, CLUB),
+
+                Arguments.of(STUDENT, CAMPUS_LIFE),
+                Arguments.of(ADMIN, CAMPUS_LIFE),
+                Arguments.of(STUDENT_COUNCIL, CAMPUS_LIFE)
+        );
+    }
+
     @DisplayName("일반 글 작성 성공 - 게시판 유형, 회원 유형에 따른 케이스 분류")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationsToWriteNormalPost")
-    void SUCCESS_writeNormalPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteNormalPost")
+    void SUCCESS_writeNormalPost(Role role, BoardType boardType) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -251,27 +298,28 @@ public class PostServiceTest {
         assertThat(post.getPostType()).isEqualTo(NORMAL);
     }
 
-    public static Stream<Arguments> FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnNormal() {
+    public static Stream<Arguments> notAllowedRoleToWriteNormalPost() {
 
         return Stream.of(
-                Arguments.of(ANONYMOUS, STUDENT_COUNCIL),
-                Arguments.of(ANONYMOUS, COMPANY),
+                Arguments.of(STUDENT_COUNCIL, ANONYMOUS),
+                Arguments.of(COMPANY, ANONYMOUS),
 
-                Arguments.of(ACTIVITY, STUDENT_COUNCIL),
+                Arguments.of(STUDENT_COUNCIL, ACTIVITY),
 
-                Arguments.of(EMPLOYMENT, STUDENT_COUNCIL),
+                Arguments.of(STUDENT_COUNCIL, EMPLOYMENT),
 
-                Arguments.of(CLUB, STUDENT_COUNCIL),
-                Arguments.of(CLUB, COMPANY),
+                Arguments.of(STUDENT_COUNCIL, CLUB),
+                Arguments.of(COMPANY, CLUB),
 
-                Arguments.of(CAMPUS_LIFE, COMPANY)
+                Arguments.of(COMPANY, CAMPUS_LIFE)
         );
     }
 
     @DisplayName("일반 글 작성 실패 - 해당 게시판에 일반글 작성 권한이 없는경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnNormal")
-    void FAIL_writeNormalPost(BoardType boardType, Role role) {
+    @MethodSource("notAllowedRoleToWriteNormalPost")
+    void FAIL_writeNormalPost(Role role, BoardType boardType) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -292,21 +340,21 @@ public class PostServiceTest {
     }
 
 
-    public static Stream<Arguments> possibleCombinationsToWriteAnnouncementPost() {
+    public static Stream<Arguments> allowedRoleToWriteAnnouncementPost() {
 
         return Stream.of(
-                Arguments.of(CAMPUS_LIFE, STUDENT_COUNCIL),
-                Arguments.of(CAMPUS_LIFE, ADMIN)
+                Arguments.of(STUDENT_COUNCIL),
+                Arguments.of(ADMIN)
         );
     }
 
-    @DisplayName("일반 공지 글 작성 성공 - 게시판 유형, 회원 유형에 따른 케이스 분류")
+    @DisplayName("공지 글 작성 성공 - 게시판 유형, 회원 유형에 따른 케이스 분류")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationsToWriteAnnouncementPost")
-    void SUCCESS_writeAnnouncementPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteAnnouncementPost")
+    void SUCCESS_writeAnnouncementPost(Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createByBoardType(university, boardType);
+        Board board = boardFactory.createByBoardType(university, CAMPUS_LIFE);
         Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
@@ -327,25 +375,25 @@ public class PostServiceTest {
         assertThat(post.getTitle()).isEqualTo("제목입니다");
         assertThat(post.getContent()).isEqualTo("내용입니다");
         assertThat(post.getBoard().getId()).isEqualTo(board.getId());
-        assertThat(post.getBoard().getBoardType()).isEqualTo(boardType);
+        assertThat(post.getBoard().getBoardType()).isEqualTo(CAMPUS_LIFE);
         assertThat(post.getPostType()).isEqualTo(ANNOUNCEMENT);
     }
 
-    public static Stream<Arguments> FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnAnnouncement() {
+    public static Stream<Arguments> notAllowedRoleToWriteAnnouncementPost() {
 
         return Stream.of(
-                Arguments.of(CAMPUS_LIFE, STUDENT),
-                Arguments.of(CAMPUS_LIFE, COMPANY)
+                Arguments.of(STUDENT),
+                Arguments.of(COMPANY)
         );
     }
 
     @DisplayName("일반 공지글 작성 실패 - 공지글 작성 권한이 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("FAIL_provideRoleAndBoardTypeForCheckingWritePermissionOnAnnouncement")
-    void FAIL_writeAnnouncementPost(BoardType boardType, Role role) {
+    @MethodSource("notAllowedRoleToWriteAnnouncementPost")
+    void FAIL_writeAnnouncementPost(Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createByBoardType(university, boardType);
+        Board board = boardFactory.createByBoardType(university, CAMPUS_LIFE);
         Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
@@ -362,59 +410,40 @@ public class PostServiceTest {
                 .message().isEqualTo("해당 권한이 없습니다");
     }
 
-
-    public static Stream<Arguments> FAIL_providingRecruitmentTypeForWritingNormalPost() {
+    public static Stream<Arguments> invalidBoardTypeToWriteAnnouncementPost() {
 
         return Stream.of(
-                Arguments.of(ANONYMOUS),
-                Arguments.of(ACTIVITY),
-                Arguments.of(EMPLOYMENT),
-                Arguments.of(CAMPUS_LIFE),
-                Arguments.of(CLUB)
+                Arguments.of(EMPLOYMENT, STUDENT),
+                Arguments.of(EMPLOYMENT, COMPANY),
+                Arguments.of(EMPLOYMENT, ADMIN),
+                Arguments.of(EMPLOYMENT, STUDENT_COUNCIL),
+
+                Arguments.of(ACTIVITY, STUDENT),
+                Arguments.of(ACTIVITY, COMPANY),
+                Arguments.of(ACTIVITY, ADMIN),
+                Arguments.of(ACTIVITY, STUDENT_COUNCIL),
+
+                Arguments.of(CLUB, STUDENT),
+                Arguments.of(CLUB, COMPANY),
+                Arguments.of(CLUB, ADMIN),
+                Arguments.of(CLUB, STUDENT_COUNCIL),
+
+                Arguments.of(ANONYMOUS, STUDENT),
+                Arguments.of(ANONYMOUS, COMPANY),
+                Arguments.of(ANONYMOUS, ADMIN),
+                Arguments.of(ANONYMOUS, STUDENT_COUNCIL)
         );
     }
 
-    @DisplayName("일반 글 작성 실패 - 일반글을 작성하는 곳에 모집글을 작성하려고 하는 경우")
-    @ParameterizedTest(name = "{index} 게시판 유형: {0}")
-    @MethodSource("FAIL_providingRecruitmentTypeForWritingNormalPost")
-    void FAIL_writeNormalPostWithRecruitmentType(BoardType boardType) {
+    @DisplayName("일반 공지글 작성 실패 - 공지글을 작성할수 있는 게시판이 아닌 경우")
+    @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
+    @MethodSource("invalidBoardTypeToWriteAnnouncementPost")
+    void FAIL_invalidBoardTypeToWriteAnnouncementPost(BoardType boardType, Role role) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.createAdminMember(university);
-
-        CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .boardId(board.getId())
-                .title("제목입니다")
-                .content("내용입니다")
-                .postType(RECRUITMENT)
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> postService.createNormalPost(request))
-                .isInstanceOf(BadRequestException.class)
-                .message().isEqualTo("해당 글 종류는 허용되지 않습니다");
-    }
-
-    public static Stream<Arguments> FAIL_providingInvalidBoardTypeForWritingAnnouncementPost() {
-
-        return Stream.of(
-                Arguments.of(ANONYMOUS),
-                Arguments.of(ACTIVITY),
-                Arguments.of(EMPLOYMENT),
-                Arguments.of(CLUB)
-        );
-    }
-
-    @DisplayName("일반 공지 글 작성 실패 - 공지글 작성이 허용되지 않는 게시판에 공지글 작성 시도")
-    @ParameterizedTest(name = "{index} 게시판 유형: {0}")
-    @MethodSource("FAIL_providingInvalidBoardTypeForWritingAnnouncementPost")
-    void FAIL_writeAnnouncementPostWithInvalidBoardType(BoardType boardType) {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.createAdminMember(university);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
@@ -430,39 +459,30 @@ public class PostServiceTest {
                 .message().isEqualTo("게시판 정보가 옳바르지 않습니다");
     }
 
-    public static Stream<Arguments> FAIL_providingInvalidBoardTypeForWritingRecruitmentPost() {
 
-        return Stream.of(
-                Arguments.of(ANONYMOUS),
-                Arguments.of(CLUB),
-                Arguments.of(CAMPUS_LIFE)
-        );
-    }
-
-    @DisplayName("모집 글 작성 실패 - 모집글 작성이 허용되지 않는 게시판에 모집글 작성 시도")
+    @DisplayName("일반 글 작성 실패 - 일반글을 작성하는 API에 모집글 작성을 요청한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}")
-    @MethodSource("FAIL_providingInvalidBoardTypeForWritingRecruitmentPost")
-    void FAIL_writeRecruitmentPostWithInvalidBoardType(BoardType boardType) {
+    @MethodSource("allowedRoleToWriteNormalPost")
+    void FAIL_writeNormalPostWithRecruitmentType(Role role, BoardType boardType) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
-        Member member = memberFactory.createAdminMember(university);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
-        CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
+        CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
                 .username(member.getLoginCredentials().getUsername())
                 .boardId(board.getId())
                 .title("제목입니다")
                 .content("내용입니다")
-                .recruitmentCompanyName("카카오")
-                .recruitmentStartDate(of(2023, 8, 1, 0, 0))
-                .recruitmentEndDate(now())
+                .postType(RECRUITMENT)
                 .build();
 
         //when //then
-        assertThatThrownBy(() -> postService.createRecruitmentPost(request))
+        assertThatThrownBy(() -> postService.createNormalPost(request))
                 .isInstanceOf(BadRequestException.class)
-                .message().isEqualTo("채용글을 작성할수 있는 게시판이 아닙니다");
+                .message().isEqualTo("해당 글 종류는 허용되지 않습니다");
     }
+
 
     @DisplayName("일반글 작성 실패 - 존재하지 않는 게시판에 글을 작성할수 없다")
     @Test
@@ -621,11 +641,7 @@ public class PostServiceTest {
     }
 
 
-
-
-
-
-    public static Stream<Arguments> possibleCombinationToWritePost() {
+    public static Stream<Arguments> allowedCombinationToWritePost() {
 
         return Stream.of(
                 Arguments.of(EMPLOYMENT, NORMAL, STUDENT),
@@ -657,7 +673,7 @@ public class PostServiceTest {
 
     @DisplayName("해당 게시판에 글 작성 권한 있는지 여부 확인 - 권한 있는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형: {1}, 회원 유형 : {2}")
-    @MethodSource("possibleCombinationToWritePost")
+    @MethodSource("allowedCombinationToWritePost")
     void SUCCESS_checkMemberHasWritePolicy(BoardType boardType, PostType postType, Role role) {
 
         //given
@@ -670,7 +686,9 @@ public class PostServiceTest {
                 member.getLoginCredentials().getUsername(), postType)).isTrue();
     }
 
-    public static Stream<Arguments> Fail_provideRoleAndBoardTypeAndPostTypeForCheckingMemberHasWritePolicy() {
+
+
+    public static Stream<Arguments> notAllowedRoleToWritePost() {
 
         return Stream.of(
                 Arguments.of(EMPLOYMENT, NORMAL, STUDENT_COUNCIL),
@@ -694,7 +712,7 @@ public class PostServiceTest {
 
     @DisplayName("해당 게시판에 글 작성 권한 있는지 여부 확인 - 권한 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("Fail_provideRoleAndBoardTypeAndPostTypeForCheckingMemberHasWritePolicy")
+    @MethodSource("notAllowedRoleToWritePost")
     void Fail_checkMemberHasWritePolicy(BoardType boardType, PostType postType, Role role) {
 
         //given
@@ -866,8 +884,8 @@ public class PostServiceTest {
 
     @DisplayName("일반글 수정 실패 - 일반글 수정이 아니라 모집글 수정을 요청한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_InvalidRequestToEditRecruitmentPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void Fail_InvalidRequestToEditRecruitmentPost(Role role, BoardType boardType) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -917,8 +935,9 @@ public class PostServiceTest {
 
     @DisplayName("모집글 수정 성공")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Success_EditRecruitPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void Success_EditRecruitPost(Role role, BoardType boardType) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -952,8 +971,8 @@ public class PostServiceTest {
 
     @DisplayName("모집글 수정 실패 - 수정을 요청한 회원을 찾을수 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditRecruitmentPostByNotExistingMember(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void Fail_EditRecruitmentPostByNotExistingMember(Role role, BoardType boardType) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -979,8 +998,9 @@ public class PostServiceTest {
 
     @DisplayName("모집글 수정 실패 - 글 작성자가 회원 탈퇴를 한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditRecruitmentPostByDeletedMember(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void Fail_EditRecruitmentPostByDeletedMember(Role role, BoardType boardType) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -1000,7 +1020,6 @@ public class PostServiceTest {
                 .recruitmentEndDate(of(2023, 8, 5, 0, 0))
                 .build();
 
-
         //when //then
         assertThatThrownBy(() -> postService.editRecruitmentPost(request))
                 .isInstanceOf(NotFoundException.class)
@@ -1009,8 +1028,8 @@ public class PostServiceTest {
 
     @DisplayName("모집글 수정 실패 - 수정할 글이 존재하지 않는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditNotExistingRecruitmentPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void Fail_EditNotExistingRecruitmentPost(Role role, BoardType boardType) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
@@ -1034,8 +1053,9 @@ public class PostServiceTest {
 
     @DisplayName("모집글 수정 실패 - 수정할 글이 이미 삭제된 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditDeletedRecruitmentPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void Fail_EditDeletedRecruitmentPost(Role role, BoardType boardType) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -1090,8 +1110,9 @@ public class PostServiceTest {
 
     @DisplayName("모집글 수정 실패 - 수정할 글이 내가 작성한 글이 아닌 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void Fail_EditRecruitmentPostWroteByOtherMember(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void Fail_EditRecruitmentPostWroteByOtherMember(Role role, BoardType boardType) {
+
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
@@ -1111,7 +1132,6 @@ public class PostServiceTest {
                 .recruitmentEndDate(of(2023, 8, 5, 0, 0))
                 .build();
 
-
         //when //then
         assertThatThrownBy(() -> postService.editRecruitmentPost(request))
                 .isInstanceOf(AuthorizationFailedException.class)
@@ -1120,7 +1140,7 @@ public class PostServiceTest {
 
     @DisplayName("글 삭제 성공")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
-    @MethodSource("possibleCombinationToWritePost")
+    @MethodSource("allowedCombinationToWritePost")
     void Success_DeletePost(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
@@ -1139,7 +1159,7 @@ public class PostServiceTest {
 
     @DisplayName("글 삭제 성공 - 관리자는 타인이 작성한 글도 삭제할수 있다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
-    @MethodSource("possibleCombinationToWritePost")
+    @MethodSource("allowedCombinationToWritePost")
     void Success_DeletePostByAdmin(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
@@ -1160,7 +1180,7 @@ public class PostServiceTest {
 
     @DisplayName("글 삭제 실패 - 글 작성자를 찾을수 없는 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
-    @MethodSource("possibleCombinationToWritePost")
+    @MethodSource("allowedCombinationToWritePost")
     void Fail_DeletePostByNotExistingMember(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
@@ -1177,7 +1197,7 @@ public class PostServiceTest {
 
     @DisplayName("글 삭제 실패 - 글 작성자가 회원 탈퇴를 한 경우")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
-    @MethodSource("possibleCombinationToWritePost")
+    @MethodSource("allowedCombinationToWritePost")
     void Fail_DeletePostByDeletedMember(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
@@ -1222,7 +1242,7 @@ public class PostServiceTest {
 
     @DisplayName("글 삭제 실패 - 이미 삭제된 글을 삭제 시도 할수 없다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
-    @MethodSource("possibleCombinationToWritePost")
+    @MethodSource("allowedCombinationToWritePost")
     void Fail_DeletePostThatIsAlreadyDeleted(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
@@ -1241,7 +1261,7 @@ public class PostServiceTest {
 
     @DisplayName("글 삭제 실패 - 내가 작성하지 않은글을 삭제할수 없다")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 유형 : {1}, 회원 유형 : {2}")
-    @MethodSource("possibleCombinationToWritePost")
+    @MethodSource("allowedCombinationToWritePost")
     void Fail_DeletePostThatIsNotMine(BoardType boardType, PostType postType, Role role) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
@@ -1260,8 +1280,8 @@ public class PostServiceTest {
 
     @DisplayName("모집 글 단건 조회")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 글 작성 회원 유형 : {1}")
-    @MethodSource("possibleCombinationToWriteRecruitmentPost")
-    void viewSingleRecruitmentPost(BoardType boardType, Role role) {
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void viewSingleRecruitmentPost(Role role, BoardType boardType) {
         //given
         University university = universityFactory.createUniversity("푸단대학교");
         Board board = boardFactory.createByBoardType(university, boardType);
