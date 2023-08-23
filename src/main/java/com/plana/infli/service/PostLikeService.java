@@ -1,7 +1,8 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.PostLike.*;
-import static com.plana.infli.exception.custom.BadRequestException.POST_LIKE_NOT_FOUND;
+import static com.plana.infli.exception.custom.BadRequestException.*;
+import static com.plana.infli.exception.custom.ConflictException.ALREADY_PRESSED_LIKE_ON_THIS_POST;
 import static com.plana.infli.exception.custom.NotFoundException.*;
 
 import com.plana.infli.domain.Member;
@@ -9,11 +10,13 @@ import com.plana.infli.domain.Post;
 import com.plana.infli.domain.PostLike;
 import com.plana.infli.exception.custom.AuthorizationFailedException;
 import com.plana.infli.exception.custom.BadRequestException;
+import com.plana.infli.exception.custom.ConflictException;
 import com.plana.infli.exception.custom.NotFoundException;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.postlike.PostLikeRepository;
 import com.plana.infli.repository.university.UniversityRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +60,10 @@ public class PostLikeService {
         if (universityRepository.isMemberAndPostInSameUniversity(member, post) == false) {
             throw new AuthorizationFailedException();
         }
+
+        if (postLikeRepository.existsByPostAndMember(post, member)) {
+            throw new ConflictException(ALREADY_PRESSED_LIKE_ON_THIS_POST);
+        }
     }
 
 
@@ -67,13 +74,17 @@ public class PostLikeService {
 
         Post post = findPostBy(postId);
 
-        PostLike postLike = findPostLikeBy(post, member);
+        List<PostLike> postLikes = findAllPostLikeBy(post, member);
 
-        postLikeRepository.delete(postLike);
+        postLikeRepository.deleteAllInBatch(postLikes);
     }
 
-    private PostLike findPostLikeBy(Post post, Member member) {
-        return postLikeRepository.findByPostAndMember(post, member)
-                .orElseThrow(() -> new BadRequestException(POST_LIKE_NOT_FOUND));
+    private List<PostLike> findAllPostLikeBy(Post post, Member member) {
+        List<PostLike> postLikes = postLikeRepository.findAllByPostAndMember(post, member);
+
+        if (postLikes.isEmpty()) {
+            throw new BadRequestException(POST_LIKE_NOT_FOUND);
+        }
+        return postLikes;
     }
 }

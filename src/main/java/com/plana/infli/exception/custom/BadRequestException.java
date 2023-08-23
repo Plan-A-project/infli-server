@@ -8,7 +8,7 @@ public class BadRequestException extends DefaultException{
 
     public static final String COMMENT_LIKE_NOT_FOUND = "해당 댓글에 좋아요를 누르지 않았습니다";
 
-    public static final String POST_LIKE_NOT_FOUND = "해당 댓글에 좋아요를 누르지 않았습니다";
+    public static final String POST_LIKE_NOT_FOUND = "해당 글에 좋아요를 누르지 않았습니다";
 
     public static final String NOT_ALL_POPULARBOARD_WAS_CHOSEN = "모든 보고싶은 게시판이 선택되지 않았습니다";
 
@@ -27,8 +27,6 @@ public class BadRequestException extends DefaultException{
     public static final String NOT_MATCHES_PASSWORD_CONFIRM = "비밀번호와 비밀번호 확인이 일치하지 않습니다.";
 
     public static final String NOT_MATCHES_NEW_PASSWORD_CONFIRM = "새 비밀번호와 새 비밀번호 확인이 일치하지 않습니다.";
-
-    public static final String INVALID_MEMBER_INFO = "회원정보가 일치하지 않습니다";
 
     public static final String IMAGE_IS_EMPTY = "업로드할 파일이 비어있습니다";
 
@@ -53,7 +51,6 @@ public class BadRequestException extends DefaultException{
     public static final String UNREGISTER_NOT_ALLOWED = "회원 탈퇴를 할수 없는 계정입니다";
 
     public static final String MEMBER_VERIFICATION_STATUS_IS_NOT_PENDING = "인증 상태가 승인 대기중이 아닙니다";
-
 
     public BadRequestException(String message) {
         super(message);

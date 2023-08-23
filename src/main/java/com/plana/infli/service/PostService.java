@@ -323,7 +323,6 @@ public class PostService {
         if (isAdmin(member)) {
             return;
         }
-
         checkThisMemberIsPostWriter(member, post);
     }
 
