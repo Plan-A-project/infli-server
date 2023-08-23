@@ -5,6 +5,7 @@ import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.ConflictException.DUPLICATED_NICKNAME;
 import static com.plana.infli.exception.custom.NotFoundException.*;
+import static org.springframework.security.core.context.SecurityContextHolder.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.ProfileImage;
@@ -20,6 +21,7 @@ import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;
 import com.plana.infli.web.dto.response.profile.image.ChangeProfileImageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,12 +50,12 @@ public class SettingService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-    public void checkIsAvailableNewNickname(String newNickname) {
-        if (newNickname.matches("^[ㄱ-ㅎ가-힣A-Za-z0-9-_]{2,8}$") == false) {
-            throw new BadRequestException("닉네임은 2~8자리여야 합니다. 한글, 영어, 숫자 조합 가능.");
+    public void checkIsAvailableNewNickname(String nickname) {
+        if (nickname.matches("^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]{2,8}$") == false) {
+            throw new BadRequestException("한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요");
         }
 
-        if (memberRepository.existsByNickname(newNickname)) {
+        if (memberRepository.existsByNickname(nickname)) {
             throw new ConflictException(DUPLICATED_NICKNAME);
         }
     }
@@ -102,17 +104,18 @@ public class SettingService {
 
         checkPasswordMatches(member, request.getCurrentPassword());
 
-        if (passwordAndPasswordConfirmMatches(request) == false) {
-            throw new BadRequestException(NOT_MATCHES_NEW_PASSWORD_CONFIRM);
-        }
+        checkPasswordConfirmMatches(request);
     }
 
-    private boolean passwordAndPasswordConfirmMatches(ModifyPasswordServiceRequest request) {
+    private static void checkPasswordConfirmMatches(ModifyPasswordServiceRequest request) {
+
         String newPassword = request.getNewPassword();
 
         String newPasswordConfirm = request.getNewPasswordConfirm();
 
-        return newPassword.equals(newPasswordConfirm);
+        if (newPassword.equals(newPasswordConfirm) == false) {
+            throw new BadRequestException(NOT_MATCHES_NEW_PASSWORD_CONFIRM);
+        }
     }
 
     private String encryptNewPassword(String newPassword) {
@@ -146,6 +149,7 @@ public class SettingService {
         validateUnregisterRequest(password, member);
 
         unregister(member);
+        clearContext();
     }
 
     private void validateUnregisterRequest(String password, Member member) {

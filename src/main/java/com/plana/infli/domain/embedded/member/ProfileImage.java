@@ -24,8 +24,8 @@ public class ProfileImage {
 
     public static ProfileImage ofDefaultProfileImage() {
         return ProfileImage.builder()
-                .originalUrl(null)
-                .thumbnailUrl(null)
+                .originalUrl("")
+                .thumbnailUrl("")
                 .build();
     }
 

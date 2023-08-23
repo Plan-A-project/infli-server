@@ -1,6 +1,7 @@
 package com.plana.infli.annotation;
 
-import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
+import static com.plana.infli.domain.embedded.member.BasicCredentials.*;
+import static com.plana.infli.domain.embedded.member.ProfileImage.*;
 import static com.plana.infli.domain.embedded.member.StudentCredentials.*;
 import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.domain.type.VerificationStatus.*;
@@ -8,12 +9,9 @@ import static com.plana.infli.domain.type.VerificationStatus.*;
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.embedded.member.BasicCredentials;
 import com.plana.infli.domain.embedded.member.CompanyCredentials;
 import com.plana.infli.domain.embedded.member.LoginCredentials;
-import com.plana.infli.domain.embedded.member.ProfileImage;
 import com.plana.infli.domain.embedded.member.StudentCredentials;
-import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
@@ -49,26 +47,24 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
         StudentCredentials studentCredentials = generateStudentInfo(withMockMember);
         CompanyCredentials companyCredentials = generateCompanyInfo(withMockMember);
 
-        Member member = Member.builder()
+        Member member = memberRepository.save(Member.builder()
                 .university(university)
                 .role(withMockMember.role())
                 .verificationStatus(SUCCESS)
                 .loginCredentials(
                         LoginCredentials.of(withMockMember.username(), encoder.encode("password")))
-                .profileImage(ProfileImage.ofDefaultProfileImage())
-                .basicCredentials(BasicCredentials.ofDefaultWithNickname(withMockMember.nickname()))
+                .profileImage(ofDefaultProfileImage())
+                .basicCredentials(ofDefaultWithNickname(withMockMember.nickname()))
                 .companyCredentials(companyCredentials)
                 .studentCredentials(studentCredentials)
-                .build();
-
-        Member savedMember = memberRepository.save(member);
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                savedMember.getLoginCredentials().getUsername(), null,
-                List.of(new SimpleGrantedAuthority(savedMember.getRole().toString())));
+                .build());
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
+
+        context.setAuthentication(
+                new UsernamePasswordAuthenticationToken(member.getLoginCredentials().getUsername(),
+                        null, List.of(new SimpleGrantedAuthority(member.getRole().toString()))));
+
         return context;
     }
 

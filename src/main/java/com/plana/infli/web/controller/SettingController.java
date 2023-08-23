@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,11 +31,10 @@ public class SettingController {
         return settingService.loadMyProfile(username);
     }
 
-    @GetMapping("/nickname/validate")
-    @Operation(summary = "닉네임 중복 여부 확인")
-    public String checkIsAvailableNickname(@RequestBody String newNickname) {
-
-        settingService.checkIsAvailableNewNickname(newNickname);
+    @GetMapping("/nickname/{nickname}")
+    @Operation(summary = "사용 가능한 새로운 닉네임인지 여부 확인")
+    public String checkIsAvailableNickname(@PathVariable String nickname) {
+        settingService.checkIsAvailableNewNickname(nickname);
         return "사용 가능한 닉네임";
     }
 
@@ -47,7 +47,7 @@ public class SettingController {
         return "닉네임 변경 완료";
     }
 
-    @PostMapping("/password/validate")
+    @PostMapping("/password/verification")
     @Operation(summary = "기존 비밀번호 검증")
     public void verifyCurrentPassword(@AuthenticatedPrincipal String username,
             @RequestBody String currentPassword) {
@@ -55,13 +55,13 @@ public class SettingController {
         settingService.verifyCurrentPassword(username, currentPassword);
     }
 
-    //TODO username, 비밀번호, 닉네임 정규표현식 검증 필요 
     @PostMapping("/password")
     @Operation(summary = "비밀번호 변경")
-    public void modifyPassword(@AuthenticatedPrincipal String username,
+    public String modifyPassword(@AuthenticatedPrincipal String username,
             @RequestBody @Validated ModifyPasswordRequest request) {
 
         settingService.changePassword(request.toServiceRequest(username));
+        return "비밀번호 변경 완료";
     }
 
     @PostMapping("/profile/image")
@@ -71,7 +71,7 @@ public class SettingController {
         return settingService.changeProfileImage(username, profileImage);
     }
 
-    @GetMapping("/unregister/profile")
+    @GetMapping("/unregister")
     @Operation(summary = "탈퇴를 요청한 회원의 이름과 이메일 조회")
     public MyProfileToUnregisterResponse loadProfileToUnregister(
             @AuthenticatedPrincipal String username) {
@@ -81,8 +81,9 @@ public class SettingController {
 
     @PostMapping("/unregister")
     @Operation(summary = "회원 탈퇴")
-    public void unregister(@AuthenticatedPrincipal String username, @RequestBody String password) {
+    public String unregister(@AuthenticatedPrincipal String username, @RequestBody String password) {
 
         settingService.unregisterMember(username, password);
+        return "탈퇴 완료";
     }
 }

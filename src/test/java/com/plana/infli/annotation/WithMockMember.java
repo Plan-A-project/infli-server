@@ -2,6 +2,7 @@ package com.plana.infli.annotation;
 
 import static com.plana.infli.domain.type.Role.*;
 import static java.lang.annotation.RetentionPolicy.*;
+import static org.springframework.security.test.context.support.TestExecutionEvent.*;
 
 import com.plana.infli.domain.type.Role;
 import java.lang.annotation.Retention;
@@ -20,5 +21,5 @@ public @interface WithMockMember {
     Role role() default STUDENT;
 
     @AliasFor(annotation = WithSecurityContext.class)
-    TestExecutionEvent setupBefore() default TestExecutionEvent.TEST_EXECUTION;
+    TestExecutionEvent setupBefore() default TEST_EXECUTION;
 }
