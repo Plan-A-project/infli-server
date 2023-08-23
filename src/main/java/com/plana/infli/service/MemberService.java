@@ -71,7 +71,7 @@ public class MemberService {
     private void validateCreateStudentMemberRequest(CreateStudentMemberServiceRequest request) {
 
         checkPasswordConfirmMatch(request.getPassword(), request.getPasswordConfirm());
-        checkUsernameDuplicate(request.getUsername());
+        checkIsValidUsername(request.getUsername());
         checkNicknameDuplicate(request.getNickname());
     }
 
@@ -81,13 +81,22 @@ public class MemberService {
         }
     }
 
-    public void checkUsernameDuplicate(String username) {
+    public void checkIsValidUsername(String username) {
+        if (username.matches("^[a-z0-9_-]{5,20}$") == false) {
+            throw new BadRequestException("영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요");
+        }
+
+
         if (memberRepository.existsByUsername(username)) {
             throw new ConflictException(DUPLICATED_USERNAME);
         }
     }
 
     public void checkNicknameDuplicate(String nickname) {
+        if (nickname.matches("^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]{2,8}$") == false) {
+            throw new BadRequestException("한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요");
+        }
+
         if (memberRepository.existsByNickname(nickname)) {
             throw new ConflictException(DUPLICATED_NICKNAME);
         }
@@ -120,7 +129,7 @@ public class MemberService {
 
     private void validateCreateCompanyMemberRequest(CreateCompanyMemberServiceRequest request) {
         checkPasswordConfirmMatch(request.getPassword(), request.getPasswordConfirm());
-        checkUsernameDuplicate(request.getUsername());
+        checkIsValidUsername(request.getUsername());
     }
 
     @Transactional

@@ -238,8 +238,6 @@ public class AuthControllerTest {
                 .andExpect(status().isCreated());
     }
 
-
-
     public static Stream<Arguments> provideInvalidUsernames() {
 
         return Stream.of(
@@ -1406,7 +1404,7 @@ public class AuthControllerTest {
     void checkNicknameDuplicate_NotDuplicated() throws Exception {
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/signup/nickname/{nickname}", "infli1234")
+                get("/api/signup/nickname/{nickname}", "infli123")
                         .with(csrf()));
 
         //then

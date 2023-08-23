@@ -14,11 +14,19 @@ public class MyProfileResponse {
 
     private final Role role;
 
+    private final String thumbnailUrl;
+
+    private final String originalUrl;
+
     @Builder
-    private MyProfileResponse(String nickname, String username, Role role) {
+    private MyProfileResponse(String nickname, String username, Role role,
+            String thumbnailUrl, String originalUrl) {
+
         this.nickname = nickname;
         this.username = username;
         this.role = role;
+        this.thumbnailUrl = thumbnailUrl;
+        this.originalUrl = originalUrl;
     }
 
     public static MyProfileResponse of(Member member) {
@@ -26,6 +34,8 @@ public class MyProfileResponse {
                 .nickname(member.getBasicCredentials().getNickname())
                 .username(member.getLoginCredentials().getUsername())
                 .role(member.getRole())
+                .thumbnailUrl(member.getProfileImage().getThumbnailUrl())
+                .originalUrl(member.getProfileImage().getOriginalUrl())
                 .build();
     }
 }

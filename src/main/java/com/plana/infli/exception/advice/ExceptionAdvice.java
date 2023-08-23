@@ -5,6 +5,7 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.plana.infli.web.dto.response.error.ErrorResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
@@ -63,6 +64,19 @@ public class ExceptionAdvice {
                 .message("Path Variable 값이 입력되지 않았습니다")
                 .build();
         response.addValidation(e.getVariableName(), e.getParameter().getParameterType().getSimpleName());
+
+        return ResponseEntity.status(response.getCode())
+                .body(response);
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> exceptionHandler(HttpMessageNotReadableException e) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .code(400)
+                .message("요청 본문의 형식이 올바르지 않습니다")
+                .build();
 
         return ResponseEntity.status(response.getCode())
                 .body(response);
