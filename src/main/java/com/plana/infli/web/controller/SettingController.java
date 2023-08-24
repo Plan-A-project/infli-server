@@ -34,8 +34,7 @@ public class SettingController {
     @GetMapping("/nickname/{nickname}")
     @Operation(summary = "사용 가능한 새로운 닉네임인지 여부 확인")
     public String checkIsAvailableNickname(@PathVariable String nickname) {
-        settingService.checkIsAvailableNewNickname(nickname);
-        return "사용 가능한 닉네임";
+        return settingService.checkIsAvailableNewNickname(nickname);
     }
 
     @PostMapping("/nickname")
@@ -49,10 +48,10 @@ public class SettingController {
 
     @PostMapping("/password/verification")
     @Operation(summary = "기존 비밀번호 검증")
-    public void verifyCurrentPassword(@AuthenticatedPrincipal String username,
+    public String verifyCurrentPassword(@AuthenticatedPrincipal String username,
             @RequestBody String currentPassword) {
 
-        settingService.verifyCurrentPassword(username, currentPassword);
+        return settingService.verifyCurrentPassword(username, currentPassword);
     }
 
     @PostMapping("/password")
@@ -72,7 +71,7 @@ public class SettingController {
     }
 
     @GetMapping("/unregister")
-    @Operation(summary = "탈퇴를 요청한 회원의 이름과 이메일 조회")
+    @Operation(summary = "탈퇴를 요청한 회원의 프로필 정보 조회")
     public MyProfileToUnregisterResponse loadProfileToUnregister(
             @AuthenticatedPrincipal String username) {
 

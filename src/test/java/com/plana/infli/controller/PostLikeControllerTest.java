@@ -52,7 +52,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @MockMvcTest
-public class PostLikeControllerTest {
+class PostLikeControllerTest {
 
     @Autowired
     private MockMvc mvc;

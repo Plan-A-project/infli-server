@@ -42,7 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @MockMvcTest
-public class CommentLikeControllerTest {
+class CommentLikeControllerTest {
 
     @Autowired
     protected MockMvc mvc;
@@ -151,7 +151,6 @@ public class CommentLikeControllerTest {
         Board board = boardFactory.createAnonymousBoard(university);
         Post post = postFactory.createNormalPost(
                 memberFactory.createVerifiedStudentMember("postMember", university), board);
-
 
         //when
         ResultActions resultActions = mvc.perform(post("/comments/{commentId}/likes", " ")

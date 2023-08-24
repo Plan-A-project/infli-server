@@ -6,6 +6,8 @@ import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.exception.custom.BadRequestException.COMPANY_VERIFICATION_ALREADY_EXISTS;
 import static com.plana.infli.exception.custom.BadRequestException.IMAGE_IS_EMPTY;
+import static com.plana.infli.exception.custom.BadRequestException.INVALID_NICKNAME;
+import static com.plana.infli.exception.custom.BadRequestException.INVALID_USERNAME;
 import static com.plana.infli.exception.custom.BadRequestException.MEMBER_VERIFICATION_STATUS_IS_NOT_PENDING;
 import static com.plana.infli.exception.custom.BadRequestException.NOT_MATCHES_PASSWORD_CONFIRM;
 import static com.plana.infli.exception.custom.ConflictException.*;
@@ -41,6 +43,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberService {
+
+    public static final String USERNAME_REGEX = "^[a-z0-9_-]{5,20}$";
+
+    public static final String REAL_NAME_REGEX = "^[가-힣]{2,10}$";
+
+    public static final String NICKNAME_REGEX = "^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]{2,8}$";
+
+    public static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()])[A-Za-z\\d!@#$%^&*()]{8,20}$";
 
     private final MemberRepository memberRepository;
 
@@ -82,8 +92,8 @@ public class MemberService {
     }
 
     public void checkIsValidUsername(String username) {
-        if (username.matches("^[a-z0-9_-]{5,20}$") == false) {
-            throw new BadRequestException("영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요");
+        if (username.matches(USERNAME_REGEX) == false) {
+            throw new BadRequestException(INVALID_USERNAME);
         }
 
 
@@ -93,8 +103,8 @@ public class MemberService {
     }
 
     public void checkNicknameDuplicate(String nickname) {
-        if (nickname.matches("^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]{2,8}$") == false) {
-            throw new BadRequestException("한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요");
+        if (nickname.matches(NICKNAME_REGEX) == false) {
+            throw new BadRequestException(INVALID_NICKNAME);
         }
 
         if (memberRepository.existsByNickname(nickname)) {

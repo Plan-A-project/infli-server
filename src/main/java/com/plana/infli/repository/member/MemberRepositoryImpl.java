@@ -137,4 +137,12 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .where(member.loginCredentials.username.eq(username))
                 .fetchOne());
     }
+
+    @Override
+    public Optional<Member> findDeletedMemberBy(Long memberId) {
+        return ofNullable(jpaQueryFactory.selectFrom(member)
+                .where(member.basicCredentials.isDeleted.isTrue())
+                .where(member.id.eq(memberId))
+                .fetchOne());
+    }
 }

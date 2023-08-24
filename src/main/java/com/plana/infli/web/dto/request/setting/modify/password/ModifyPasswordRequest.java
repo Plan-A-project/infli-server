@@ -1,6 +1,6 @@
 package com.plana.infli.web.dto.request.setting.modify.password;
 
-import static com.plana.infli.web.controller.AuthController.PASSWORD_REGEX;
+import static com.plana.infli.service.MemberService.PASSWORD_REGEX;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

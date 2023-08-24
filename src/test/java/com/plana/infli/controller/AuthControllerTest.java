@@ -49,7 +49,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @MockMvcTest
-public class AuthControllerTest {
+class AuthControllerTest {
 
     @Autowired
     protected MockMvc mvc;
@@ -281,7 +281,8 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.username").value("영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
+                .andExpect(jsonPath("$.validation.username").value(
+                        "영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
     }
 
     @DisplayName("기업 회원 회원가입 실패 - Username 정규표현식 잘못된 유형")
@@ -312,7 +313,8 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.username").value("영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
+                .andExpect(jsonPath("$.validation.username").value(
+                        "영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
     }
 
 
@@ -589,7 +591,8 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
+                .andExpect(jsonPath("$.validation.password").value(
+                        "비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
     }
 
     @DisplayName("기업 회원 회원가입 실패 - 비밀번호 정규표현식 잘못된 유형")
@@ -620,7 +623,8 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
+                .andExpect(jsonPath("$.validation.password").value(
+                        "비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
     }
 
 
@@ -760,7 +764,8 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.nickname").value("한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요"));
+                .andExpect(jsonPath("$.validation.nickname").value(
+                        "한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요"));
     }
 
     @DisplayName("기업 회원 회원가입 실패 - 닉네임 정규표현식 잘못된 유형")
@@ -791,12 +796,9 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.nickname").value("한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요"));
+                .andExpect(jsonPath("$.validation.nickname").value(
+                        "한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요"));
     }
-
-
-
-
 
 
     @DisplayName("학생 회원 회원가입 실패 - username은  필수다")
@@ -854,11 +856,9 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.username").value("영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
+                .andExpect(jsonPath("$.validation.username").value(
+                        "영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
     }
-
-
-
 
 
     @DisplayName("기업 회원 회원가입 실패 - username은 필수다")
@@ -918,10 +918,9 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.username").value("영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
+                .andExpect(jsonPath("$.validation.username").value(
+                        "영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요"));
     }
-
-
 
 
     @DisplayName("학생 회원 회원가입 실패 - 이름은  필수다")
@@ -983,8 +982,6 @@ public class AuthControllerTest {
     }
 
 
-
-
     @DisplayName("학생 회원 회원가입 실패 - 비밀번호는 필수다")
     @Test
     void passwordNotProvidedInStudentSignup() throws Exception {
@@ -1040,10 +1037,9 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
+                .andExpect(jsonPath("$.validation.password").value(
+                        "비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
     }
-
-
 
 
     @DisplayName("기업 회원 회원가입 실패 - 비밀번호는 필수다")
@@ -1104,11 +1100,9 @@ public class AuthControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
-                .andExpect(jsonPath("$.validation.password").value("비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
+                .andExpect(jsonPath("$.validation.password").value(
+                        "비밀번호는 영어, 숫자, 특수문자를 포함해서 8~20자리 이내로 입력해주세요."));
     }
-
-
-
 
 
     @DisplayName("학생 회원 회원가입 실패 - 비밀번호 확인은 필수다")
@@ -1170,8 +1164,6 @@ public class AuthControllerTest {
     }
 
 
-
-
     @DisplayName("기업 회원 회원가입 실패 - 비밀번호 확인은 필수다")
     @Test
     void passwordConfirmIsMandatory() throws Exception {
@@ -1231,8 +1223,6 @@ public class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("잘못된 요청입니다"))
                 .andExpect(jsonPath("$.validation.passwordConfirm").value("비밀번호 확인을 입력해주세요"));
     }
-
-
 
 
     @DisplayName("학생 회원 회원가입 실패 - 대학교 ID 번호는 필수다")
@@ -1382,7 +1372,6 @@ public class AuthControllerTest {
                 .universityId(university.getId())
                 .build());
 
-
         //when
         ResultActions resultActions = mvc.perform(
                 get("/signup/username/{username}", "infli")
@@ -1420,7 +1409,6 @@ public class AuthControllerTest {
                 .nickname("jin8743")
                 .universityId(university.getId())
                 .build());
-
 
         //when
         ResultActions resultActions = mvc.perform(

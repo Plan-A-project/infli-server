@@ -5,7 +5,9 @@ import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.exception.custom.BadRequestException.*;
 import static com.plana.infli.exception.custom.ConflictException.DUPLICATED_NICKNAME;
 import static com.plana.infli.exception.custom.NotFoundException.*;
+import static com.plana.infli.service.MemberService.NICKNAME_REGEX;
 import static org.springframework.security.core.context.SecurityContextHolder.*;
+import static org.springframework.util.StringUtils.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.ProfileImage;
@@ -21,10 +23,11 @@ import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;
 import com.plana.infli.web.dto.response.profile.image.ChangeProfileImageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
+import lombok.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -50,14 +53,16 @@ public class SettingService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-    public void checkIsAvailableNewNickname(String nickname) {
-        if (nickname.matches("^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]{2,8}$") == false) {
-            throw new BadRequestException("한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요");
+    public String checkIsAvailableNewNickname(String nickname) {
+        if (nickname.matches(NICKNAME_REGEX) == false) {
+            throw new BadRequestException(INVALID_NICKNAME);
         }
 
         if (memberRepository.existsByNickname(nickname)) {
             throw new ConflictException(DUPLICATED_NICKNAME);
         }
+
+        return "사용 가능한 닉네임";
     }
 
     @Transactional
@@ -70,20 +75,20 @@ public class SettingService {
         editNickname(member, newNickname);
     }
 
-    public void verifyCurrentPassword(String username, String currentPassword) {
+    public String verifyCurrentPassword(String username, String currentPassword) {
 
         Member member = findMemberBy(username);
 
-        checkPasswordMatches(member, currentPassword);
+        return checkPasswordMatches(member, currentPassword);
     }
 
-    private void checkPasswordMatches(Member member, String password) {
+    private String checkPasswordMatches(Member member, String password) {
 
-        if (passwordEncoder.matches(
-                password, member.getLoginCredentials().getPassword()) == false) {
-
-            throw new BadRequestException(PASSWORD_NOT_MATCH);
+        if (passwordEncoder.matches(password, member.getLoginCredentials().getPassword())) {
+            return "비밀번호 일치";
         }
+
+        throw new BadRequestException(PASSWORD_NOT_MATCH);
     }
 
     @Transactional
@@ -129,6 +134,8 @@ public class SettingService {
 
         Member member = findMemberBy(username);
 
+        checkIsValidFile(multipartFile);
+
         String path = "members/" + member.getId();
 
         String originalUrl = s3Uploader.uploadAsOriginalImage(multipartFile, path);
@@ -140,6 +147,12 @@ public class SettingService {
         editProfileImage(member, newProfileImage);
 
         return ChangeProfileImageResponse.of(newProfileImage);
+    }
+
+    private void checkIsValidFile(MultipartFile file) {
+        if (file.isEmpty() || hasText(file.getOriginalFilename()) == false) {
+            throw new BadRequestException(IMAGE_IS_EMPTY);
+        }
     }
 
     @Transactional
