@@ -1,18 +1,20 @@
 package com.plana.infli.service;
 
 import static com.plana.infli.domain.CommentLike.*;
-import static com.plana.infli.exception.custom.BadRequestException.COMMENT_LIKE_NOT_FOUND;
-import static com.plana.infli.exception.custom.ConflictException.ALREADY_PRESSED_LIKE_ON_THIS_COMMENT;
-import static com.plana.infli.exception.custom.NotFoundException.*;
+import static com.plana.infli.infra.exception.custom.BadRequestException.COMMENT_LIKE_NOT_FOUND;
+import static com.plana.infli.infra.exception.custom.ConflictException.ALREADY_PRESSED_LIKE_ON_THIS_COMMENT;
+import static com.plana.infli.infra.exception.custom.NotFoundException.COMMENT_NOT_FOUND;
+import static com.plana.infli.infra.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
+import static com.plana.infli.infra.exception.custom.NotFoundException.POST_NOT_FOUND;
 
 import com.plana.infli.domain.Comment;
 import com.plana.infli.domain.CommentLike;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
-import com.plana.infli.exception.custom.AuthorizationFailedException;
-import com.plana.infli.exception.custom.BadRequestException;
-import com.plana.infli.exception.custom.ConflictException;
-import com.plana.infli.exception.custom.NotFoundException;
+import com.plana.infli.infra.exception.custom.AuthorizationFailedException;
+import com.plana.infli.infra.exception.custom.BadRequestException;
+import com.plana.infli.infra.exception.custom.ConflictException;
+import com.plana.infli.infra.exception.custom.NotFoundException;
 import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
@@ -32,8 +34,6 @@ public class CommentLikeService {
     private final CommentLikeRepository commentLikeRepository;
 
     private final MemberRepository memberRepository;
-
-    private final PostRepository postRepository;
 
     private final CommentRepository commentRepository;
 

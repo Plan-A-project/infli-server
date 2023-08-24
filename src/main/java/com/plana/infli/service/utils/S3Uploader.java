@@ -1,12 +1,10 @@
-package com.plana.infli.utils;
+package com.plana.infli.service.utils;
 
 import static com.amazonaws.services.s3.model.CannedAccessControlList.*;
-import static com.plana.infli.exception.custom.BadRequestException.IMAGE_IS_EMPTY;
 import static org.springframework.util.StringUtils.*;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.plana.infli.exception.custom.BadRequestException;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;

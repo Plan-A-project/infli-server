@@ -1,4 +1,4 @@
-package com.plana.infli.exception.advice;
+package com.plana.infli.infra.exception.advice;
 
 import static java.lang.Integer.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;

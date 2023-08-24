@@ -1,9 +1,8 @@
 package com.plana.infli.service.aop.retry;
 
-import static com.plana.infli.exception.custom.InternalServerErrorException.POST_VIEW_FAILED;
+import static com.plana.infli.infra.exception.custom.InternalServerErrorException.POST_VIEW_FAILED;
 
-import com.plana.infli.exception.custom.InternalServerErrorException;
-import com.plana.infli.service.aop.retry.Retry;
+import com.plana.infli.infra.exception.custom.InternalServerErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

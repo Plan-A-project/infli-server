@@ -1,4 +1,4 @@
-package com.plana.infli.exception.custom;
+package com.plana.infli.infra.exception.custom;
 
 import lombok.Getter;
 
