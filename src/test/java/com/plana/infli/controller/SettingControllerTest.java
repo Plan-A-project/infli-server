@@ -33,8 +33,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -78,7 +76,7 @@ class SettingControllerTest {
         Member member = findContextMember();
 
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/profile").with(csrf()));
+        ResultActions resultActions = mvc.perform(get("/setting/profile").with(csrf()));
 
         //then
         resultActions
@@ -100,7 +98,7 @@ class SettingControllerTest {
         Member member = findContextMember();
 
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/profile").with(csrf()));
+        ResultActions resultActions = mvc.perform(get("/setting/profile").with(csrf()));
 
         //then
         resultActions
@@ -122,7 +120,7 @@ class SettingControllerTest {
         Member member = findContextMember();
 
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/profile").with(csrf()));
+        ResultActions resultActions = mvc.perform(get("/setting/profile").with(csrf()));
 
 
         //then
@@ -145,7 +143,7 @@ class SettingControllerTest {
         Member member = findContextMember();
 
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/profile").with(csrf()));
+        ResultActions resultActions = mvc.perform(get("/setting/profile").with(csrf()));
 
         //then
         resultActions
@@ -161,7 +159,7 @@ class SettingControllerTest {
     @Test
     void loadMyProfileWithoutLogin() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/profile").with(csrf()));
+        ResultActions resultActions = mvc.perform(get("/setting/profile").with(csrf()));
 
         //then
         resultActions
@@ -175,7 +173,7 @@ class SettingControllerTest {
     @Test
     void checkIfValidNewNickname() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/nickname/{nickname}", "infli1")
+        ResultActions resultActions = mvc.perform(get("/setting/nickname/{nickname}", "infli1")
                 .with(csrf()));
 
         //then
@@ -190,7 +188,7 @@ class SettingControllerTest {
     @Test
     void newNicknameIsEmpty() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/nickname/{nickname}", " ")
+        ResultActions resultActions = mvc.perform(get("/setting/nickname/{nickname}", " ")
                 .with(csrf()));
 
         //then
@@ -203,7 +201,7 @@ class SettingControllerTest {
     @Test
     void checkIsValidNicknameWithoutLogin() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/nickname/{nickname}", "infli12")
+        ResultActions resultActions = mvc.perform(get("/setting/nickname/{nickname}", "infli12")
                 .with(csrf()));
 
         //then
@@ -220,7 +218,7 @@ class SettingControllerTest {
         Member member = findContextMember();
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/nickname")
+        ResultActions resultActions = mvc.perform(post("/setting/nickname")
                 .content("infli12")
                 .with(csrf()));
 
@@ -235,7 +233,7 @@ class SettingControllerTest {
     @Test
     void changeNicknameWithoutLogin() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/nickname")
+        ResultActions resultActions = mvc.perform(post("/setting/nickname")
                 .content("infli12")
                 .with(csrf()));
 
@@ -250,7 +248,7 @@ class SettingControllerTest {
     @Test
     void changeNicknameWithEmptyString() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/nickname")
+        ResultActions resultActions = mvc.perform(post("/setting/nickname")
                 .content("")
                 .with(csrf()));
 
@@ -265,7 +263,7 @@ class SettingControllerTest {
     @Test
     void changeNicknameWithEmptyString2() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/nickname"));
+        ResultActions resultActions = mvc.perform(post("/setting/nickname"));
 
         //then
         resultActions.andExpect(status().isBadRequest())
@@ -278,7 +276,7 @@ class SettingControllerTest {
     @Test
     void verifyCurrentPassword() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password/verification")
+        ResultActions resultActions = mvc.perform(post("/setting/password/verification")
                 .content("password"));
 
         //then
@@ -292,7 +290,7 @@ class SettingControllerTest {
     void provideInvalidPassword() throws Exception {
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password/verification")
+        ResultActions resultActions = mvc.perform(post("/setting/password/verification")
                 .content("1111"));
 
         //then
@@ -305,7 +303,7 @@ class SettingControllerTest {
     @Test
     void verifyCurrentPasswordWithoutLogin() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password/verification")
+        ResultActions resultActions = mvc.perform(post("/setting/password/verification")
                 .content("password"));
 
         //then
@@ -320,7 +318,7 @@ class SettingControllerTest {
     void verifyCurrentPasswordWithoutProvidingPassword() throws Exception {
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password/verification")
+        ResultActions resultActions = mvc.perform(post("/setting/password/verification")
                 .content(""));
 
         //then
@@ -335,7 +333,7 @@ class SettingControllerTest {
     void verifyCurrentPasswordWithoutProvidingPassword2() throws Exception {
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password/verification"));
+        ResultActions resultActions = mvc.perform(post("/setting/password/verification"));
 
         //then
         resultActions.andExpect(status().isBadRequest())
@@ -356,7 +354,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -377,7 +375,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -399,7 +397,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -421,7 +419,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -443,7 +441,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -466,7 +464,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -488,7 +486,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -510,7 +508,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -532,7 +530,7 @@ class SettingControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(json)
                 .contentType(APPLICATION_JSON));
 
@@ -547,7 +545,7 @@ class SettingControllerTest {
     @Test
     void changePasswordWithoutRequestBody() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password")
+        ResultActions resultActions = mvc.perform(post("/setting/password")
                 .content(""));
 
         //then
@@ -561,7 +559,7 @@ class SettingControllerTest {
     @Test
     void changePasswordWithoutRequestBody2() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/password"));
+        ResultActions resultActions = mvc.perform(post("/setting/password"));
 
         //then
         resultActions.andExpect(status().isBadRequest())
@@ -577,7 +575,7 @@ class SettingControllerTest {
         Member member = findContextMember();
 
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/unregister"));
+        ResultActions resultActions = mvc.perform(get("/setting/unregister"));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -597,7 +595,7 @@ class SettingControllerTest {
                 findContextMember().getLoginCredentials().getUsername()).get();
 
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/unregister"));
+        ResultActions resultActions = mvc.perform(get("/setting/unregister"));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -613,7 +611,7 @@ class SettingControllerTest {
     @Test
     void loadMemberProfileToUnregisterWithoutLogin() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(get("/api/setting/unregister"));
+        ResultActions resultActions = mvc.perform(get("/setting/unregister"));
 
         //then
         resultActions.andExpect(status().isUnauthorized())
@@ -628,7 +626,7 @@ class SettingControllerTest {
         Member member = findContextMember();
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/unregister")
+        ResultActions resultActions = mvc.perform(post("/setting/unregister")
                 .content("password")
                 .with(csrf()));
 
@@ -646,7 +644,7 @@ class SettingControllerTest {
     @Test
     void unregisterMemberWithoutLogin() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/unregister")
+        ResultActions resultActions = mvc.perform(post("/setting/unregister")
                 .content("password")
                 .with(csrf()));
 
@@ -661,7 +659,7 @@ class SettingControllerTest {
     @Test
     void unregisterMemberWithoutProvidingPassword() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/unregister"));
+        ResultActions resultActions = mvc.perform(post("/setting/unregister"));
 
         //then
         resultActions.andExpect(status().isBadRequest())
@@ -674,7 +672,7 @@ class SettingControllerTest {
     @Test
     void unregisterMemberWithoutProvidingPassword2() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/setting/unregister")
+        ResultActions resultActions = mvc.perform(post("/setting/unregister")
                 .content(""));
 
         //then
@@ -717,8 +715,4 @@ class SettingControllerTest {
 //
 //            assertThat(membergetProfileImageUrl()).isNotEqualTo(imageUrl);
 //        }
-
-
-
-
 }

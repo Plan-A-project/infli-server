@@ -107,7 +107,7 @@ public class PostLikeControllerTest {
                 board);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/posts/{postId}/likes", post.getId())
+        ResultActions resultActions = mvc.perform(post("/posts/{postId}/likes", post.getId())
                 .with(csrf()));
 
         //then
@@ -126,7 +126,7 @@ public class PostLikeControllerTest {
                 board);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/posts/{postId}/likes", post.getId())
+        ResultActions resultActions = mvc.perform(post("/posts/{postId}/likes", post.getId())
                 .with(csrf()));
 
         //then
@@ -141,7 +141,7 @@ public class PostLikeControllerTest {
     @WithMockMember
     void postIdToPressLikeIsMandatory() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/posts/{postId}/likes", " ")
+        ResultActions resultActions = mvc.perform(post("/posts/{postId}/likes", " ")
                 .with(csrf()));
 
         //then
@@ -158,7 +158,7 @@ public class PostLikeControllerTest {
     @WithMockMember
     void postIdToPressLikeMustBeInNumberFormat() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(post("/api/posts/{postId}/likes", "A")
+        ResultActions resultActions = mvc.perform(post("/posts/{postId}/likes", "A")
                 .with(csrf()));
 
         //then
@@ -183,7 +183,7 @@ public class PostLikeControllerTest {
         PostLike postLike = postLikeFactory.createPostLike(member, post);
 
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/posts/{postId}/likes", post.getId())
+        ResultActions resultActions = mvc.perform(delete("/posts/{postId}/likes", post.getId())
                 .with(csrf()));
 
         //then
@@ -202,7 +202,7 @@ public class PostLikeControllerTest {
                 board);
 
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/posts/{postId}/likes", post.getId())
+        ResultActions resultActions = mvc.perform(delete("/posts/{postId}/likes", post.getId())
                 .with(csrf()));
 
         //then
@@ -216,7 +216,7 @@ public class PostLikeControllerTest {
     @WithMockMember
     void postIdToCancelLikeIsMandatory() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/posts/{postId}/likes", " ")
+        ResultActions resultActions = mvc.perform(delete("/posts/{postId}/likes", " ")
                 .with(csrf()));
 
         //then
@@ -231,7 +231,7 @@ public class PostLikeControllerTest {
     @WithMockMember
     void postIdToCancelLikeMustBeInNumberFormat() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/posts/{postId}/likes", "a")
+        ResultActions resultActions = mvc.perform(delete("/posts/{postId}/likes", "a")
                 .with(csrf()));
 
         //then

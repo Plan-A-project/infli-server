@@ -29,14 +29,10 @@ import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.MemberService;
-import com.plana.infli.web.dto.request.comment.create.CreateCommentServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberRequest;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberServiceRequest;
-import com.plana.infli.web.dto.response.comment.create.CreateCommentResponse;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpSession;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -49,7 +45,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -104,7 +99,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -141,7 +136,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -199,7 +194,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -228,7 +223,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -278,7 +273,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -309,7 +304,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -351,7 +346,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -426,7 +421,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -492,7 +487,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -521,7 +516,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -586,7 +581,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -617,7 +612,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -678,7 +673,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -707,7 +702,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -757,7 +752,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -788,7 +783,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -822,7 +817,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -851,7 +846,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -885,7 +880,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -915,7 +910,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -947,7 +942,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -976,7 +971,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1008,7 +1003,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1037,7 +1032,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1070,7 +1065,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1101,7 +1096,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1134,7 +1129,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1163,7 +1158,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1196,7 +1191,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1226,7 +1221,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1257,7 +1252,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/student")
+        ResultActions resultActions = mvc.perform(post("/signup/student")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1286,7 +1281,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1317,7 +1312,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1347,7 +1342,7 @@ public class AuthControllerTest {
         String json = om.writeValueAsString(request);
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/signup/company")
+        ResultActions resultActions = mvc.perform(post("/signup/company")
                 .content(json)
                 .contentType(APPLICATION_JSON)
                 .with(csrf()));
@@ -1364,7 +1359,7 @@ public class AuthControllerTest {
     void checkUsernameDuplicate_NotDuplicated() throws Exception {
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/signup/username/{username}", "infli1234")
+                get("/signup/username/{username}", "infli1234")
                         .with(csrf()));
 
         //then
@@ -1390,7 +1385,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/signup/username/{username}", "infli")
+                get("/signup/username/{username}", "infli")
                         .with(csrf()));
 
         //then
@@ -1404,7 +1399,7 @@ public class AuthControllerTest {
     void checkNicknameDuplicate_NotDuplicated() throws Exception {
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/signup/nickname/{nickname}", "infli123")
+                get("/signup/nickname/{nickname}", "infli123")
                         .with(csrf()));
 
         //then
@@ -1429,7 +1424,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/signup/nickname/{nickname}", "jin8743")
+                get("/signup/nickname/{nickname}", "jin8743")
                         .with(csrf()));
 
         //then
@@ -1459,7 +1454,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/login")
+                post("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1489,7 +1484,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/login")
+                post("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1519,7 +1514,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/login")
+                post("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1550,7 +1545,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/login")
+                post("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1581,7 +1576,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/login")
+                post("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1612,7 +1607,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/login")
+                post("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1646,7 +1641,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/login")
+                post("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1677,7 +1672,7 @@ public class AuthControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/login")
+                get("/login")
                         .content(json)
                         .contentType(APPLICATION_JSON));
 
@@ -1711,7 +1706,7 @@ public class AuthControllerTest {
                                     .build());
                             //when
                             ResultActions resultActions = mvc.perform(
-                                    post("/api/login")
+                                    post("/login")
                                             .content(json)
                                             .contentType(APPLICATION_JSON));
 
@@ -1724,7 +1719,7 @@ public class AuthControllerTest {
                         () -> {
                             //when
                             ResultActions resultActions = mvc.perform(
-                                    post("/api/logout"));
+                                    post("/logout"));
 
                             //then
                             resultActions.andExpect(status().isOk())
@@ -1759,7 +1754,7 @@ public class AuthControllerTest {
                                     .build());
                             //when
                             ResultActions resultActions = mvc.perform(
-                                    post("/api/login")
+                                    post("/login")
                                             .content(json)
                                             .contentType(APPLICATION_JSON));
 
@@ -1772,7 +1767,7 @@ public class AuthControllerTest {
                         () -> {
                             //when
                             ResultActions resultActions = mvc.perform(
-                                    get("/api/logout"));
+                                    get("/logout"));
 
                             //then
                             resultActions.andExpect(status().isUnauthorized())
