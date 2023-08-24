@@ -1,4 +1,4 @@
-package com.plana.infli.exception.advice;
+package com.plana.infli.infra.exception.advice;
 
 import java.util.stream.Collectors;
 

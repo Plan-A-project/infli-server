@@ -1,12 +1,12 @@
-package com.plana.infli.exception.advice;
+package com.plana.infli.infra.exception.advice;
 
 import static java.lang.String.valueOf;
 
+import com.plana.infli.infra.exception.custom.DefaultException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.plana.infli.exception.custom.DefaultException;
 import com.plana.infli.web.dto.response.error.ErrorResponse;
 
 @RestControllerAdvice

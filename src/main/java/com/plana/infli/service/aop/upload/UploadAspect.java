@@ -1,8 +1,8 @@
 package com.plana.infli.service.aop.upload;
 
-import static com.plana.infli.exception.custom.InternalServerErrorException.IMAGE_UPLOAD_FAILED;
+import static com.plana.infli.infra.exception.custom.InternalServerErrorException.IMAGE_UPLOAD_FAILED;
 
-import com.plana.infli.exception.custom.InternalServerErrorException;
+import com.plana.infli.infra.exception.custom.InternalServerErrorException;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
