@@ -117,7 +117,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -151,7 +151,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -179,7 +179,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -209,7 +209,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -232,7 +232,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -263,7 +263,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -291,7 +291,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -319,7 +319,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -350,7 +350,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -381,7 +381,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -411,7 +411,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
+        ResultActions resultActions = mvc.perform(patch("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -446,7 +446,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
+        ResultActions resultActions = mvc.perform(patch("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -475,7 +475,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
+        ResultActions resultActions = mvc.perform(patch("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -505,7 +505,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
+        ResultActions resultActions = mvc.perform(patch("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -535,7 +535,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
+        ResultActions resultActions = mvc.perform(patch("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -569,7 +569,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
+        ResultActions resultActions = mvc.perform(patch("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -603,7 +603,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(patch("/api/comments")
+        ResultActions resultActions = mvc.perform(patch("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -633,7 +633,7 @@ public class CommentControllerTest {
                 .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments")
+        ResultActions resultActions = mvc.perform(post("/comments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request)
                 .with(csrf()));
@@ -659,9 +659,8 @@ public class CommentControllerTest {
         Comment comment = commentFactory.createComment(member, post);
 
         //when
-        ResultActions resultActions = mvc.perform(
-                delete("/api/comments/{commentId}", comment.getId())
-                        .with(csrf()));
+        mvc.perform(delete("/comments/{commentId}", comment.getId())
+                .with(csrf()));
 
         //then
         Comment findComment = commentRepository.findById(comment.getId()).get();
@@ -685,9 +684,8 @@ public class CommentControllerTest {
         Comment comment = commentFactory.createChildComment(member, post, parentComment);
 
         //when
-        ResultActions resultActions = mvc.perform(
-                delete("/api/comments/{commentId}", comment.getId())
-                        .with(csrf()));
+        mvc.perform(delete("/comments/{commentId}", comment.getId())
+                .with(csrf()));
 
         //then
         Comment findComment = commentRepository.findById(comment.getId()).get();
@@ -708,7 +706,7 @@ public class CommentControllerTest {
         Comment comment = commentFactory.createComment(member, post);
 
         //when
-        ResultActions resultActions = mvc.perform(delete("/api/comments/{commentId}", " ")
+        ResultActions resultActions = mvc.perform(delete("/comments/{commentId}", " ")
                 .with(csrf()));
 
         //then
@@ -732,7 +730,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                delete("/api/comments/{commentId}", comment.getId())
+                delete("/comments/{commentId}", comment.getId())
                         .with(csrf()));
 
         //then
@@ -766,7 +764,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/{postId}/comments?page={page}", post.getId(), 1)
+                get("/posts/{postId}/comments?page={page}", post.getId(), 1)
                         .with(csrf()));
 
         //then
@@ -786,7 +784,7 @@ public class CommentControllerTest {
     void viewCommentsInPostWithoutPostId() throws Exception {
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/comments")
+                get("/posts/comments")
                         .param("page", "1")
                         .with(csrf()));
 
@@ -808,7 +806,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/{postId}/comments", post.getId())
+                get("/posts/{postId}/comments", post.getId())
                         .param("page", "1")
                         .with(csrf()));
 
@@ -829,7 +827,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/comments")
+                get("/posts/comments")
                         .param("id", post.getId().toString())
                         .param("page", "1")
                         .with(csrf()));
@@ -861,7 +859,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/{postId}/comments/best", post.getId())
+                get("/posts/{postId}/comments/best", post.getId())
                         .with(csrf()));
 
         //then
@@ -886,7 +884,7 @@ public class CommentControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                get("/api/posts/{postId}/comments/best", post.getId())
+                get("/posts/{postId}/comments/best", post.getId())
                         .with(csrf()));
 
         //then

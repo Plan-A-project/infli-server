@@ -26,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api")
 public class PostController {
 
     private final PostService postService;

@@ -39,7 +39,7 @@ public class CustomLoginConfigurer <H extends HttpSecurityBuilder<H>> extends
         getAuthenticationFilter().setAuthenticationManager(authenticationManager);
         getAuthenticationFilter().setAuthenticationSuccessHandler(successHandler);
         getAuthenticationFilter().setAuthenticationFailureHandler(failureHandler);
-        getAuthenticationFilter().setFilterProcessesUrl("/api/login");
+        getAuthenticationFilter().setFilterProcessesUrl("/login");
 
         SessionAuthenticationStrategy sessionAuthenticationStrategy = http
                 .getSharedObject(SessionAuthenticationStrategy.class);

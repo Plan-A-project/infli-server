@@ -81,25 +81,10 @@ public class BoardControllerTest {
     private PopularBoardRepository popularBoardRepository;
 
     @Autowired
-    private CommentFactory commentFactory;
-
-    @Autowired
-    private UniversityFactory universityFactory;
-
-    @Autowired
     private PopularBoardFactory popularBoardFactory;
 
     @Autowired
     private BoardFactory boardFactory;
-
-    @Autowired
-    private PostFactory postFactory;
-
-    @Autowired
-    private MemberFactory memberFactory;
-
-    @Autowired
-    private CommentLikeFactory commentLikeFactory;
 
     @AfterEach
     void tearDown() {
@@ -118,7 +103,7 @@ public class BoardControllerTest {
     @Test
     void checkDefaultPopularBoardExists() throws Exception {
         //when
-        ResultActions resultActions = mvc.perform(get("/api/boards/popular/exists")
+        ResultActions resultActions = mvc.perform(get("/boards/popular/exists")
                 .with(csrf()));
 
         //then
@@ -137,7 +122,7 @@ public class BoardControllerTest {
         popularBoardFactory.create(member, board, 1);
 
         //when
-        ResultActions resultActions = mvc.perform(get("/api/boards/popular/exists")
+        ResultActions resultActions = mvc.perform(get("/boards/popular/exists")
                 .with(csrf()));
 
         //then
@@ -174,7 +159,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(post("/api/boards/popular"));
+                .perform(post("/boards/popular"));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -209,7 +194,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(get("/api/boards/popular"));
+                .perform(get("/boards/popular"));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -243,7 +228,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(get("/api/settings/boards/popular"));
+                .perform(get("/settings/boards/popular"));
 
         //then
         List<PopularBoard> boards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
@@ -293,7 +278,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(patch("/api/settings/boards/popular")
+                .perform(patch("/settings/boards/popular")
                         .contentType(APPLICATION_JSON)
                         .content(json)
                         .with(csrf()));
@@ -328,7 +313,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(get("/api/settings/boards")
+                .perform(get("/settings/boards")
                         .with(csrf()));
 
         //then
@@ -374,7 +359,7 @@ public class BoardControllerTest {
 
         //when
         ResultActions resultActions = mvc
-                .perform(post("/api/settings/boards/popular")
+                .perform(post("/settings/boards/popular")
                         .contentType(APPLICATION_JSON)
                         .content(json)
                         .with(csrf()));

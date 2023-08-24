@@ -112,7 +112,7 @@ public class CommentLikeControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/comments/{commentId}/likes", comment.getId())
+                post("/comments/{commentId}/likes", comment.getId())
                         .with(csrf()));
 
         //then
@@ -133,7 +133,7 @@ public class CommentLikeControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                post("/api/comments/{commentId}/likes", comment.getId())
+                post("/comments/{commentId}/likes", comment.getId())
                         .with(csrf()));
 
         //then
@@ -154,7 +154,7 @@ public class CommentLikeControllerTest {
 
 
         //when
-        ResultActions resultActions = mvc.perform(post("/api/comments/{commentId}/likes", " ")
+        ResultActions resultActions = mvc.perform(post("/comments/{commentId}/likes", " ")
                         .with(csrf()))
                 .andExpect(jsonPath("$.message").value("Path Variable 값이 입력되지 않았습니다"))
                 .andExpect(jsonPath("$.validation.commentId").value("Long"));
@@ -181,7 +181,7 @@ public class CommentLikeControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                delete("/api/comments/{commentId}/likes", comment.getId())
+                delete("/comments/{commentId}/likes", comment.getId())
                         .with(csrf()));
 
         //then
@@ -208,7 +208,7 @@ public class CommentLikeControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                delete("/api/comments/{commentId}/likes", comment.getId())
+                delete("/comments/{commentId}/likes", comment.getId())
                         .with(csrf()));
 
         //then
@@ -234,7 +234,7 @@ public class CommentLikeControllerTest {
 
         //when
         ResultActions resultActions = mvc.perform(
-                delete("/api/comments/{commentId}/likes", "")
+                delete("/comments/{commentId}/likes", "")
                         .with(csrf()));
 
         //then

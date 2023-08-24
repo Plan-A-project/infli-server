@@ -75,16 +75,16 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator")
                         .permitAll()
-                        .requestMatchers("/api/login").permitAll()
-                        .requestMatchers("/api/signup/**").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/login").permitAll()
+                        .requestMatchers("/signup/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/member/email/auth/**").permitAll()
                         .requestMatchers("/member/student/auth/**").permitAll()
                         .requestMatchers("/member/company/auth/**").permitAll()
                         .anyRequest().authenticated())
 
                 .logout((logout) -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/api/logout", "POST"))
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
                         .deleteCookies("JSESSIONID", "remember-me")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
@@ -109,7 +109,7 @@ public class SecurityConfig {
                 .apply(new CustomLoginConfigurer<>())
                 .successHandlerCustom(authenticationSuccessHandler)
                 .failureHandlerCustom(authenticationFailureHandler)
-                .loginProcessingUrl("/api/login")
+                .loginProcessingUrl("/login")
                 .setAuthenticationManager(authenticationManager());
 
     }

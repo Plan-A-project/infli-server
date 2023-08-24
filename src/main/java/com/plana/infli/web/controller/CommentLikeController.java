@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
 public class CommentLikeController {
 
     private final CommentLikeService commentLikeService;
