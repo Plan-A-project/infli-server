@@ -52,7 +52,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 @ActiveProfiles("test")
 @Slf4j
-public class PostServiceTest {
+class PostServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
@@ -687,7 +687,6 @@ public class PostServiceTest {
     }
 
 
-
     public static Stream<Arguments> notAllowedRoleToWritePost() {
 
         return Stream.of(
@@ -1209,7 +1208,8 @@ public class PostServiceTest {
         memberRepository.delete(member);
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getLoginCredentials().getUsername()))
+        assertThatThrownBy(() -> postService.deletePost(post.getId(),
+                member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
@@ -1235,7 +1235,8 @@ public class PostServiceTest {
         Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(-10L, member.getLoginCredentials().getUsername()))
+        assertThatThrownBy(
+                () -> postService.deletePost(-10L, member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
@@ -1254,7 +1255,8 @@ public class PostServiceTest {
         postService.deletePost(post.getId(), member.getLoginCredentials().getUsername());
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getLoginCredentials().getUsername()))
+        assertThatThrownBy(() -> postService.deletePost(post.getId(),
+                member.getLoginCredentials().getUsername()))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
     }
@@ -1273,7 +1275,8 @@ public class PostServiceTest {
         Member member = memberFactory.createVerifiedStudentMember("member", university);
 
         //when //then
-        assertThatThrownBy(() -> postService.deletePost(post.getId(), member.getLoginCredentials().getUsername()))
+        assertThatThrownBy(() -> postService.deletePost(post.getId(),
+                member.getLoginCredentials().getUsername()))
                 .isInstanceOf(AuthorizationFailedException.class)
                 .message().isEqualTo("해당 권한이 없습니다");
     }
@@ -1336,7 +1339,8 @@ public class PostServiceTest {
                 member.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getNickname()).isEqualTo(postMember.getBasicCredentials().getNickname());
+        assertThat(response.getNickname()).isEqualTo(
+                postMember.getBasicCredentials().getNickname());
     }
 
     public static Stream<Arguments> possibleCombinationToWriteRecruitmentPostExceptCompanyMember() {
@@ -1369,7 +1373,8 @@ public class PostServiceTest {
                 member.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getNickname()).isEqualTo(postMember.getBasicCredentials().getNickname());
+        assertThat(response.getNickname()).isEqualTo(
+                postMember.getBasicCredentials().getNickname());
     }
 
 
@@ -1473,7 +1478,8 @@ public class PostServiceTest {
                         "postType", "nickname", "content")
                 .containsExactly(post.getId(), post.getTitle(), post.getCommentMemberCount(), 0, 1,
                         post.getThumbnailUrl(), board.getBoardName(), board.getId(),
-                        post.getPostType().toString(), postMember.getBasicCredentials().getNickname(),
+                        post.getPostType().toString(),
+                        postMember.getBasicCredentials().getNickname(),
                         post.getContent());
     }
 }

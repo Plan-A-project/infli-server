@@ -36,7 +36,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class CommentLikeServiceTest {
+class CommentLikeServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
@@ -146,7 +146,6 @@ public class CommentLikeServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
         memberRepository.delete(member);
-
 
         //when //then
         assertThatThrownBy(() -> commentLikeService.createCommentLike(

@@ -40,7 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles("test")
-public class BoardServiceTest {
+class BoardServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
@@ -93,9 +93,9 @@ public class BoardServiceTest {
 
         Member member = memberFactory.createVerifiedStudentMember("member", university);
 
-
         //when
-        boolean exists = boardService.popularBoardExistsBy(member.getLoginCredentials().getUsername());
+        boolean exists = boardService.popularBoardExistsBy(
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(exists).isFalse();
@@ -117,7 +117,8 @@ public class BoardServiceTest {
         boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when
-        boolean exists = boardService.popularBoardExistsBy(member.getLoginCredentials().getUsername());
+        boolean exists = boardService.popularBoardExistsBy(
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(exists).isTrue();
@@ -172,7 +173,8 @@ public class BoardServiceTest {
         boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when //then
-        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername()))
+        assertThatThrownBy(() -> boardService.createDefaultPopularBoards(
+                member.getLoginCredentials().getUsername()))
                 .isInstanceOf(ConflictException.class)
                 .message().isEqualTo("인기 게시판 기본값이 이미 생성되었습니다");
     }
@@ -197,7 +199,6 @@ public class BoardServiceTest {
     }
 
 
-
     @DisplayName("특정 회원이 보고싶은 인기 게시판 기본 설정을 하지 않았을 경우 조회 시나리오")
     @TestFactory
     Collection<DynamicTest> listPopularBoardScenario() {
@@ -216,7 +217,8 @@ public class BoardServiceTest {
                 dynamicTest("특정 회원이 보고싶은 인기 게시판 기본 설정값이 없는 것을 확인한다",
                         () -> {
                             //when
-                            boolean exists = boardService.popularBoardExistsBy(member.getLoginCredentials().getUsername());
+                            boolean exists = boardService.popularBoardExistsBy(
+                                    member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(exists).isFalse();
@@ -225,7 +227,8 @@ public class BoardServiceTest {
                 dynamicTest("기본 설정값이 없는 경우, 해당 대학에 존재하는 모든 게시판에 각각 대응하는 인기 게시판을 생성한다",
                         () -> {
                             //when
-                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
+                            boardService.createDefaultPopularBoards(
+                                    member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(popularBoardRepository.findEnabledPopularBoardCountBy(
@@ -288,14 +291,16 @@ public class BoardServiceTest {
                 dynamicTest("해당 대학에 존재하는 모든 게시판에 각각 대응하는 인기 게시판을 생성한다 (기본값 생성)",
                         () -> {
                             //when
-                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
+                            boardService.createDefaultPopularBoards(
+                                    member.getLoginCredentials().getUsername());
 
                             //then
                             assertThat(popularBoardRepository.findEnabledPopularBoardCountBy(
                                     member)).isEqualTo(5);
                         }),
 
-                dynamicTest("기본값 설정 후 인기 게시판 목록 조회시 기본값은 1.채용 2.대외활동 3.동아리 4.익명 5.학교생활 인기게시판 순으로 조회된다",
+                dynamicTest(
+                        "기본값 설정 후 인기 게시판 목록 조회시 기본값은 1.채용 2.대외활동 3.동아리 4.익명 5.학교생활 인기게시판 순으로 조회된다",
                         () -> {
                             //when
                             PopularBoardsSettingsResponse response = boardService.loadEnabledPopularBoardsForSettingBy(
@@ -306,7 +311,8 @@ public class BoardServiceTest {
 
                             List<PopularBoard> boards = popularBoardRepository.findAllWithBoardOrderBySequenceByMember(
                                     member);
-                            assertThat(response.getPopularBoards()).extracting("popularBoardId", "boardName",
+                            assertThat(response.getPopularBoards()).extracting("popularBoardId",
+                                            "boardName",
                                             "boardType")
                                     .containsExactly(
                                             tuple(boards.get(0).getId(),
@@ -384,7 +390,6 @@ public class BoardServiceTest {
                         campusLifePopularBoard.getId()))
                 .build();
 
-
         //when
         boardService.changePopularBoardSequence(request);
 
@@ -414,7 +419,8 @@ public class BoardServiceTest {
         boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
 
         //when
-        BoardListResponse response = boardService.loadAllBoard(member.getLoginCredentials().getUsername());
+        BoardListResponse response = boardService.loadAllBoard(
+                member.getLoginCredentials().getUsername());
 
         //then
         assertThat(response.getUniversityId()).isEqualTo(university.getId());
@@ -447,7 +453,8 @@ public class BoardServiceTest {
                 dynamicTest("인기 게시판 기본값 설정 후, 5개의 인기 게시판 중에서 학교생활과 익명 인기게시판만 보고싶다고 선택한다",
                         () -> {
                             //given
-                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
+                            boardService.createDefaultPopularBoards(
+                                    member.getLoginCredentials().getUsername());
 
                             ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
                                     .username(member.getLoginCredentials().getUsername())
@@ -463,7 +470,7 @@ public class BoardServiceTest {
                         }),
 
                 dynamicTest("학교생활과, 익명 인기 게시판만 보고싶다고 설정 완료후, 보고싶다고 설정한 인기 게시판 목록을 조회하면"
-                        + "학교생활과 익명 인기 게시판만 조회되며, 1.채용 2.대외활동 3.동아리 4.익명 5.학교생활 순으로 조회된다",
+                                + "학교생활과 익명 인기 게시판만 조회되며, 1.채용 2.대외활동 3.동아리 4.익명 5.학교생활 순으로 조회된다",
                         () -> {
                             //then
                             PopularBoardsResponse response = boardService.loadEnabledPopularBoardsBy(
@@ -501,7 +508,8 @@ public class BoardServiceTest {
                 dynamicTest("인기 게시판 기본값 설정 후, 5개의 인기 게시판 중에서 동아리, 익명, 채용 인기게시판만 보고싶다고 선택한다",
                         () -> {
                             //given
-                            boardService.createDefaultPopularBoards(member.getLoginCredentials().getUsername());
+                            boardService.createDefaultPopularBoards(
+                                    member.getLoginCredentials().getUsername());
 
                             ChangePopularBoardVisibilityServiceRequest request = ChangePopularBoardVisibilityServiceRequest.builder()
                                     .username(member.getLoginCredentials().getUsername())

@@ -12,6 +12,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -33,6 +34,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -40,13 +45,13 @@ import org.springframework.test.web.servlet.ResultActions;
 class SettingControllerTest {
 
     @Autowired
+    private ResourceLoader resourceLoader;
+
+    @Autowired
     private MockMvc mvc;
 
     @Autowired
     private ObjectMapper om;
-
-    @Autowired
-    private MemberFactory memberFactory;
 
     @Autowired
     private UniversityRepository universityRepository;
@@ -56,9 +61,6 @@ class SettingControllerTest {
 
     @Autowired
     private CompanyRepository companyRepository;
-
-    @Autowired
-    private UniversityFactory universityFactory;
 
     @AfterEach
     void tearDown() {
@@ -681,38 +683,113 @@ class SettingControllerTest {
                 .andDo(print());
     }
 
+    @DisplayName("프로필 사진 변경 성공")
+    @WithMockMember
+    @Test
+    void changeProfileImage() throws Exception {
+        Member member = findContextMember();
+
+        //given
+        String fileName = "testImage.png";
+        Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "testImage.png",
+                IMAGE_PNG_VALUE,
+                resource.getInputStream()
+        );
+
+        //when
+        ResultActions resultActions = mvc
+                .perform(multipart("/setting/profile/image")
+                        .file(file));
+
+        //then
+        Member findMember = memberRepository.findActiveMemberBy(member.getId()).get();
+
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.originalUrl")
+                        .value(findMember.getProfileImage().getOriginalUrl()))
+
+                .andExpect(jsonPath("$.thumbnailUrl")
+                        .value(findMember.getProfileImage().getThumbnailUrl()))
+                .andDo(print());
+
+    }
+
+
+    @DisplayName("프로필 사진 변경 실패 - 로그인을 하지 않은 경우")
+    @Test
+    void changeProfileImageWithoutLogin() throws Exception {
+
+        //given
+        String fileName = "testImage.png";
+        Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "testImage.png",
+                IMAGE_PNG_VALUE,
+                resource.getInputStream()
+        );
+
+        //when
+        ResultActions resultActions = mvc
+                .perform(multipart("/setting/profile/image")
+                        .file(file));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("인증을 하지 못하였습니다. 로그인 후 이용해 주세요"))
+                .andDo(print());
+
+    }
+
+    @DisplayName("프로필 사진 변경 실패 - 업로드할 사진을 첨부하지 않은 경우")
+    @WithMockMember
+    @Test
+    void changeProfileImageWithoutProvidingImage() throws Exception {
+        //when
+        ResultActions resultActions = mvc
+                .perform(multipart("/setting/profile/image"));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("멀티 파트 요청에서 파일이 누락되었습니다"))
+                .andDo(print());
+    }
+
+
+    @DisplayName("프로필 사진 변경 실패 - 비어있는 파일을 업로드 한 경우")
+    @WithMockMember
+    @Test
+    void changeProfileImageProvidingEmptyFile() throws Exception {
+        //given
+        Resource resource = resourceLoader.getResource("");
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                null,
+                IMAGE_PNG_VALUE,
+                resource.getInputStream()
+        );
+
+        //when
+        ResultActions resultActions = mvc
+                .perform(multipart("/setting/profile/image")
+                        .file(file));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("업로드할 파일이 비어있습니다"))
+                .andDo(print());
+
+    }
+
+
     private Member findContextMember() {
         String username = getContext().getAuthentication().getName();
         return memberRepository.findActiveMemberBy(username).get();
     }
-
-//        @DisplayName("사용자는 프로필 사진을 변경할 수 없다.")
-//        @Test
-//        public void profileImageModify() throws Exception{
-//            signup();
-//            String fileName = "testImage.png";
-//            Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
-//
-//            MockMultipartFile file = new MockMultipartFile(
-//                "file",
-//                "testImage.png",
-//                MediaType.IMAGE_PNG_VALUE,
-//                resource.getInputStream()
-//            );
-//
-//            ResultActions perform = mockMvc
-//                .perform(
-//                    multipart("/member/profile/image/modify")
-//                        .file(file));
-//
-//            perform
-//                .andDo(print())
-//                .andExpect(status().isUnauthorized());
-//
-//            String imageUrl = perform.andReturn().getResponse().getContentAsString();
-//            Member member = memberRepository.findByEmail("youngjin@gmail.com")
-//                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
-//
-//            assertThat(membergetProfileImageUrl()).isNotEqualTo(imageUrl);
-//        }
 }

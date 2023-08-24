@@ -45,7 +45,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @MockMvcTest
-public class CommentControllerTest {
+class CommentControllerTest {
 
 
     @Autowired
@@ -756,11 +756,12 @@ public class CommentControllerTest {
                 memberFactory.createVerifiedStudentMember("commentMember2", university), post);
 
         Comment childComment1 = commentFactory.createChildComment(
-                memberFactory.createVerifiedStudentMember("commentMember3", university), post, comment1);
+                memberFactory.createVerifiedStudentMember("commentMember3", university), post,
+                comment1);
 
         Comment childComment2 = commentFactory.createChildComment(
-                memberFactory.createVerifiedStudentMember("commentMember4", university), post, comment1);
-
+                memberFactory.createVerifiedStudentMember("commentMember4", university), post,
+                comment1);
 
         //when
         ResultActions resultActions = mvc.perform(
@@ -853,9 +854,9 @@ public class CommentControllerTest {
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
             commentLikeFactory.createCommentLike(
-                    memberFactory.createVerifiedStudentMember("likeMember" + i, university), comment);
+                    memberFactory.createVerifiedStudentMember("likeMember" + i, university),
+                    comment);
         });
-
 
         //when
         ResultActions resultActions = mvc.perform(

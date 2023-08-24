@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 @RestControllerAdvice
 public class ExceptionAdvice {
@@ -76,6 +77,19 @@ public class ExceptionAdvice {
         ErrorResponse response = ErrorResponse.builder()
                 .code(400)
                 .message("요청 본문의 형식이 올바르지 않습니다")
+                .build();
+
+        return ResponseEntity.status(response.getCode())
+                .body(response);
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> exceptionHandler(MissingServletRequestPartException e) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .code(400)
+                .message("멀티 파트 요청에서 파일이 누락되었습니다")
                 .build();
 
         return ResponseEntity.status(response.getCode())

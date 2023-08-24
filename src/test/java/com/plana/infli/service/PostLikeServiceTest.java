@@ -48,7 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class PostLikeServiceTest {
+class PostLikeServiceTest {
 
     @Autowired
     private PostLikeService postLikeService;
@@ -214,7 +214,6 @@ public class PostLikeServiceTest {
         Board board = boardFactory.createAnonymousBoard(university);
         Member postMember = memberFactory.createStudentCouncilMember(university);
         Post post = postFactory.createNormalPost(postMember, board);
-
 
         //when //then
         assertThatThrownBy(() -> postLikeService.pressPostLike("aaa", post.getId()))

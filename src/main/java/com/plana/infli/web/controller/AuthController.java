@@ -19,14 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
 
-    public static final String USERNAME_REGEX = "^[a-z0-9_-]{5,20}$";
-
-    public static final String REAL_NAME_REGEX = "^[가-힣]{2,10}$";
-
-    public static final String NICKNAME_REGEX = "^[ㄱ-ㅎㅏ-ㅣ가-힣a-zA-Z0-9]{2,8}$";
-
-    public static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()])[A-Za-z\\d!@#$%^&*()]{8,20}$";
-
     private final MemberService memberService;
 
     @PostMapping("/signup/student")

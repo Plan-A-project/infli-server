@@ -33,8 +33,6 @@ public class S3Uploader {
 
     public String uploadAsOriginalImage(MultipartFile multipartFile, String directoryPath) {
 
-        validateUploadedFile(multipartFile);
-
         String storeFileName = generateStoreFileName(multipartFile.getOriginalFilename());
 
         File file = generateFile(multipartFile, storeFileName);
@@ -55,8 +53,6 @@ public class S3Uploader {
 
     public String uploadAsThumbnailImage(MultipartFile multipartFile, String directoryPath) {
 
-        validateUploadedFile(multipartFile);
-
         String storeFileName = generateStoreFileName(
                 cleanPath(multipartFile.getOriginalFilename()));
 
@@ -72,12 +68,6 @@ public class S3Uploader {
         thumbnailFile.delete();
 
         return amazonS3.getUrl(bucket, fullPathName).toString();
-    }
-
-    private void validateUploadedFile(MultipartFile multipartFile) {
-        if (multipartFile.isEmpty() || multipartFile.getOriginalFilename() == null) {
-            throw new BadRequestException(IMAGE_IS_EMPTY);
-        }
     }
 
     @SneakyThrows(IOException.class)

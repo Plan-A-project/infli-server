@@ -29,4 +29,5 @@ public interface MemberRepositoryCustom {
 
     Optional<Member> findActiveMemberWithCompanyBy(String username);
 
+    Optional<Member> findDeletedMemberBy(Long memberId);
 }

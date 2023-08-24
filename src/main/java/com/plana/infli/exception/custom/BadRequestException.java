@@ -52,6 +52,10 @@ public class BadRequestException extends DefaultException{
 
     public static final String MEMBER_VERIFICATION_STATUS_IS_NOT_PENDING = "인증 상태가 승인 대기중이 아닙니다";
 
+    public static final String INVALID_NICKNAME = "한글, 영어, 숫자를 포함해서 2~8자리 이내로 입력해주세요";
+
+    public static final String INVALID_USERNAME = "영어, 숫자, 특수문자 -, _ 를 포함해서 5~20자리 이내로 입력해주세요";
+
     public BadRequestException(String message) {
         super(message);
     }

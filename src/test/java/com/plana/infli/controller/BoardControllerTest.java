@@ -48,7 +48,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @MockMvcTest
-public class BoardControllerTest {
+class BoardControllerTest {
 
     @Autowired
     private ObjectMapper om;
@@ -235,19 +235,24 @@ public class BoardControllerTest {
                 member);
 
         resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.popularBoards[0].popularBoardId").value(boards.get(0).getId()))
+                .andExpect(
+                        jsonPath("$.popularBoards[0].popularBoardId").value(boards.get(0).getId()))
                 .andExpect(jsonPath("$.popularBoards[0].boardName").value("채용"))
 
-                .andExpect(jsonPath("$.popularBoards[1].popularBoardId").value(boards.get(1).getId()))
+                .andExpect(
+                        jsonPath("$.popularBoards[1].popularBoardId").value(boards.get(1).getId()))
                 .andExpect(jsonPath("$.popularBoards[1].boardName").value("대외활동"))
 
-                .andExpect(jsonPath("$.popularBoards[2].popularBoardId").value(boards.get(2).getId()))
+                .andExpect(
+                        jsonPath("$.popularBoards[2].popularBoardId").value(boards.get(2).getId()))
                 .andExpect(jsonPath("$.popularBoards[2].boardName").value("동아리"))
 
-                .andExpect(jsonPath("$.popularBoards[3].popularBoardId").value(boards.get(3).getId()))
+                .andExpect(
+                        jsonPath("$.popularBoards[3].popularBoardId").value(boards.get(3).getId()))
                 .andExpect(jsonPath("$.popularBoards[3].boardName").value("익명"))
 
-                .andExpect(jsonPath("$.popularBoards[4].popularBoardId").value(boards.get(4).getId()))
+                .andExpect(
+                        jsonPath("$.popularBoards[4].popularBoardId").value(boards.get(4).getId()))
                 .andExpect(jsonPath("$.popularBoards[4].boardName").value("학교생활"))
                 .andDo(print());
     }
@@ -371,7 +376,8 @@ public class BoardControllerTest {
         /**
          * 별도로 정렬 순서를 변경하지 않는한 기본 조회 순서는 1.채용 2.대외활동 3.동아리 4.익명 5.학교생활 이다
          */
-        List<SinglePopularBoard> enabledPopularBoards = popularBoardRepository.loadEnabledPopularBoardsBy(member);
+        List<SinglePopularBoard> enabledPopularBoards = popularBoardRepository.loadEnabledPopularBoardsBy(
+                member);
         assertThat(enabledPopularBoards).hasSize(2)
                 .extracting("boardName")
                 .containsExactly("동아리", "학교생활");
