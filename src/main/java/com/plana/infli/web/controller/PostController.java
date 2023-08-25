@@ -30,11 +30,10 @@ public class PostController {
 
     private final PostService postService;
 
-    @GetMapping("/boards/{boardId}/permissions")
+    @GetMapping("/boards/{boardId}/permission")
     @Operation(summary = "특정 게시판에 글 작성 권한이 있는지 여부 확인")
     public boolean checkMemberHasWritePermission(@AuthenticatedPrincipal String username,
-            @PathVariable Long boardId, PostType postType) {
-
+            @PathVariable Long boardId, @RequestParam PostType postType) {
         return postService.checkMemberHasWritePermission(boardId, username, postType);
     }
 
@@ -54,12 +53,10 @@ public class PostController {
         return postService.createRecruitmentPost(request.toServiceRequest(username));
     }
 
-
     @PostMapping("/posts/{postId}/images")
     @Operation(summary = "특정 글에 사진 업로드")
-    public PostImageUploadResponse uploadPostImages(
-            @AuthenticatedPrincipal String username, @PathVariable Long postId,
-            List<MultipartFile> multipartFiles) {
+    public PostImageUploadResponse uploadPostImages(@AuthenticatedPrincipal String username,
+            @PathVariable Long postId, @RequestParam List<MultipartFile> multipartFiles) {
 
         return postService.uploadPostImages(postId, multipartFiles, username);
     }

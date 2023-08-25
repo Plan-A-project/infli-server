@@ -75,14 +75,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     @Override
-    public Optional<Post> findActivePostWithBoardBy(Long id) {
-        return ofNullable(jpaQueryFactory.selectFrom(post)
-                .innerJoin(post.board, board).fetchJoin()
-                .where(postIsActiveAndIdEqual(id))
-                .fetchOne());
-    }
-
-    @Override
     public Optional<Post> findActivePostWithMemberBy(Long id) {
         return ofNullable(jpaQueryFactory
                 .selectFrom(post)

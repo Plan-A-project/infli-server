@@ -9,6 +9,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -91,6 +92,22 @@ public class ExceptionAdvice {
                 .code(400)
                 .message("멀티 파트 요청에서 파일이 누락되었습니다")
                 .build();
+
+        return ResponseEntity.status(response.getCode())
+                .body(response);
+    }
+
+    @ResponseStatus(BAD_REQUEST)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> exceptionHandler(MissingServletRequestParameterException e) {
+
+        ErrorResponse response = ErrorResponse.builder()
+                .code(400)
+                .message("Request Parameter가 누락되었습니다")
+                .build();
+
+        response.addValidation(e.getParameterName(),
+                "파라미터 타입 : " + e.getParameterType());
 
         return ResponseEntity.status(response.getCode())
                 .body(response);

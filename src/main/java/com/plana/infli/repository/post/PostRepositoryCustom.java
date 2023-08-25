@@ -13,8 +13,6 @@ public interface PostRepositoryCustom {
 
     Optional<Post> findActivePostBy(Long id);
 
-    Optional<Post> findActivePostWithBoardBy(Long id);
-
     List<SearchedPost> searchPostByKeyWord(PostQueryRequest request);
 
     Optional<Post> findActivePostWithMemberBy(Long id);

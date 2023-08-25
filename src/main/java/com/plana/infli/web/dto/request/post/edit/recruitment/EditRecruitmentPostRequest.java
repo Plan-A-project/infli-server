@@ -25,7 +25,7 @@ public class EditRecruitmentPostRequest {
     @Nullable
     private String thumbnailUrl;
 
-    @NotNull(message = "회사명을 입력해주세요")
+    @NotEmpty(message = "회사명을 입력해주세요")
     private String recruitmentCompanyName;
 
     @NotNull(message = "모집 시작일을 입력해주세요")
