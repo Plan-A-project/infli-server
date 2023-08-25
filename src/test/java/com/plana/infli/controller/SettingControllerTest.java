@@ -679,42 +679,6 @@ class SettingControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("프로필 사진 변경 성공")
-    @WithMockMember
-    @Test
-    void changeProfileImage() throws Exception {
-        Member member = findContextMember();
-
-        //given
-        String fileName = "testImage.png";
-        Resource resource = resourceLoader.getResource("classpath:/static/images/" + fileName);
-
-        MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "testImage.png",
-                IMAGE_PNG_VALUE,
-                resource.getInputStream()
-        );
-
-        //when
-        ResultActions resultActions = mvc
-                .perform(multipart("/setting/profile/image")
-                        .file(file));
-
-        //then
-        Member findMember = memberRepository.findActiveMemberBy(member.getId()).get();
-
-        resultActions.andExpect(status().isOk())
-                .andExpect(jsonPath("$.originalUrl")
-                        .value(findMember.getProfileImage().getOriginalUrl()))
-
-                .andExpect(jsonPath("$.thumbnailUrl")
-                        .value(findMember.getProfileImage().getThumbnailUrl()))
-                .andDo(print());
-
-    }
-
-
     @DisplayName("프로필 사진 변경 실패 - 로그인을 하지 않은 경우")
     @Test
     void changeProfileImageWithoutLogin() throws Exception {

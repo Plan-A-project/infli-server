@@ -1,5 +1,6 @@
 package com.plana.infli.annotation;
 
+import static com.plana.infli.domain.editor.MemberEditor.*;
 import static com.plana.infli.domain.embedded.member.BasicCredentials.*;
 import static com.plana.infli.domain.embedded.member.ProfileImage.*;
 import static com.plana.infli.domain.embedded.member.StudentCredentials.*;
@@ -9,6 +10,7 @@ import static com.plana.infli.domain.type.VerificationStatus.*;
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
+import com.plana.infli.domain.editor.MemberEditor;
 import com.plana.infli.domain.embedded.member.CompanyCredentials;
 import com.plana.infli.domain.embedded.member.LoginCredentials;
 import com.plana.infli.domain.embedded.member.StudentCredentials;
@@ -24,8 +26,10 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Transactional
 public class MockMemberFactory implements WithSecurityContextFactory<WithMockMember> {
 
     private final MemberRepository memberRepository;
@@ -59,8 +63,9 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
                 .studentCredentials(studentCredentials)
                 .build());
 
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        acceptPolicy(member);
 
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(
                 new UsernamePasswordAuthenticationToken(member.getLoginCredentials().getUsername(),
                         null, List.of(new SimpleGrantedAuthority(member.getRole().toString()))));
