@@ -248,11 +248,6 @@ public class CommentService {
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
     }
 
-    private Post findPostWithBoardAndMemberBy(Long postId) {
-        return postRepository.findActivePostWithBoardAndMemberBy(postId)
-                .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
-    }
-
     public MyCommentsResponse loadMyComments(int page, String email) {
 
         // 자신이 작성한 댓글 목록을 보고싶은 회원

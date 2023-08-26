@@ -1,4 +1,4 @@
-package com.plana.infli.mock;
+package com.plana.infli.service.mock;
 
 import static com.plana.infli.domain.embedded.member.BasicCredentials.ofDefaultWithNickname;
 import static com.plana.infli.domain.embedded.member.ProfileImage.ofDefaultProfileImage;

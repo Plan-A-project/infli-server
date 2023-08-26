@@ -1642,6 +1642,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
+    @Test
     void loadSinglePostWithoutLogin() throws Exception {
         //given
         University university = universityFactory.createUniversity("푸단대학교");

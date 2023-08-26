@@ -14,8 +14,6 @@ public class NotFoundException extends DefaultException {
 
     public static final String COMMENT_NOT_FOUND = "댓글이 존재하지 않거나 삭제되었습니다";
 
-	public static final String FILE_NOT_FOUND = "파일을 찾을수 없습니다";
-
 
 	public NotFoundException(String message) {
 		super(message);

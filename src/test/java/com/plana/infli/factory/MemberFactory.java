@@ -43,7 +43,7 @@ public class MemberFactory {
                 .university(university)
                 .role(role)
                 .verificationStatus(verificationStatus)
-                .loginCredentials(LoginCredentials.of(randomUUID().toString(),
+                .loginCredentials(LoginCredentials.of(randomUUID().toString().substring(0, 10),
                         encoder.encode("password")))
                 .profileImage(ofDefaultProfileImage())
                 .basicCredentials(ofDefaultWithNickname(nickname))
