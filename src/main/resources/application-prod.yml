@@ -4,6 +4,7 @@ server:
     session:
       cookie:
         same-site: "none"
+        secure: true
     encoding:
       charset: utf-8
       force: true
