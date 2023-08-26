@@ -84,7 +84,7 @@ public class MemberService {
 
         checkPasswordConfirmMatch(request.getPassword(), request.getPasswordConfirm());
         checkIsValidUsername(request.getUsername());
-        checkNicknameDuplicate(request.getNickname());
+        checkIsValidNickname(request.getNickname());
     }
 
     private void checkPasswordConfirmMatch(String password, String passwordConfirm) {
@@ -93,18 +93,19 @@ public class MemberService {
         }
     }
 
-    public void checkIsValidUsername(String username) {
+    public boolean checkIsValidUsername(String username) {
         if (username.matches(USERNAME_REGEX) == false) {
             throw new BadRequestException(INVALID_USERNAME);
         }
 
-
         if (memberRepository.existsByUsername(username)) {
             throw new ConflictException(DUPLICATED_USERNAME);
         }
+
+        return true;
     }
 
-    public void checkNicknameDuplicate(String nickname) {
+    public boolean checkIsValidNickname(String nickname) {
         if (nickname.matches(NICKNAME_REGEX) == false) {
             throw new BadRequestException(INVALID_NICKNAME);
         }
@@ -112,6 +113,8 @@ public class MemberService {
         if (memberRepository.existsByNickname(nickname)) {
             throw new ConflictException(DUPLICATED_NICKNAME);
         }
+
+        return true;
     }
 
     private University findUniversityBy(Long universityId) {

@@ -11,6 +11,8 @@ import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID
 import static com.plana.infli.infra.exception.custom.ConflictException.DUPLICATED_UNIVERSITY_EMAIL;
 import static com.plana.infli.infra.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
 import static java.time.LocalDateTime.*;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 import com.plana.infli.domain.EmailVerification;
 import com.plana.infli.domain.Member;
@@ -29,6 +31,7 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,7 +88,7 @@ public class MailService {
 
     @Transactional
     // TODO 탈퇴후 동일한 대학 이메일로 가입하려는 경우 고려해야함
-    //TODO 학생 회원만 업로그 가능한지 검증 필요
+    // TODO 학생 회원만 업로드 가능한지 검증 필요
     // TODO AOp 다시 확인 해야됨
     @Upload
     public void sendVerificationMail(SendVerificationMailServiceRequest request) {
@@ -121,10 +124,11 @@ public class MailService {
         Email from = new Email(MESSAGE_FROM);
         String subject = "인플리 학생 인증 메일입니다";
         Email to = new Email(emailVerification.getUniversityEmail());
-        Content content = new Content("text/plain", "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
-                "http://dukcode.iptime.org/verification/student/email/"
-                + emailVerification.getCode() +
-                "\n" + "30분안에 인증하셔야 합니다.");
+        Content content = new Content(TEXT_PLAIN_VALUE,
+                "안녕하세요. INFLI 입니다. 다음 링크를 클릭하시면 인증이 완료됩니다.\n" +
+                        "https://infli.co/verification/student/email/"
+                        + emailVerification.getCode() +
+                        "\n" + "30분안에 인증하셔야 합니다.");
 
         return new Mail(from, subject, to, content);
     }
