@@ -1,6 +1,9 @@
 server:
   port: 8080
   servlet:
+    session:
+      cookie:
+        same-site: "none"
     encoding:
       charset: utf-8
       force: true
