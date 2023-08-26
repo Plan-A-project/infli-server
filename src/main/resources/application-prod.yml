@@ -3,7 +3,8 @@ server:
   servlet:
     session:
       cookie:
-        same-site: "none"
+        same-site: none
+        secure: true
     encoding:
       charset: utf-8
       force: true
@@ -18,6 +19,7 @@ spring:
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
 
   jpa:
     open-in-view: false
