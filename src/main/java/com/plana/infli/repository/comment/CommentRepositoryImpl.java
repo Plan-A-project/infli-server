@@ -51,13 +51,11 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                         comment.createdAt, comment.content,
                         isMyComment(request.getMember()),
                         comment.commentLikes.size(),
-                        comment.id.in(
-                                myCommentLikesInThisPost(request.getPost(), request.getMember())),
+                        getPressedLikeOnThisComment(request),
                         comment.parentComment.isNull(), comment.status.isEdited,
                         comment.member.eq(request.getPost().getMember())))
                 .from(comment)
                 .innerJoin(comment.member, member)
-                .innerJoin(comment.post, post)
                 .where(comment.post.eq(request.getPost()))
                 .where(commentIsNotDeleted()
                         .or(commentIsDeletedButChildCommentExists()))
@@ -67,13 +65,38 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .fetch();
     }
 
+
+
+    private StringExpression nicknameEq() {
+        return new CaseBuilder()
+                .when(commentIsNotAnonymous()).then(comment.member.basicCredentials.nickname)
+                .otherwise(nullExpression());
+    }
+
+    private BooleanExpression commentIsNotAnonymous() {
+        return comment.post.board.boardType
+                .in(List.of(EMPLOYMENT, ACTIVITY, CLUB, CAMPUS_LIFE));
+    }
+
+    private StringExpression profileImageUrlEq() {
+        return new CaseBuilder()
+                .when(commentIsNotAnonymous())
+                .then(comment.member.profileImage.thumbnailUrl)
+                .otherwise(nullExpression());
+    }
+
     private  BooleanExpression isMyComment(Member findMember) {
         return comment.in(myComments(findMember));
     }
 
+
     private JPQLQuery<Comment> myComments(Member findMember) {
         return selectFrom(comment)
                 .where(comment.member.eq(findMember));
+    }
+
+    private BooleanExpression getPressedLikeOnThisComment(CommentQueryRequest request) {
+        return comment.id.in(myCommentLikesInThisPost(request.getPost(), request.getMember()));
     }
 
     private JPQLQuery<Long> myCommentLikesInThisPost(Post findPost, Member findMember) {
@@ -155,23 +178,9 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
 
-    private StringExpression profileImageUrlEq() {
-        return new CaseBuilder()
-                .when(commentIsNotAnonymous())
-                .then(comment.member.profileImage.thumbnailUrl)
-                .otherwise(nullExpression());
-    }
 
-    private BooleanExpression commentIsNotAnonymous() {
-        return comment.post.board.boardType
-                .in(List.of(EMPLOYMENT, ACTIVITY, CLUB, CAMPUS_LIFE));
-    }
 
-    private StringExpression nicknameEq() {
-        return new CaseBuilder()
-                .when(commentIsNotAnonymous()).then(comment.member.basicCredentials.nickname)
-                .otherwise(nullExpression());
-    }
+
 
     @Override
     public Long findActiveCommentsCountIn(Post findPost) {

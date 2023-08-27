@@ -115,7 +115,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .otherwise(nullExpression());
     }
 
-    private static BooleanExpression postIsNotAnonymous() {
+    private BooleanExpression postIsNotAnonymous() {
         return post.board.boardType.in(List.of(EMPLOYMENT, ACTIVITY, CLUB, CAMPUS_LIFE));
     }
 
