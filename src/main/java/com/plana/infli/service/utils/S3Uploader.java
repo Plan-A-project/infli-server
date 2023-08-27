@@ -4,6 +4,7 @@ import static com.amazonaws.services.s3.model.CannedAccessControlList.*;
 import static org.springframework.util.StringUtils.*;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import java.io.IOException;
 import java.util.UUID;
@@ -23,11 +24,9 @@ import java.io.FileOutputStream;
 @Service
 public class S3Uploader {
 
+    private static final String BUCKET = "inflibucket";
+
     private final AmazonS3 amazonS3;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
-
 
     public String uploadAsOriginalImage(MultipartFile multipartFile, String directoryPath) {
 
@@ -41,12 +40,12 @@ public class S3Uploader {
 
         file.delete();
 
-        return amazonS3.getUrl(bucket, fullPathName).toString();
+        return amazonS3.getUrl(BUCKET, fullPathName).toString();
     }
 
     private void uploadToS3(File file, String fullPathName) {
         amazonS3.putObject(
-                new PutObjectRequest(bucket, fullPathName, file).withCannedAcl(PublicRead));
+                new PutObjectRequest(BUCKET, fullPathName, file).withCannedAcl(PublicRead));
     }
 
     public String uploadAsThumbnailImage(MultipartFile multipartFile, String directoryPath) {
@@ -65,7 +64,7 @@ public class S3Uploader {
         originalFile.delete();
         thumbnailFile.delete();
 
-        return amazonS3.getUrl(bucket, fullPathName).toString();
+        return amazonS3.getUrl(BUCKET, fullPathName).toString();
     }
 
     @SneakyThrows(IOException.class)

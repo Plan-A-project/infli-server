@@ -1,8 +1,8 @@
 package com.plana.infli.infra.security.entrypoint;
 
 import static com.plana.infli.infra.exception.custom.AuthenticationFailedException.MESSAGE;
+import static jakarta.servlet.http.HttpServletResponse.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.hc.core5.http.HttpStatus.SC_UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import jakarta.servlet.http.HttpServletRequest;

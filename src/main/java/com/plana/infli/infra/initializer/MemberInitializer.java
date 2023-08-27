@@ -47,7 +47,7 @@ public class MemberInitializer implements CommandLineRunner {
     private University university;
 
     @Override
-    public void run(String... args)   {
+    public void run(String... args) {
 
         university = universityRepository.findByName("푸단대학교")
                 .orElseGet(() -> universityRepository.save(create("푸단대학교")));

@@ -31,3 +31,5 @@ spring:
 logging:
   level:
     sql: debug
+
+SENDGRID_API_KEY: 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
