@@ -5,11 +5,9 @@ import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.type.PostType.*;
 import static com.plana.infli.domain.QBoard.*;
 import static com.plana.infli.domain.QComment.*;
-import static com.plana.infli.domain.QCompany.*;
 import static com.plana.infli.domain.QMember.*;
 import static com.plana.infli.domain.QPost.*;
 import static com.plana.infli.domain.QPostLike.*;
-import static com.plana.infli.domain.type.Role.*;
 import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder.popular;
 import static com.querydsl.core.types.dsl.Expressions.*;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
@@ -21,9 +19,6 @@ import static java.util.stream.Collectors.groupingBy;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.QBoard;
-import com.plana.infli.domain.QUniversity;
-import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
@@ -42,19 +37,15 @@ import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.BooleanPath;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.DateTimeExpression;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -238,7 +229,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
-
     }
 
     @Override

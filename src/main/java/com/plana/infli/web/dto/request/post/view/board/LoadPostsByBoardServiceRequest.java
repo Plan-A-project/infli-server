@@ -10,7 +10,6 @@ import lombok.Getter;
 @Getter
 public class LoadPostsByBoardServiceRequest {
 
-    @Nullable
     private final String username;
 
     private final Long boardId;
@@ -24,7 +23,7 @@ public class LoadPostsByBoardServiceRequest {
     private final Integer size;
 
     @Builder
-    private LoadPostsByBoardServiceRequest(@Nullable String username, Long boardId,
+    private LoadPostsByBoardServiceRequest(String username, Long boardId,
             PostType type, Integer page, PostViewOrder order, Integer size) {
 
         this.username = username;

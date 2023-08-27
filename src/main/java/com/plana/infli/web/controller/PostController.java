@@ -105,9 +105,8 @@ public class PostController {
         return postService.loadMyPosts(username, page);
     }
 
-    @GetMapping("/boards/{boardId}")
+    @GetMapping("/boards/{boardId}/posts")
     @Operation(summary = "특정 게시판에 작성된 글 목록 조회")
-    @PermitAll
     public BoardPostsResponse loadsPostsByBoard(@AuthenticatedPrincipal String username,
             @PathVariable Long boardId, @Validated LoadPostsByBoardRequest request) {
         return postService.loadPostsByBoard(request.toServiceRequest(boardId, username));

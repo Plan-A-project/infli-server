@@ -73,10 +73,12 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator")
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+                                "/actuator")
                         .permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/signup/**").permitAll()
+                        .requestMatchers("/boards/{boardId}/posts").permitAll()
                         .requestMatchers("/member/email/auth/**").permitAll()
                         .requestMatchers("/member/student/auth/**").permitAll()
                         .requestMatchers("/member/company/auth/**").permitAll()

@@ -4,6 +4,7 @@ import static com.plana.infli.domain.Board.create;
 import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
 import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.type.Role.ADMIN;
+import static com.plana.infli.domain.type.Role.STUDENT;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Member;
@@ -53,6 +54,22 @@ public class DefaultInitializer implements CommandLineRunner {
         createBoardWithType(ANONYMOUS);
         createBoardWithType(CAMPUS_LIFE);
         createAdminMember();
+        createAnonymousUser();
+    }
+
+    private void createAnonymousUser() {
+        if (memberRepository.existsByUsername("anonymousUser") == false) {
+            memberRepository.save(Member.builder()
+                    .university(university)
+                    .role(STUDENT)
+                    .verificationStatus(SUCCESS)
+                    .loginCredentials(of("anonymousUser", encoder.encode("password1234!")))
+                    .profileImage(ProfileImage.ofDefaultProfileImage())
+                    .basicCredentials(BasicCredentials.ofDefaultWithNickname("익명사용자"))
+                    .companyCredentials(null)
+                    .companyCredentials(null)
+                    .build());
+        }
     }
 
     private void createBoardWithType(BoardType boardType) {
@@ -62,7 +79,8 @@ public class DefaultInitializer implements CommandLineRunner {
     }
 
     private void createAdminMember() {
-        if (memberRepository.count() == 0) {
+        if (memberRepository.adminMemberExists() == false) {
+
             memberRepository.save(Member.builder()
                     .university(university)
                     .role(ADMIN)

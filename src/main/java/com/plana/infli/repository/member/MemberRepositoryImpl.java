@@ -50,6 +50,16 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     }
 
     @Override
+    public boolean adminMemberExists() {
+        Integer fetchOne = jpaQueryFactory.selectOne()
+                .from(member)
+                .where(member.role.eq(ADMIN))
+                .fetchFirst();
+
+        return fetchOne != null;
+    }
+
+    @Override
     public Optional<Member> findActiveMemberBy(String username) {
         return ofNullable(jpaQueryFactory.selectFrom(member)
                 .where(member.loginCredentials.username.eq(username))
