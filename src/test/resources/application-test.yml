@@ -32,4 +32,4 @@ logging:
   level:
     sql: debug
 
-SENDGRID_API_KEY: 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
+SENDGRID_API_KEY: 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
