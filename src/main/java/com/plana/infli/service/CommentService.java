@@ -229,7 +229,7 @@ public class CommentService {
         }
     }
 
-    public PostCommentsResponse loadCommentsInPost(String username, Long postId, int page) {
+    public PostCommentsResponse loadCommentsInPost(String username, Long postId, Integer page) {
 
         Member member = findMemberBy(username);
 

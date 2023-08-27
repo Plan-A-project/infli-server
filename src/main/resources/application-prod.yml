@@ -9,6 +9,7 @@ server:
       charset: utf-8
       force: true
 
+
 spring:
   config:
     activate:
@@ -20,6 +21,10 @@ spring:
     password: ${DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
 
   jpa:
     open-in-view: false
