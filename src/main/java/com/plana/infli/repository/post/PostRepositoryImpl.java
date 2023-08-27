@@ -214,24 +214,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return posts;
     }
 
-    @Override
-    public Optional<Post> findActivePostWithOptimisticLock(Long postId) {
-        return Optional.ofNullable(jpaQueryFactory.selectFrom(post)
-                .where(post.id.eq(postId))
-                .where(postIsActive())
-                .setLockMode(OPTIMISTIC)
-                .fetchOne());
-    }
-
-    @Override
-    public Optional<Post> findActivePostWithBoardAndMemberBy(Long id) {
-        return ofNullable(jpaQueryFactory.selectFrom(post)
-                .where(postIsActiveAndIdEqual(id))
-                .innerJoin(post.board, board).fetchJoin()
-                .innerJoin(post.member, member).fetchJoin()
-                .fetchOne());
-    }
-
     private List<Long> findPostIdsByBoard(PostQueryRequest request) {
         return jpaQueryFactory.select(post.id)
                 .from(post)
@@ -258,6 +240,28 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .fetch();
 
     }
+
+    @Override
+    public Optional<Post> findActivePostWithOptimisticLock(Long postId) {
+        return Optional.ofNullable(jpaQueryFactory.selectFrom(post)
+                .where(post.id.eq(postId))
+                .where(postIsActive())
+                .setLockMode(OPTIMISTIC)
+                .fetchOne());
+    }
+
+    @Override
+    public Optional<Post> findActivePostWithBoardAndMemberBy(Long id) {
+        return ofNullable(jpaQueryFactory.selectFrom(post)
+                .where(postIsActiveAndIdEqual(id))
+                .innerJoin(post.board, board).fetchJoin()
+                .innerJoin(post.member, member).fetchJoin()
+                .fetchOne());
+    }
+
+
+
+
 
     private Expression<String> getMemberRole(Board board) {
         return board.getBoardType().equals(ANONYMOUS) ? nullExpression()
