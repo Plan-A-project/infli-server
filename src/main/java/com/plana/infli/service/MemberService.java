@@ -199,8 +199,7 @@ public class MemberService {
         }
     }
 
-    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(
-            String username, int page) {
+    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(String username) {
 
         Member admin = findWithUniversityBy(username);
 
@@ -209,9 +208,9 @@ public class MemberService {
         }
 
         List<StudentVerificationImage> verificationImages = memberRepository.loadStudentVerificationImages(
-                admin.getUniversity(), page);
+                admin.getUniversity());
 
-        return LoadStudentVerificationsResponse.of(20, page, verificationImages);
+        return LoadStudentVerificationsResponse.of(verificationImages);
     }
 
     private Member findWithUniversityBy(String username) {
@@ -248,8 +247,7 @@ public class MemberService {
         }
     }
 
-    public LoadCompanyVerificationsResponse loadCompanyVerificationRequestImages(String username,
-            int page) {
+    public LoadCompanyVerificationsResponse loadCompanyVerificationRequestImages(String username) {
 
         Member admin = findWithUniversityBy(username);
 
@@ -258,9 +256,9 @@ public class MemberService {
         }
 
         List<CompanyVerificationImage> verificationImages = memberRepository.loadCompanyVerificationImages(
-                admin.getUniversity(), page);
+                admin.getUniversity());
 
-        return LoadCompanyVerificationsResponse.of(20, page, verificationImages);
+        return LoadCompanyVerificationsResponse.of(verificationImages);
     }
 
     public boolean checkMemberAcceptedPolicy(String username) {
