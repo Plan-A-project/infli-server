@@ -111,11 +111,10 @@ public class PostController {
         return postService.loadPostsByBoard(request.toServiceRequest(boardId, username));
     }
 
-    @GetMapping("/posts/search")
+    @GetMapping("/search")
     @Operation(summary = "글 키워드로 검색")
     public SearchedPostsResponse searchPostsByKeyword(
-            @AuthenticatedPrincipal String username,
-            @Validated SearchPostsByKeywordRequest request) {
+            @AuthenticatedPrincipal String username, @Validated SearchPostsByKeywordRequest request) {
 
         return postService.searchPostsByKeyword(request.toServiceRequest(username));
     }
