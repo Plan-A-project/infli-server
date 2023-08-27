@@ -23,6 +23,7 @@ public class MyPostsResponse extends DefaultPostsResponse {
         return MyPostsResponse.builder()
                 .sizeRequest(request.getSize())
                 .currentPage(request.getPage())
+                .actualSize(posts.size())
                 .posts(posts)
                 .build();
     }

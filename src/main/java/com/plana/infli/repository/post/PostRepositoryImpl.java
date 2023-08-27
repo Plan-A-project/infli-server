@@ -164,7 +164,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         setCommentCount(ids, posts);
 
-        return null;
+        return posts;
     }
 
     private List<Long> findMyPostIds(PostQueryRequest request) {
@@ -176,6 +176,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .limit(request.getSize())
                 .fetch();
     }
+
+    private BooleanExpression postIsActiveAndWriterEqual(Member findMember) {
+        return postIsActive().and(postWriterEqual(findMember));
+    }
+
 
     private List<MyPost> findMyPosts(List<Long> ids, Member findMember) {
 
@@ -275,9 +280,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
 
-    private BooleanExpression postIsActiveAndWriterEqual(Member findMember) {
-        return postIsActive().and(postWriterEqual(findMember));
-    }
 
 
 
