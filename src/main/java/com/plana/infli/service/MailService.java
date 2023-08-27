@@ -95,7 +95,7 @@ public class MailService {
 
         Member member = findMemberBy(request.getUsername());
 
-        validateSendMailRequest(request.getUniversityEmail(), member);
+//        validateSendMailRequest(request.getUniversityEmail(), member);
 
         EmailVerification emailVerification = request.toEntity(member, now());
 
