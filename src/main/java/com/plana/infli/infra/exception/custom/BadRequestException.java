@@ -14,7 +14,7 @@ public class BadRequestException extends DefaultException{
 
     public static final String PASSWORD_NOT_MATCH = "비밀번호가 일치하지 않습니다.";
 
-    public static final String IMAGE_NOT_PROVIDED = "업로드할 사진이 선택되지 않았습니다 ";
+    public static final String IMAGE_NOT_PROVIDED = "업로드할 사진이 선택되지 않았습니다";
 
     public static final String BOARD_TYPE_IS_NOT_RECRUITMENT = "채용글을 작성할수 있는 게시판이 아닙니다";
 

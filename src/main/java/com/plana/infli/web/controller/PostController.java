@@ -17,6 +17,7 @@ import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.security.PermitAll;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,7 +57,7 @@ public class PostController {
     @PostMapping("/posts/{postId}/images")
     @Operation(summary = "특정 글에 사진 업로드")
     public PostImageUploadResponse uploadPostImages(@AuthenticatedPrincipal String username,
-            @PathVariable Long postId, @RequestParam List<MultipartFile> multipartFiles) {
+            @PathVariable Long postId, List<MultipartFile> multipartFiles) {
 
         return postService.uploadPostImages(postId, multipartFiles, username);
     }
@@ -106,6 +107,7 @@ public class PostController {
 
     @GetMapping("/boards/{boardId}")
     @Operation(summary = "특정 게시판에 작성된 글 목록 조회")
+    @PermitAll
     public BoardPostsResponse loadsPostsByBoard(@AuthenticatedPrincipal String username,
             @PathVariable Long boardId, @Validated LoadPostsByBoardRequest request) {
         return postService.loadPostsByBoard(request.toServiceRequest(boardId, username));

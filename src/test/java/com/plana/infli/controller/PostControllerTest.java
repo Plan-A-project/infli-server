@@ -839,7 +839,7 @@ public class PostControllerTest {
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("멀티 파트 요청에서 파일이 누락되었습니다"))
+                .andExpect(jsonPath("$.message").value("업로드할 사진이 선택되지 않았습니다"))
                 .andDo(print());
     }
 
@@ -863,7 +863,7 @@ public class PostControllerTest {
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("멀티 파트 요청에서 파일이 누락되었습니다"))
+                .andExpect(jsonPath("$.message").value("업로드할 사진이 선택되지 않았습니다"))
                 .andDo(print());
     }
 

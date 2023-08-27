@@ -50,6 +50,7 @@ import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
+import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -225,12 +226,12 @@ public class PostService {
     //TODO
     private  void validateImages(List<MultipartFile> files) {
 
-        if (files.size() > 11) {
-            throw new BadRequestException(MAX_IMAGES_EXCEEDED);
+        if (files == null || files.isEmpty()) {
+            throw new BadRequestException(IMAGE_NOT_PROVIDED);
         }
 
-        if (files.isEmpty()) {
-            throw new BadRequestException(IMAGE_NOT_PROVIDED);
+        if (files.size() > 11) {
+            throw new BadRequestException(MAX_IMAGES_EXCEEDED);
         }
 
         files.forEach(file -> {
@@ -377,11 +378,13 @@ public class PostService {
 
     public BoardPostsResponse loadPostsByBoard(LoadPostsByBoardServiceRequest request) {
 
-        Member member = findMemberBy(request.getUsername());
+        @Nullable Member member = findOrDefaultNull(request.getUsername());
 
         Board board = findBoardBy(request.getBoardId());
 
-        checkIfInSameUniversity(member, board);
+        if (member != null) {
+            checkIfInSameUniversity(member, board);
+        }
 
         validateTypes(request.getType(), board.getBoardType());
 
@@ -390,6 +393,11 @@ public class PostService {
         List<BoardPost> posts = postRepository.loadPostsByBoard(queryRequest);
 
         return BoardPostsResponse.of(posts, queryRequest);
+    }
+
+    private Member findOrDefaultNull(String username) {
+        return username != null ? memberRepository.findActiveMemberBy(username)
+                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND)) : null;
     }
 
     private void validateTypes(PostType postType, BoardType boardType) {

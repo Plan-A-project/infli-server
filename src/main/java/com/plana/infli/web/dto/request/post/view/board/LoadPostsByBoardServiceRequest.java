@@ -3,12 +3,14 @@ package com.plana.infli.web.dto.request.post.view.board;
 
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
+import jakarta.annotation.Nullable;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class LoadPostsByBoardServiceRequest {
 
+    @Nullable
     private final String username;
 
     private final Long boardId;
@@ -22,7 +24,7 @@ public class LoadPostsByBoardServiceRequest {
     private final Integer size;
 
     @Builder
-    private LoadPostsByBoardServiceRequest(String username, Long boardId,
+    private LoadPostsByBoardServiceRequest(@Nullable String username, Long boardId,
             PostType type, Integer page, PostViewOrder order, Integer size) {
 
         this.username = username;
