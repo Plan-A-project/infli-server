@@ -1,5 +1,6 @@
 package com.plana.infli.repository.post;
 
+import static com.plana.infli.domain.QUniversity.*;
 import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.type.PostType.*;
 import static com.plana.infli.domain.QBoard.*;
@@ -20,6 +21,8 @@ import static java.util.stream.Collectors.groupingBy;
 
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.QBoard;
+import com.plana.infli.domain.QUniversity;
 import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
@@ -36,10 +39,13 @@ import com.plana.infli.web.dto.response.post.search.QSearchedPost;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import com.plana.infli.web.dto.response.post.single.QSinglePostResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.BooleanPath;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.DateTimeExpression;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -48,6 +54,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -298,20 +305,22 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(post.board.university.eq(request.getMember().getUniversity()))
                 .where(contentOrTitleEq(request.getKeyword()))
                 .where(postIsActive())
+                .innerJoin(post.board, board)
+                .innerJoin(post.board.university, university)
                 .orderBy(post.id.desc())
                 .offset(request.getOffset())
                 .limit(request.getSize())
                 .fetch();
     }
 
-    private BooleanExpression contentOrTitleEq(String keyword) {
+    private BooleanBuilder contentOrTitleEq(String keyword) {
         String[] keyWords = keyword.trim().split("\\s+");
 
-        return Arrays.stream(keyWords)
-                .map(word -> post.title.containsIgnoreCase(word)
-                        .or(post.content.containsIgnoreCase(word)))
-                .reduce(BooleanExpression::and)
-                .orElse(null);
+        BooleanBuilder keywordConditions = new BooleanBuilder();
+        for (String word : keyWords) {
+            keywordConditions.or(post.title.contains(word).or(post.content.contains(word)));
+        }
+        return keywordConditions;
     }
 
 
