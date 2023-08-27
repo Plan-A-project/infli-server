@@ -1,5 +1,6 @@
 package com.plana.infli.infra.security.provider;
 
+import com.plana.infli.domain.Member;
 import com.plana.infli.infra.security.service.CustomUser;
 import com.plana.infli.infra.security.service.CustomUserDetailService;
 import com.plana.infli.infra.security.token.CustomAuthenticationToken;
@@ -29,9 +30,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         CustomUser customUser = (CustomUser) userDetailService.loadUserByUsername(username);
 
         if (encoder.matches(password, customUser.getPassword())) {
-            return new CustomAuthenticationToken(customUser, null, customUser.getAuthorities());
+            return new CustomAuthenticationToken(
+                    customUser, null, customUser.getAuthorities());
         }
-
         throw new BadCredentialsException("아이디 또는 비밀번호를 잘못 입력했습니다.");
     }
 
