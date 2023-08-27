@@ -378,13 +378,11 @@ public class PostService {
 
     public BoardPostsResponse loadPostsByBoard(LoadPostsByBoardServiceRequest request) {
 
-        @Nullable Member member = findOrDefaultNull(request.getUsername());
-
         Board board = findBoardBy(request.getBoardId());
 
-        if (member != null) {
-            checkIfInSameUniversity(member, board);
-        }
+        Member member = findMemberBy(request.getUsername());
+
+        checkIfInSameUniversity(member, board);
 
         validateTypes(request.getType(), board.getBoardType());
 
@@ -393,11 +391,6 @@ public class PostService {
         List<BoardPost> posts = postRepository.loadPostsByBoard(queryRequest);
 
         return BoardPostsResponse.of(posts, queryRequest);
-    }
-
-    private Member findOrDefaultNull(String username) {
-        return username != null ? memberRepository.findActiveMemberBy(username)
-                .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND)) : null;
     }
 
     private void validateTypes(PostType postType, BoardType boardType) {

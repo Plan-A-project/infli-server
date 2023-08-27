@@ -13,6 +13,8 @@ public interface MemberRepositoryCustom {
 
     boolean existsByUsername(String username);
 
+    boolean adminMemberExists();
+
     Optional<Member> findActiveMemberBy(String username);
 
     boolean existsByNickname(String nickname);
