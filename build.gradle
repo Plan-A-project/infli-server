@@ -36,13 +36,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-//    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-config', version: '4.0.3'
     testImplementation 'org.projectlombok:lombok:1.18.26'
     testAnnotationProcessor "org.projectlombok:lombok:1.18.26"
+    implementation 'com.mysql:mysql-connector-j:8.0.33'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
