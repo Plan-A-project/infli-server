@@ -77,7 +77,6 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/login").permitAll()
                         .requestMatchers("/signup/**").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/member/email/auth/**").permitAll()
                         .requestMatchers("/member/student/auth/**").permitAll()
                         .requestMatchers("/member/company/auth/**").permitAll()

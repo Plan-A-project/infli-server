@@ -86,8 +86,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     }
 
     @Override
-    public List<StudentVerificationImage> loadStudentVerificationImages(University university,
-            int page) {
+    public List<StudentVerificationImage> loadStudentVerificationImages(University university) {
 
         return jpaQueryFactory
                 .select(new QStudentVerificationImage(member.id,
@@ -99,14 +98,11 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .where(member.basicCredentials.isDeleted.isFalse())
                 .where(member.role.eq(STUDENT))
                 .where(member.verificationStatus.eq(PENDING))
-                .offset((page - 1) * 20L)
-                .limit(20)
                 .fetch();
     }
 
     @Override
-    public List<CompanyVerificationImage> loadCompanyVerificationImages(University university,
-            int page) {
+    public List<CompanyVerificationImage> loadCompanyVerificationImages(University university) {
 
         return jpaQueryFactory
                 .select(new QCompanyVerificationImage(member.id,member.companyCredentials.companyCertificateUrl, member.companyCredentials.company.name,
@@ -116,8 +112,6 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .where(member.basicCredentials.isDeleted.isFalse())
                 .where(member.role.eq(COMPANY))
                 .where(member.verificationStatus.eq(PENDING))
-                .offset((page - 1) * 20L)
-                .limit(20)
                 .fetch();
     }
 

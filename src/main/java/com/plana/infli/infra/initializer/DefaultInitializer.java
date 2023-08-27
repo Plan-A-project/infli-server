@@ -8,12 +8,9 @@ import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.BasicCredentials;
-import com.plana.infli.domain.embedded.member.LoginCredentials;
 import com.plana.infli.domain.embedded.member.ProfileImage;
 import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.type.Role;
-import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.repository.board.BoardRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;

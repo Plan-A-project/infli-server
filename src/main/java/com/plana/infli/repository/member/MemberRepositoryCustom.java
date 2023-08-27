@@ -21,9 +21,9 @@ public interface MemberRepositoryCustom {
 
     Optional<Member> findActiveMemberWithUniversityBy(Long memberId);
 
-    List<StudentVerificationImage> loadStudentVerificationImages(University university, int page);
+    List<StudentVerificationImage> loadStudentVerificationImages(University university);
 
-    List<CompanyVerificationImage> loadCompanyVerificationImages(University university, int page);
+    List<CompanyVerificationImage> loadCompanyVerificationImages(University university);
 
     Optional<Member> findActiveMemberBy(Long memberId);
 
