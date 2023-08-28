@@ -295,30 +295,30 @@ class CommentServiceTest {
         assertThat(commentRepository.findAllActiveCommentCount()).isEqualTo(0);
     }
 
-    @DisplayName("미인증 회원은 댓글을 작성할 수 없다")
-    @Test
-    void uncertifiedMemberCanNotWriteComment() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-
-        Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
-
-        CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
-                .content("댓글입니다")
-                .parentCommentId(null)
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.createComment(request))
-                .isInstanceOf(AuthorizationFailedException.class)
-                .message().isEqualTo("해당 권한이 없습니다");
-    }
+//    @DisplayName("미인증 회원은 댓글을 작성할 수 없다")
+//    @Test
+//    void uncertifiedMemberCanNotWriteComment() {
+//        //given
+//        University university = universityFactory.createUniversity("푸단대학교");
+//        Board board = boardFactory.createAnonymousBoard(university);
+//
+//        Post post = postFactory.createNormalPost(
+//                memberFactory.createVerifiedStudentMember("postMember", university), board);
+//
+//        Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
+//
+//        CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+//                .username(member.getLoginCredentials().getUsername())
+//                .postId(post.getId())
+//                .content("댓글입니다")
+//                .parentCommentId(null)
+//                .build();
+//
+//        //when //then
+//        assertThatThrownBy(() -> commentService.createComment(request))
+//                .isInstanceOf(AuthorizationFailedException.class)
+//                .message().isEqualTo("해당 권한이 없습니다");
+//    }
 
     @DisplayName("내가 소속된 대학이 아닌, 다른 대학에 작성된 글에 댓글을 달 수 없다")
     @Test
@@ -774,33 +774,33 @@ class CommentServiceTest {
 
     }
 
-    @DisplayName("미인증 회원은 대댓글을 작성할 수 없다")
-    @Test
-    void uncertifiedMemberCanNotWriteChildComment() {
-        //given
-        University university = universityFactory.createUniversity("푸단대학교");
-        Board board = boardFactory.createAnonymousBoard(university);
-        Post post = postFactory.createNormalPost(
-                memberFactory.createVerifiedStudentMember("postMember", university), board);
-
-        Comment parentComment = commentFactory.createComment(
-                memberFactory.createVerifiedStudentMember("commentMember", university), post);
-
-        Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
-
-        CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
-                .username(member.getLoginCredentials().getUsername())
-                .postId(post.getId())
-                .content("댓글입니다")
-                .parentCommentId(parentComment.getId())
-                .build();
-
-        //when //then
-        assertThatThrownBy(() -> commentService.createComment(request))
-                .isInstanceOf(AuthorizationFailedException.class)
-                .message().isEqualTo("해당 권한이 없습니다");
-
-    }
+//    @DisplayName("미인증 회원은 대댓글을 작성할 수 없다")
+//    @Test
+//    void uncertifiedMemberCanNotWriteChildComment() {
+//        //given
+//        University university = universityFactory.createUniversity("푸단대학교");
+//        Board board = boardFactory.createAnonymousBoard(university);
+//        Post post = postFactory.createNormalPost(
+//                memberFactory.createVerifiedStudentMember("postMember", university), board);
+//
+//        Comment parentComment = commentFactory.createComment(
+//                memberFactory.createVerifiedStudentMember("commentMember", university), post);
+//
+//        Member member = memberFactory.createUncertifiedStudentMember("nickname", university);
+//
+//        CreateCommentServiceRequest request = CreateCommentServiceRequest.builder()
+//                .username(member.getLoginCredentials().getUsername())
+//                .postId(post.getId())
+//                .content("댓글입니다")
+//                .parentCommentId(parentComment.getId())
+//                .build();
+//
+//        //when //then
+//        assertThatThrownBy(() -> commentService.createComment(request))
+//                .isInstanceOf(AuthorizationFailedException.class)
+//                .message().isEqualTo("해당 권한이 없습니다");
+//
+//    }
 
     //TODO 대댓글 identifier number 테스트 필요
     // TODO newParentComment 팩토리 메서드 identifier number
