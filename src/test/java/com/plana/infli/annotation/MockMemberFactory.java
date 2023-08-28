@@ -63,7 +63,9 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
                 .studentCredentials(studentCredentials)
                 .build());
 
-        acceptPolicy(member);
+        if (withMockMember.policyAccepted()) {
+            acceptPolicy(member);
+        }
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(

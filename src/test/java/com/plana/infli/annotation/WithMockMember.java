@@ -20,6 +20,8 @@ public @interface WithMockMember {
 
     Role role() default STUDENT;
 
+    boolean policyAccepted() default true;
+
     @AliasFor(annotation = WithSecurityContext.class)
     TestExecutionEvent setupBefore() default TEST_EXECUTION;
 }
