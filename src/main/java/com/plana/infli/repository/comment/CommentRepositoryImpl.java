@@ -1,12 +1,11 @@
 package com.plana.infli.repository.comment;
 
-import static com.plana.infli.domain.Board.*;
 import static com.plana.infli.domain.QComment.comment;
 import static com.plana.infli.domain.QCommentLike.*;
 import static com.plana.infli.domain.QMember.member;
 import static com.plana.infli.domain.QPost.post;
 import static com.plana.infli.domain.type.BoardType.*;
-import static com.querydsl.core.types.dsl.Expressions.*;
+import static com.querydsl.core.types.dsl.Expressions.asBoolean;
 import static com.querydsl.core.types.dsl.Expressions.booleanPath;
 import static com.querydsl.core.types.dsl.Expressions.nullExpression;
 import static com.querydsl.jpa.JPAExpressions.*;
@@ -22,17 +21,14 @@ import com.plana.infli.web.dto.response.comment.view.mycomment.MyComment;
 import com.plana.infli.web.dto.response.comment.view.mycomment.QMyComment;
 import com.plana.infli.web.dto.response.comment.view.post.PostComment;
 import com.plana.infli.web.dto.response.comment.view.post.QPostComment;
-import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.SimpleExpression;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 
 @RequiredArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositoryCustom {
@@ -47,15 +43,19 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .select(new QPostComment(comment.id,
                         nicknameEq(),
                         profileImageUrlEq(),
-                        comment.status.isDeleted, comment.identifierNumber,
-                        comment.createdAt, comment.content,
+                        comment.status.isDeleted,
+                        comment.identifierNumber,
+                        comment.createdAt,
+                        comment.content,
                         isMyComment(request.getMember()),
                         comment.commentLikes.size(),
                         getPressedLikeOnThisComment(request),
-                        comment.parentComment.isNull(), comment.status.isEdited,
-                        comment.member.eq(request.getPost().getMember())))
+                        comment.parentComment.isNull(),
+                        comment.status.isEdited,
+                        isMyComment(request.getPost().getMember()))
+                )
                 .from(comment)
-                .innerJoin(comment.member, member)
+                .leftJoin(comment.member, member)
                 .where(comment.post.eq(request.getPost()))
                 .where(commentIsNotDeleted()
                         .or(commentIsDeletedButChildCommentExists()))
@@ -64,7 +64,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .limit(request.getSize())
                 .fetch();
     }
-
 
 
     private StringExpression nicknameEq() {
@@ -96,11 +95,11 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     private BooleanExpression getPressedLikeOnThisComment(CommentQueryRequest request) {
-        return comment.id.in(myCommentLikesInThisPost(request.getPost(), request.getMember()));
+        return comment.in(myLikedCommentsInThisPost(request.getPost(), request.getMember()));
     }
 
-    private JPQLQuery<Long> myCommentLikesInThisPost(Post findPost, Member findMember) {
-        return select(commentLike.comment.id)
+    private JPQLQuery<Comment> myLikedCommentsInThisPost(Post findPost, Member findMember) {
+        return select(commentLike.comment)
                 .from(commentLike)
                 .where(commentLike.member.eq(findMember))
                 .where(commentLike.comment.post.eq(findPost));
@@ -176,9 +175,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                 .innerJoin(comment.member, member).fetchJoin()
                 .fetchOne());
     }
-
-
-
 
 
 
