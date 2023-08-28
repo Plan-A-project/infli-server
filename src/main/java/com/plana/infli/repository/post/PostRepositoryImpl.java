@@ -336,7 +336,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return jpaQueryFactory
                 .select(new QSearchedPost(
                         post.id, post.title, post.likes.size(), pressedLikeOnThisPost(member),
-                        post.viewCount, post.createdAt, post.thumbnailUrl, post.content))
+                        post.viewCount, post.createdAt, post.thumbnailUrl, post.content,
+                        post.board.boardName, post.board.id))
                 .from(post)
                 .where(post.id.in(ids))
                 .orderBy(post.id.desc())
