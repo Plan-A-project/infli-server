@@ -116,7 +116,6 @@ public class PostInitializer implements CommandLineRunner {
                     .member(member)
                     .recruitment(createRecruitment(board, postType))
                     .build());
-
         });
     }
 
