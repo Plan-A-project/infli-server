@@ -83,7 +83,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     @Override
     public SinglePostResponse loadSinglePostResponse(PostQueryRequest request) {
-        return jpaQueryFactory.select(
+        SinglePostResponse response = jpaQueryFactory.select(
                         new QSinglePostResponse(
                                 post.board.boardName, post.board.id,
                                 post.postType.stringValue(), writerEq(),
@@ -97,6 +97,18 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .where(post.eq(request.getPost()))
                 .innerJoin(post.member, member)
                 .fetchOne();
+
+        response.loadCommentCount(findCommentCount(request.getPost()));
+        return response;
+    }
+
+    private int findCommentCount(Post post) {
+        Long commentCount = jpaQueryFactory.select(comment.count())
+                .from(comment)
+                .where(comment.status.isDeleted.isFalse())
+                .where(comment.post.eq(post))
+                .fetchOne();
+        return commentCount != null ? commentCount.intValue() : 0;
     }
 
     private BooleanExpression isMyPost(Member member) {

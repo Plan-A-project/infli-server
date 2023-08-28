@@ -21,8 +21,9 @@ public class SearchedPostsResponse {
     private final int currentPage;
 
     @Builder
-    private SearchedPostsResponse(int sizeRequest, int actualSize, int currentPage,
-            List<SearchedPost> posts) {
+    private SearchedPostsResponse(int sizeRequest, int actualSize,
+            int currentPage, List<SearchedPost> posts) {
+
         this.sizeRequest = sizeRequest;
         this.actualSize = actualSize;
         this.currentPage = currentPage;
