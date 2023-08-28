@@ -9,8 +9,14 @@ import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID
 import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID_STUDENT_VERIFICATION_REQUEST;
 import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID_UNIVERSITY_EMAIL;
 import static com.plana.infli.infra.exception.custom.ConflictException.DUPLICATED_UNIVERSITY_EMAIL;
+import static com.plana.infli.infra.exception.custom.InternalServerErrorException.EMAIL_SEND_FAILED;
 import static com.plana.infli.infra.exception.custom.NotFoundException.MEMBER_NOT_FOUND;
+import static com.sendgrid.Method.*;
+import static jakarta.servlet.http.HttpServletResponse.SC_ACCEPTED;
+import static jakarta.servlet.http.HttpServletResponse.SC_OK;
+import static java.lang.String.*;
 import static java.time.LocalDateTime.*;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.TEXT_PLAIN;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
@@ -18,6 +24,7 @@ import com.plana.infli.domain.EmailVerification;
 import com.plana.infli.domain.Member;
 import com.plana.infli.infra.exception.custom.BadRequestException;
 import com.plana.infli.infra.exception.custom.ConflictException;
+import com.plana.infli.infra.exception.custom.InternalServerErrorException;
 import com.plana.infli.infra.exception.custom.NotFoundException;
 import com.plana.infli.repository.emailVerification.EmailVerificationRepository;
 import com.plana.infli.repository.member.MemberRepository;
@@ -25,30 +32,36 @@ import com.plana.infli.service.aop.upload.Upload;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailServiceRequest;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
+import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
+@Slf4j
 public class MailService {
-
-    @Value("${SENDGRID_API_KEY}")
-    private String SENDGRID_API_KEY;
 
     private final MemberRepository memberRepository;
 
     private final EmailVerificationRepository emailVerificationRepository;
+
+    private final SendGrid sendGrid;
 
     private static final String MESSAGE_FROM = "no-reply@infli.co";
 
@@ -111,13 +124,18 @@ public class MailService {
 
     @SneakyThrows({IOException.class})
     private void sendMail(Mail mail) {
-
-        SendGrid sg = new SendGrid(SENDGRID_API_KEY);
         Request sendRequest = new Request();
-        sendRequest.setMethod(Method.POST);
+        sendRequest.setMethod(POST);
         sendRequest.setEndpoint("mail/send");
         sendRequest.setBody(mail.build());
-        sg.api(sendRequest);
+        Response response = sendGrid.api(sendRequest);
+        checkSendStatus(response);
+    }
+
+    private void checkSendStatus(Response response) {
+        if (response.getStatusCode() != SC_ACCEPTED) {
+            throw new InternalServerErrorException(EMAIL_SEND_FAILED);
+        }
     }
 
     private Mail generateMail(EmailVerification emailVerification) {

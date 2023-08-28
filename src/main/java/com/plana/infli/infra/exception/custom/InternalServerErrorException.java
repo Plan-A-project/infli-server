@@ -7,6 +7,7 @@ public class InternalServerErrorException extends DefaultException{
 
     public static final String POST_VIEW_FAILED = "글 조회에 실패했습니다";
 
+    public static final String EMAIL_SEND_FAILED = "이메일 전송에 실패했습니다";
 
 
     public InternalServerErrorException(String message, Throwable cause) {
