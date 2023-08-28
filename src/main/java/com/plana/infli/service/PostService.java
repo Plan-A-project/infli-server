@@ -80,6 +80,7 @@ public class PostService {
 
 
     @Transactional
+    //TODO 이메일 인증 받은 사람만 글 작성 가능하도록  추후 변경 필요
     public Long createNormalPost(CreateNormalPostServiceRequest request) {
 
         Member member = findMemberWithUniversityBy(request.getUsername());

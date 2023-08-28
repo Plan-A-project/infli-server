@@ -57,13 +57,14 @@ public class CommentService {
 
     @Transactional
     @Retry
+    //TODO 이메일 인증 받은 회원만 댓글 작성 가능하도록 변경 필요
     public CreateCommentResponse createComment(CreateCommentServiceRequest request) {
 
         validateContentLength(request.getContent());
 
         Member member = findMemberBy(request.getUsername());
 
-        checkWritePermission(member);
+//        checkWritePermission(member);
 
         Post post = findPostWithLockBy(request.getPostId());
 
@@ -75,8 +76,8 @@ public class CommentService {
 
         int identifierNumber = generateIdentifierNumber(post, member);
 
-        Comment comment = create(post, request.getContent(), member, parentComment,
-                identifierNumber);
+        Comment comment = create(post, request.getContent(),
+                member, parentComment, identifierNumber);
 
         return CreateCommentResponse.of(commentRepository.save(comment));
     }

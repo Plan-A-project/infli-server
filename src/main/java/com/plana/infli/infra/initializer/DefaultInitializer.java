@@ -5,11 +5,13 @@ import static com.plana.infli.domain.embedded.member.LoginCredentials.*;
 import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.type.Role.ADMIN;
 import static com.plana.infli.domain.type.Role.STUDENT;
+import static com.plana.infli.domain.type.Role.STUDENT_COUNCIL;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.embedded.member.BasicCredentials;
 import com.plana.infli.domain.embedded.member.ProfileImage;
+import com.plana.infli.domain.embedded.member.StudentCredentials;
 import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.University;
 import com.plana.infli.repository.board.BoardRepository;
@@ -53,12 +55,32 @@ public class DefaultInitializer implements CommandLineRunner {
         createBoardWithType(CLUB);
         createBoardWithType(ANONYMOUS);
         createBoardWithType(CAMPUS_LIFE);
+
         createAdminMember();
         createAnonymousUser();
+        createStudentCouncilMember();
+    }
+
+    private void createStudentCouncilMember() {
+
+        if (memberRepository.existsByRole(STUDENT_COUNCIL) == false) {
+
+            memberRepository.save(Member.builder()
+                    .university(university)
+                    .role(STUDENT_COUNCIL)
+                    .verificationStatus(SUCCESS)
+                    .loginCredentials(of("studentcouncil1234", encoder.encode("infli1234!")))
+                    .profileImage(ProfileImage.ofDefaultProfileImage())
+                    .basicCredentials(BasicCredentials.ofDefaultWithNickname("학생회"))
+                    .studentCredentials(null)
+                    .companyCredentials(null)
+                    .build());
+        }
     }
 
     private void createAnonymousUser() {
         if (memberRepository.existsByUsername("anonymousUser") == false) {
+
             memberRepository.save(Member.builder()
                     .university(university)
                     .role(STUDENT)
@@ -66,7 +88,7 @@ public class DefaultInitializer implements CommandLineRunner {
                     .loginCredentials(of("anonymousUser", encoder.encode("password1234!")))
                     .profileImage(ProfileImage.ofDefaultProfileImage())
                     .basicCredentials(BasicCredentials.ofDefaultWithNickname("익명사용자"))
-                    .companyCredentials(null)
+                    .studentCredentials(StudentCredentials.ofDefault("이영진"))
                     .companyCredentials(null)
                     .build());
         }
@@ -79,16 +101,16 @@ public class DefaultInitializer implements CommandLineRunner {
     }
 
     private void createAdminMember() {
-        if (memberRepository.adminMemberExists() == false) {
+        if (memberRepository.existsByRole(ADMIN) == false) {
 
             memberRepository.save(Member.builder()
                     .university(university)
                     .role(ADMIN)
                     .verificationStatus(SUCCESS)
-                    .loginCredentials(of("infli1234", encoder.encode("infli1234!")))
+                    .loginCredentials(of("admin1234", encoder.encode("infli1234!")))
                     .profileImage(ProfileImage.ofDefaultProfileImage())
                     .basicCredentials(BasicCredentials.ofDefaultWithNickname("관리자"))
-                    .companyCredentials(null)
+                    .studentCredentials(null)
                     .companyCredentials(null)
                     .build());
         }

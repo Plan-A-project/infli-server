@@ -50,10 +50,10 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     }
 
     @Override
-    public boolean adminMemberExists() {
+    public boolean existsByRole(Role role) {
         Integer fetchOne = jpaQueryFactory.selectOne()
                 .from(member)
-                .where(member.role.eq(ADMIN))
+                .where(member.role.eq(role))
                 .fetchFirst();
 
         return fetchOne != null;
