@@ -10,10 +10,8 @@ import static java.util.UUID.*;
 
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
-import com.plana.infli.domain.embedded.member.BasicCredentials;
 import com.plana.infli.domain.embedded.member.CompanyCredentials;
 import com.plana.infli.domain.embedded.member.LoginCredentials;
-import com.plana.infli.domain.embedded.member.ProfileImage;
 import com.plana.infli.domain.embedded.member.StudentCredentials;
 import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.University;
@@ -78,7 +76,7 @@ public class MemberFactory {
     }
 
 
-    public Member createUncertifiedStudentMember(String nickname, University university) {
+    public Member createUnverifiedStudentMember(String nickname, University university) {
         Member member = of(nickname, university, STUDENT, null, NOT_STARTED, true);
         return memberRepository.save(member);
     }

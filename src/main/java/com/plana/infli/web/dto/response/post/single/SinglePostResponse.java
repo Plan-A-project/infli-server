@@ -24,7 +24,6 @@ public class SinglePostResponse extends DefaultPost {
     @Nullable
     // 글 작성자
     // 익명글인 경우 : null
-    // 기업 회원이 작한 글인 경우 : 회사 이름
     // 나머지 경우 : 작성자 닉네임
     private final String nickname ;
 

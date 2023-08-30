@@ -2,12 +2,14 @@ package com.plana.infli.infra.security.config;
 
 import static java.util.Arrays.*;
 import static java.util.List.*;
+import static org.springframework.http.HttpMethod.*;
 
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
@@ -73,15 +75,12 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-                                "/actuator")
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**",
+                                "/v3/api-docs/**", "/actuator")
                         .permitAll()
-                        .requestMatchers("/login").permitAll()
-                        .requestMatchers("/signup/**").permitAll()
+                        .requestMatchers("/login", "/signup/**").permitAll()
                         .requestMatchers("/boards/{boardId}/posts").permitAll()
-                        .requestMatchers("/member/email/auth/**").permitAll()
-                        .requestMatchers("/member/student/auth/**").permitAll()
-                        .requestMatchers("/member/company/auth/**").permitAll()
+                        .requestMatchers(GET, "/verification/student/email/{code}").permitAll()
                         .anyRequest().authenticated())
 
                 .logout((logout) -> logout

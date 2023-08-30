@@ -34,7 +34,7 @@ public abstract class DefaultPost {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public void loadCommentCount(int commentCount) {
+    public void setCommentCount(int commentCount) {
         this.commentCount = commentCount;
     }
 }

@@ -84,8 +84,8 @@ public class MailService {
                 .orElseThrow(() -> new BadRequestException(INVALID_EMAIL_CODE));
     }
 
-    private void validateVerifyStudentMemberEmailRequest(Member member,
-            EmailVerification emailVerification) {
+    private void validateVerifyStudentMemberEmailRequest(
+            Member member, EmailVerification emailVerification) {
 
         if (member.getRole() != STUDENT || member.getVerificationStatus() != PENDING) {
             setVerificationStatusAsFail(member);
@@ -99,16 +99,16 @@ public class MailService {
         }
     }
 
-    @Transactional
     // TODO 탈퇴후 동일한 대학 이메일로 가입하려는 경우 고려해야함
     // TODO 학생 회원만 업로드 가능한지 검증 필요
     // TODO AOp 다시 확인 해야됨
     @Upload
+    @Transactional
     public void sendVerificationMail(SendVerificationMailServiceRequest request) {
 
         Member member = findMemberBy(request.getUsername());
 
-//        validateSendMailRequest(request.getUniversityEmail(), member);
+        validateSendMailRequest(request.getUniversityEmail(), member);
 
         EmailVerification emailVerification = request.toEntity(member, now());
 
@@ -122,8 +122,22 @@ public class MailService {
                 emailVerification.getUniversityEmail());
     }
 
+    private void validateSendMailRequest(String universityEmail, Member member) {
+        if (universityEmail.endsWith(ALLOWED_EMAIL_SUFFIX) == false) {
+            throw new BadRequestException(INVALID_UNIVERSITY_EMAIL);
+        }
+
+        if (member.getVerificationStatus() == SUCCESS) {
+            throw new BadRequestException(EMAIL_VERIFICATION_ALREADY_EXISTS);
+        }
+
+        if (memberRepository.existsByVerifiedUniversityEmail(universityEmail)) {
+            throw new ConflictException(DUPLICATED_UNIVERSITY_EMAIL);
+        }
+    }
+
     @SneakyThrows({IOException.class})
-    private void sendMail(Mail mail) {
+    public void sendMail(Mail mail) {
         Request sendRequest = new Request();
         sendRequest.setMethod(POST);
         sendRequest.setEndpoint("mail/send");
@@ -151,19 +165,7 @@ public class MailService {
         return new Mail(from, subject, to, content);
     }
 
-    private void validateSendMailRequest(String universityEmail, Member member) {
-        if (universityEmail.endsWith(ALLOWED_EMAIL_SUFFIX) == false) {
-            throw new BadRequestException(INVALID_UNIVERSITY_EMAIL);
-        }
 
-        if (member.getVerificationStatus() == SUCCESS) {
-            throw new BadRequestException(EMAIL_VERIFICATION_ALREADY_EXISTS);
-        }
-
-        if (memberRepository.existsByVerifiedUniversityEmail(universityEmail)) {
-            throw new ConflictException(DUPLICATED_UNIVERSITY_EMAIL);
-        }
-    }
 
     private Member findMemberBy(String email) {
 

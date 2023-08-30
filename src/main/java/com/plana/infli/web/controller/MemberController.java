@@ -5,6 +5,8 @@ import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailRequest;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +25,6 @@ public class MemberController {
 
     private final MailService mailService;
 
-
     @GetMapping("/policy")
     @Operation(summary = "글 작성 이용 규칙 동의 여부 확인")
     public boolean checkMemberAcceptedWritePolicy(@AuthenticatedPrincipal String username) {
@@ -36,6 +37,7 @@ public class MemberController {
         memberService.acceptPolicy(username);
     }
 
+    @RolesAllowed({"STUDENT"})
     @PostMapping("/verification/student/email")
     public void sendVerificationEmail(@AuthenticatedPrincipal String username,
             @RequestBody @Validated SendVerificationMailRequest request) {
@@ -48,12 +50,14 @@ public class MemberController {
     }
 
     @PostMapping("/verification/student/certificate")
+    @RolesAllowed({"COMPANY"})
     public void uploadEnrollmentCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
         memberService.uploadUniversityCertificateImage(username, file);
     }
 
     @PostMapping("/verification/company/certificate")
+    @RolesAllowed({"COMPANY"})
     public void uploadCompanyCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
         memberService.uploadCompanyCertificateImage(username, file);

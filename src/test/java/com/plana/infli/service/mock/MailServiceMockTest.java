@@ -25,6 +25,8 @@
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
+//import org.mockito.InjectMocks;
+//import org.mockito.Mock;
 //import org.mockito.Spy;
 //import org.mockito.junit.jupiter.MockitoExtension;
 //import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,16 +37,16 @@
 //    @Spy
 //    private MemberFactory memberFactory;
 //
-//    @Spy
+//    @Mock
 //    private MemberRepository memberRepository;
 //
-//    @Spy
+//    @Mock
 //    private UniversityFactory universityFactory;
 //
 //    @Spy
 //    private PasswordEncoder encoder;
 //
-//    @Spy
+//    @InjectMocks
 //    private MailService mailService;
 //
 //    @DisplayName("대학교 인증 이메일 발송 성공")
