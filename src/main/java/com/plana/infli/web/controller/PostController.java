@@ -99,7 +99,6 @@ public class PostController {
     @Operation(summary = "내가 작성한 글 목록 조회")
     public MyPostsResponse loadMyPosts(@AuthenticatedPrincipal String username,
             @RequestParam Integer page) {
-
         return postService.loadMyPosts(username, page);
     }
 

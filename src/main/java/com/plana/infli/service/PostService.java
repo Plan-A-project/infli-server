@@ -186,8 +186,6 @@ public class PostService {
                 request.getRecruitmentEndDate());
     }
 
-
-    @Transactional
     public PostImageUploadResponse uploadPostImages(Long postId, List<MultipartFile> multipartFiles, String username) {
 
         validateImages(multipartFiles);
@@ -204,8 +202,8 @@ public class PostService {
                 directoryPath);
 
         List<String> originalImageUrls = new ArrayList<>();
-        multipartFiles.forEach(multipartFile -> {
-            String url = s3Uploader.uploadAsOriginalImage(multipartFile, directoryPath);
+        multipartFiles.forEach(file -> {
+            String url = s3Uploader.uploadAsOriginalImage(file, directoryPath);
             originalImageUrls.add(url);
         });
 
@@ -231,12 +229,12 @@ public class PostService {
             throw new BadRequestException(IMAGE_NOT_PROVIDED);
         }
 
-        if (files.size() > 11) {
+        if (files.size() > 10) {
             throw new BadRequestException(MAX_IMAGES_EXCEEDED);
         }
 
         files.forEach(file -> {
-            if (file.isEmpty()) {
+            if (file == null || file.isEmpty()) {
                 throw new BadRequestException(IMAGE_NOT_PROVIDED);
             }
         });

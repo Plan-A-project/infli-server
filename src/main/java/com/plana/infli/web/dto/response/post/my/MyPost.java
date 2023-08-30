@@ -21,9 +21,12 @@ public class MyPost extends DefaultPost {
     private final LocalDateTime recruitmentEndDate;
 
     @QueryProjection
-    public MyPost(Long postId, String title, boolean pressedLike,int likeCount, int viewCount, LocalDateTime createdAt,
-            String thumbnailURL, String boardName, String companyName,
-            LocalDateTime recruitmentStartDate, LocalDateTime recruitmentEndDate) {
+    public MyPost(Long postId, String title, boolean pressedLike, int likeCount, int viewCount,
+            LocalDateTime createdAt, String thumbnailURL, String boardName,
+            @Nullable String companyName,
+            @Nullable LocalDateTime recruitmentStartDate,
+            @Nullable LocalDateTime recruitmentEndDate) {
+
         super(postId, title, pressedLike, likeCount, viewCount, createdAt, thumbnailURL);
 
         this.boardName = boardName;

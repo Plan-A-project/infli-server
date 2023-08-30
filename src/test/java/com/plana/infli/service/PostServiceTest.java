@@ -3,19 +3,22 @@ package com.plana.infli.service;
 import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.type.PostType.*;
 import static com.plana.infli.domain.type.Role.*;
+import static com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder.*;
 import static java.time.LocalDateTime.now;
 import static java.time.LocalDateTime.of;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.linesOf;
 
 import com.plana.infli.domain.Board;
+import com.plana.infli.domain.PostLike;
 import com.plana.infli.domain.type.BoardType;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.domain.University;
+import com.plana.infli.factory.PostLikeFactory;
 import com.plana.infli.infra.exception.custom.AuthorizationFailedException;
 import com.plana.infli.infra.exception.custom.BadRequestException;
 import com.plana.infli.infra.exception.custom.NotFoundException;
@@ -30,13 +33,23 @@ import com.plana.infli.repository.comment.CommentRepository;
 import com.plana.infli.repository.commentlike.CommentLikeRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
+import com.plana.infli.repository.postlike.PostLikeRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.web.dto.request.post.create.normal.CreateNormalPostServiceRequest;
 import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.normal.EditNormalPostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest;
+import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardServiceRequest;
+import com.plana.infli.web.dto.response.post.board.BoardPostsResponse;
+import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
-import jakarta.persistence.EntityManager;
+import io.micrometer.core.instrument.noop.NoopTimeGauge;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
@@ -47,7 +60,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.core.parameters.P;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.multipart.MultipartFile;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -73,10 +89,10 @@ class PostServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private CommentService commentService;
+    private UniversityFactory universityFactory;
 
     @Autowired
-    private UniversityFactory universityFactory;
+    private PostLikeRepository postLikeRepository;
 
     @Autowired
     private MemberFactory memberFactory;
@@ -97,12 +113,13 @@ class PostServiceTest {
     private PostService postService;
 
     @Autowired
-    private EntityManager em;
+    private PostLikeFactory postLikeFactory;
 
     @AfterEach
     void tearDown() {
         commentLikeRepository.deleteAllInBatch();
         commentRepository.deleteAllInBatch();
+        postLikeRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
         boardRepository.deleteAllInBatch();
@@ -549,6 +566,27 @@ class PostServiceTest {
                 .message().isEqualTo("게시판을 찾을수 없습니다");
     }
 
+    @DisplayName("일반글 작성 실패 - 글 작성 규정을 동의하지 않고 글을 작성할수 없다")
+    @Test
+    void writeNormalPostWithoutAgreeingOnWritePolicy() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createAdminMember(university);
+
+        CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(999L)
+                .title("제목입니다")
+                .content("내용입니다")
+                .postType(ANNOUNCEMENT)
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.createNormalPost(request))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시판을 찾을수 없습니다");
+    }
+
     @DisplayName("일반 공지글 작성 실패 - 존재하지 않는 회원의 계정으로 글을 작성할수 없다")
     @Test
     void writeAnnouncementPostByNotExistingMember() {
@@ -640,6 +678,30 @@ class PostServiceTest {
                 .message().isEqualTo("모집 종료일이 시작일보다 빠를수 없습니다");
     }
 
+    @DisplayName("모집글 작성 실패 - 글 작성 규정 동의를 하지 않은 상태로 글 작성을 할수 없다")
+    @Test
+    void createRecruitmentPostWithoutAgreeingOnWritePolicy() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createEmploymentBoard(university);
+        Member member = memberFactory.createPolicyNotAcceptedMemberWithRole(
+                university, COMPANY);
+
+        CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .title("제목입니다")
+                .content("내용입니다")
+                .recruitmentCompanyName("카카오")
+                .recruitmentStartDate(of(2023, 8, 1, 0, 0))
+                .recruitmentEndDate(of(2023, 9, 1, 0, 0))
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.createRecruitmentPost(request))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("글 작성 규칙 동의를 먼저 진행해주세요");
+    }
 
     public static Stream<Arguments> allowedCombinationToWritePost() {
 
@@ -1482,4 +1544,701 @@ class PostServiceTest {
                         postMember.getBasicCredentials().getNickname(),
                         post.getContent());
     }
+
+    @DisplayName("글 단건 조회 실패 - 존재하지 않는 회원이 조회를 요청한 경우")
+    @Test
+    void loadSinglePostByNotExistingMember() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when //then
+        assertThatThrownBy(() -> postService.loadSinglePost(post.getId(), "AAAAA"))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("사용자를 찾을수 없습니다");
+    }
+
+    @DisplayName("글 단건 조회 실패 - 조회를 요청한 회원이 탈퇴한 회원인 경우")
+    @Test
+    void loadSinglePostByDeletedMember() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        memberRepository.delete(member);
+
+        //when //then
+        assertThatThrownBy(
+                () -> postService.loadSinglePost(
+                        post.getId(), member.getLoginCredentials().getUsername()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("사용자를 찾을수 없습니다");
+    }
+
+    @DisplayName("글 단건 조회 실패 - 글이 존재하지 않는 경우")
+    @Test
+    void loadNotExistingSingle() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+
+        //when //then
+        assertThatThrownBy(
+                () -> postService.loadSinglePost(-1L, member.getLoginCredentials().getUsername()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+    }
+
+    @DisplayName("글 단건 조회 실패 - 글이 삭제된 경우")
+    @Test
+    void loadDeletedSinglePost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        postService.deletePost(post.getId(), member.getLoginCredentials().getUsername());
+
+        //when //then
+        assertThatThrownBy(
+                () -> postService.loadSinglePost(-1L, member.getLoginCredentials().getUsername()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+    }
+
+    @DisplayName("글 단건 조회 실패 - 해당 글이 내가 소속되지 않은 다른 대학교 게시판에 작성된 글이 경우")
+    @Test
+    void loadSinglePostThatIsNotFromMyUniversity() {
+        //given
+        University university1 = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university1);
+        Member member = memberFactory.createVerifiedStudentMember("member", university1);
+        Post post = postFactory.createNormalPost(member, board);
+
+        University university2 = universityFactory.createUniversity("서울대학교");
+        Member anotherMember = memberFactory.createVerifiedStudentMember("nickanme", university2);
+
+        //when //then
+        assertThatThrownBy(
+                () -> postService.loadSinglePost(post.getId(),
+                        anotherMember.getLoginCredentials().getUsername()))
+                .isInstanceOf(AuthorizationFailedException.class)
+                .message().isEqualTo("해당 권한이 없습니다");
+    }
+
+    @DisplayName("글 단건 조회시 조회수 증가 동시성 테스트")
+    @Test
+    void viewCountConcurrencyTest() throws InterruptedException {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createNormalPost(
+                memberFactory.createVerifiedStudentMember("postMember", university), board);
+
+        int threadCount = 100;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        for (int i = 0; i < threadCount; i++) {
+
+            int finalI = i;
+            executorService.submit(() -> {
+
+                try {
+                    Member member = memberFactory.createVerifiedStudentMember("" + finalI,
+                            university);
+
+                    postService.loadSinglePost(post.getId(),
+                            member.getLoginCredentials().getUsername());
+
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        Post findPost = postRepository.findPostById(post.getId()).get();
+        assertThat(findPost.getViewCount()).isEqualTo(100);
+    }
+
+    @DisplayName("글 단건 조회 성공 - 글 작성자 본인이 해당 글을 조회하는 경우 확인이 가능하다")
+    @Test
+    void loadSinglePost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        SinglePostResponse response = postService.loadSinglePost(post.getId(),
+                member.getLoginCredentials().getUsername());
+
+        //then
+        assertThat(response.isMyPost()).isTrue();
+    }
+
+    @DisplayName("글 단건 조회 성공 - 해당 글이 익명 글인 경우 글 작성자 컬럼의 값은 null 이다")
+    @Test
+    void loadAnonymousSinglePost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        SinglePostResponse response = postService.loadSinglePost(post.getId(),
+                member.getLoginCredentials().getUsername());
+
+        //then
+        assertThat(response.getNickname()).isNull();
+    }
+
+    @DisplayName("글 단건 조회시 내가 해당 글에 좋아요를 눌렀는지 확인 - 좋아요 누른 경우")
+    @Test
+    void loadSinglePostThatIPressedLike() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member postMember = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(postMember, board);
+
+        Member member = memberFactory.createUnverifiedStudentMember("nickanme", university);
+        PostLike postLike = postLikeFactory.createPostLike(member, post);
+
+        //when
+        SinglePostResponse response = postService.loadSinglePost(post.getId(),
+                member.getLoginCredentials().getUsername());
+
+        //then
+        assertThat(response.isPressedLike()).isTrue();
+    }
+
+    @DisplayName("글 단건 조회시 내가 해당 글에 좋아요를 눌렀는지 확인 - 좋아요 누르지 않은 경우")
+    @Test
+    void loadSinglePostThatIDidNotPressedLike() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member postMember = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(postMember, board);
+
+        Member member = memberFactory.createUnverifiedStudentMember("nickanme", university);
+
+        //when
+        SinglePostResponse response = postService.loadSinglePost(post.getId(),
+                member.getLoginCredentials().getUsername());
+
+        //then
+        assertThat(response.isPressedLike()).isFalse();
+    }
+
+    @DisplayName("내가 작성한 글 목록 조회 - 해당 글이 일반글인 경우")
+    @ParameterizedTest(name = "{index} 글 작성 회원 유형 : {0}, 게시판 유형 : {1}")
+    @MethodSource("allowedRoleToWriteNormalPost")
+    void loadMyNormalPost(Role role, BoardType boardType) {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
+        Board board = boardFactory.createByBoardType(university, boardType);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        MyPostsResponse response = postService.loadMyPosts(
+                member.getLoginCredentials().getUsername(), 1);
+
+        //then
+        assertThat(response).extracting("sizeRequest", "currentPage", "actualSize")
+                .containsExactly(20, 1, 1);
+
+        assertThat(response.getPosts()).extracting("boardName", "postId",
+                        "title", "commentCount", "pressedLike", "likeCount", "viewCount", "thumbnailUrl")
+                .containsExactly(
+                        tuple(board.getBoardName(), post.getId(),
+                                post.getTitle(), 0, false, 0, 0, null));
+    }
+
+    @DisplayName("내가 작성한 글 목록 조회 - 해당 글이 채용글인 경우")
+    @ParameterizedTest(name = "{index} 글 작성 회원 유형 : {0}, 게시판 유형 : {1}")
+    @MethodSource("allowedRoleToWriteRecruitmentPost")
+    void loadMyRecruitmentPost(Role role, BoardType boardType) {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
+        Board board = boardFactory.createByBoardType(university, boardType);
+        Post post = postFactory.createRecruitmentPost(member, board);
+
+        //when
+        MyPostsResponse response = postService.loadMyPosts(
+                member.getLoginCredentials().getUsername(), 1);
+
+        //then
+        assertThat(response).extracting("sizeRequest", "currentPage", "actualSize")
+                .containsExactly(20, 1, 1);
+
+        assertThat(response.getPosts()).extracting("boardName", "postId", "companyName",
+                        "recruitmentStartDate", "recruitmentEndDate",
+                        "title", "commentCount", "pressedLike", "likeCount", "viewCount", "thumbnailUrl")
+                .containsExactly(
+                        tuple(board.getBoardName(), post.getId(),
+                                post.getRecruitment().getCompanyName(),
+                                post.getRecruitment().getStartDate(),
+                                post.getRecruitment().getEndDate(),
+                                post.getTitle(), 0, false, 0, 0, null));
+    }
+
+    @DisplayName("내가 작성한 글 목록 조회 - 내가 해당 글에 좋아요를 누른 경우")
+    @Test
+    void loadMyPostThatIPressedLike() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        postLikeFactory.createPostLike(member, post);
+
+        //when
+        MyPostsResponse response = postService.loadMyPosts(
+                member.getLoginCredentials().getUsername(), 1);
+
+        //then
+        assertThat(response.getPosts().get(0).isPressedLike()).isTrue();
+    }
+
+    @DisplayName("내가 작성한 글 목록 조회 - 내가 해당 글에 좋아요를 누르지 않은 경우")
+    @Test
+    void loadMyPostThatIDidNotPressedLike() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Board board = boardFactory.createAnonymousBoard(university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        MyPostsResponse response = postService.loadMyPosts(
+                member.getLoginCredentials().getUsername(), 1);
+
+        //then
+        assertThat(response.getPosts().get(0).isPressedLike()).isFalse();
+    }
+
+
+    @DisplayName("내가 작성한 글 목록 조회 - 한 페이지당 글이 20개씩 조회된다")
+    @Test
+    void loadMyPost_DefaultPageSizeIs20() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Board board = boardFactory.createAnonymousBoard(university);
+
+        IntStream.rangeClosed(1, 21).forEach(i -> postFactory.createNormalPost(member, board));
+
+        //when
+        MyPostsResponse response = postService.loadMyPosts(
+                member.getLoginCredentials().getUsername(), 1);
+
+        //then
+        assertThat(response.getPosts()).size().isEqualTo(20);
+    }
+
+
+    @DisplayName("내가 작성한 글 목록 조회 - 내가 글을 작성한 적이 없는 경우")
+    @Test
+    void loadMyPostWhenIDidNotWriteAnyPost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+
+        //when
+        MyPostsResponse response = postService.loadMyPosts(
+                member.getLoginCredentials().getUsername(), 1);
+
+        //then
+        assertThat(response.getPosts()).isEmpty();
+    }
+
+
+    @DisplayName("내가 작성한 글 목록 조회 실패 - 회원이 존재하지 않는 경우")
+    @Test
+    void loadNotExistingMemberPost() {
+
+        //when //then
+        assertThatThrownBy(() -> postService.loadMyPosts("aaa", 1))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("사용자를 찾을수 없습니다");
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 성공 - 일반 글인 경우")
+    @Test
+    void loadPostsByBoard() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        LoadPostsByBoardServiceRequest request = LoadPostsByBoardServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .type(NORMAL)
+                .page(1)
+                .order(recent)
+                .size(20)
+                .build();
+
+        //when
+        BoardPostsResponse response = postService.loadPostsByBoard(request);
+
+        //then
+        assertThat(response).extracting("boardId", "boardName")
+                .containsExactly(board.getId(), board.getBoardName());
+        assertThat(response.getPosts()).extracting("postId", "title", "commentCount", "pressedLike",
+                        "likeCount", "viewCount", "thumbnailUrl")
+                .containsExactly(tuple(post.getId(), post.getTitle(), 0, false,
+                        0, 0, null));
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 성공 - 채용 글인 경우")
+    @Test
+    void loadRecruitmentPostsByBoard() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createEmploymentBoard(university);
+        Member member = memberFactory.createVerifiedCompanyMember(university);
+        Post post = postFactory.createRecruitmentPost(member, board);
+
+        LoadPostsByBoardServiceRequest request = LoadPostsByBoardServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .type(RECRUITMENT)
+                .page(1)
+                .order(recent)
+                .size(20)
+                .build();
+
+        //when
+        BoardPostsResponse response = postService.loadPostsByBoard(request);
+
+        //then
+        assertThat(response).extracting("boardId", "boardName")
+                .containsExactly(board.getId(), board.getBoardName());
+        assertThat(response.getPosts()).extracting("postId", "title", "commentCount", "pressedLike",
+                        "likeCount", "viewCount", "thumbnailUrl", "memberRole", "companyName",
+                        "recruitmentStartDate", "recruitmentEndDate")
+                .containsExactly(tuple(post.getId(), post.getTitle(), 0, false,
+                        0, 0, null, member.getRole().name(), post.getRecruitment().getCompanyName(),
+                        post.getRecruitment().getStartDate(), post.getRecruitment().getEndDate()));
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 실패 - 존재하지 않는 게시판 Id인 경우")
+    @Test
+    void loadPostsByNotExistingBoardId() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedCompanyMember(university);
+
+        LoadPostsByBoardServiceRequest request = LoadPostsByBoardServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(-1L)
+                .type(RECRUITMENT)
+                .page(1)
+                .order(recent)
+                .size(20)
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.loadPostsByBoard(request))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시판을 찾을수 없습니다");
+    }
+
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 실패 - 해당 게시판이 내가 속한 대학교의 게시판이 아닌 경우")
+    @Test
+    void loadPostsByBoardThatIsNotInMyUniversity() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+
+        University otherUniversity = universityFactory.createUniversity("서울대학교");
+        Member member = memberFactory.createUnverifiedStudentMember("nickname", otherUniversity);
+
+        LoadPostsByBoardServiceRequest request = LoadPostsByBoardServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .type(NORMAL)
+                .page(1)
+                .order(recent)
+                .size(20)
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.loadPostsByBoard(request))
+                .isInstanceOf(AuthorizationFailedException.class)
+                .message().isEqualTo("해당 권한이 없습니다");
+    }
+
+    public static Stream<Arguments> invalidBoardTypeAndPostTypeCombination() {
+
+        return Stream.of(
+                Arguments.of(EMPLOYMENT, ANNOUNCEMENT),
+
+                Arguments.of(ACTIVITY, ANNOUNCEMENT),
+
+                Arguments.of(CLUB, ANNOUNCEMENT),
+                Arguments.of(CLUB, RECRUITMENT),
+
+                Arguments.of(ANONYMOUS, ANNOUNCEMENT),
+                Arguments.of(ANONYMOUS, RECRUITMENT),
+
+                Arguments.of(CAMPUS_LIFE, RECRUITMENT)
+        );
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 성공 - 게시판 유형과 글 유형이 옳바르지 않은 경우")
+    @ParameterizedTest(name = "{index} 게시판 유형 : {0}, 글 유형 : {1}")
+    @MethodSource("invalidBoardTypeAndPostTypeCombination")
+    void loadPostsByBoard_ValidBoardTypeAndPostType(BoardType boardType, PostType postType) {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createByBoardType(university, boardType);
+        Member member = memberFactory.createUnverifiedStudentMember("nickname", university);
+
+        LoadPostsByBoardServiceRequest request = LoadPostsByBoardServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .type(postType)
+                .page(1)
+                .order(recent)
+                .size(20)
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.loadPostsByBoard(request))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("게시판 정보가 옳바르지 않습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 업로드 하려는 사진이 10장이 넘을 경우")
+    @Test
+    void uploadImagesToPost_MaxImageSizeExceeded() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+        IntStream.rangeClosed(1, 11).forEach(i -> {
+            MockMultipartFile multipartFile = new MockMultipartFile("file " + i, new byte[]{1, 2, 3, 4});
+            files.add(multipartFile);
+        });
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("최대 10개까지 업로드 할 수 있습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 업로드할 파일 List가 null 인 경우")
+    @Test
+    void uploadImagesToPost_filesListIsNull() {
+
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = null;
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("업로드할 사진이 선택되지 않았습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 업로드할 파일 List가 비어있는 경우")
+    @Test
+    void uploadImagesToPost_filesListIsEmpty() {
+
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("업로드할 사진이 선택되지 않았습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 업로드할 파일이 nul 인 경우")
+    @Test
+    void uploadImagesToPost_fileIsNull() {
+
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+        files.add(null);
+        files.add(null);
+        files.add(null);
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("업로드할 사진이 선택되지 않았습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 업로드할 파일이 비어있는 경우")
+    @Test
+    void uploadImagesToPost_fileIsEmpty() {
+
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+        MockMultipartFile multipartFile = new MockMultipartFile("emptyFile", new byte[]{});
+        files.add(multipartFile);
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(BadRequestException.class)
+                .message().isEqualTo("업로드할 사진이 선택되지 않았습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 업로드를 요청한 회원이 존재하지 않는 경우")
+    @Test
+    void uploadImagesToPostByNotExistingMember() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                "emptyFile", new byte[]{1, 2, 3, 4, 5, 6});
+        files.add(multipartFile);
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files, "aaa"))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("사용자를 찾을수 없습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 업로드를 요청한 회원이 탈퇴한 회원인 경우")
+    @Test
+    void uploadImagesToPostByDeletedMember() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                "emptyFile", new byte[]{1, 2, 3, 4, 5, 6});
+        files.add(multipartFile);
+
+        memberRepository.delete(member);
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("사용자를 찾을수 없습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 사진을 업로드할 글이 존재하지 않는 경우")
+    @Test
+    void uploadImagesToNotExistingPost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+
+        List<MultipartFile> files = new ArrayList<>();
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                "emptyFile", new byte[]{1, 2, 3, 4, 5, 6});
+        files.add(multipartFile);
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(-1L, files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 사진을 업로드할 글이 삭제된 경우")
+    @Test
+    void uploadImagesToDeletedPost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                "emptyFile", new byte[]{1, 2, 3, 4, 5, 6});
+        files.add(multipartFile);
+
+        postService.deletePost(post.getId(), member.getLoginCredentials().getUsername());
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                member.getLoginCredentials().getUsername()))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
+    }
+
+    @DisplayName("특정글에 사진 업로드 실패 - 글 작성자와 사진 업로드를 요청한 회원이 서로 다른 경우")
+    @Test
+    void uploadImagesToPostByNonPostWriterMember() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("nickname", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        List<MultipartFile> files = new ArrayList<>();
+        MockMultipartFile multipartFile = new MockMultipartFile(
+                "emptyFile", new byte[]{1, 2, 3, 4, 5, 6});
+        files.add(multipartFile);
+
+        Member anotherMember = memberFactory.createVerifiedCompanyMember(university);
+
+        //when //then
+        assertThatThrownBy(() -> postService.uploadPostImages(post.getId(), files,
+                anotherMember.getLoginCredentials().getUsername()))
+                .isInstanceOf(AuthorizationFailedException.class)
+                .message().isEqualTo("해당 권한이 없습니다");
+    }
+
+
 }

@@ -98,7 +98,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .innerJoin(post.member, member)
                 .fetchOne();
 
-        response.loadCommentCount(findCommentCount(request.getPost()));
+        response.setCommentCount(findCommentCount(request.getPost()));
         return response;
     }
 
@@ -348,7 +348,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
         Map<Long, List<CommentCount>> map = findCommentCount(ids);
 
-        result.forEach(post -> post.loadCommentCount(findCommentCounts(map, post)));
+        result.forEach(post -> post.setCommentCount(findCommentCounts(map, post)));
     }
 
     private Map<Long, List<CommentCount>> findCommentCount(List<Long> ids) {

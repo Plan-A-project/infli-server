@@ -13,12 +13,12 @@ public class MyPostsResponse extends DefaultPostsResponse {
 
     @Builder
     public MyPostsResponse(int sizeRequest, int currentPage, int actualSize,
-            List<? extends DefaultPost> posts) {
+            List<MyPost> posts) {
         super(sizeRequest, currentPage, actualSize, posts);
     }
 
     public static MyPostsResponse of(PostQueryRequest request,
-            List<? extends DefaultPost> posts) {
+            List<MyPost> posts) {
 
         return MyPostsResponse.builder()
                 .sizeRequest(request.getSize())

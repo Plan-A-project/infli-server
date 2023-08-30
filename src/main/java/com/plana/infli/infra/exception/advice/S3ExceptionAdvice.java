@@ -1,5 +1,6 @@
 package com.plana.infli.infra.exception.advice;
 
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 import com.amazonaws.AmazonServiceException;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class S3ExceptionAdvice {
 
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
     @ExceptionHandler(SdkClientException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(SdkClientException e) {
         ErrorResponse response = ErrorResponse.builder()
@@ -28,7 +29,7 @@ public class S3ExceptionAdvice {
                 .body(response);
     }
 
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(INTERNAL_SERVER_ERROR)
     @ExceptionHandler(AmazonServiceException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(AmazonServiceException e) {
         ErrorResponse response = ErrorResponse.builder()

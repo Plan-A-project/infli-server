@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-@Profile({"dev", "prod"})
+@Profile({"dev", "prod", "local"})
 @Order(0)
 public class DefaultInitializer implements CommandLineRunner {
 
