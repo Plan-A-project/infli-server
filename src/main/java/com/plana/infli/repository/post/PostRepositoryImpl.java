@@ -103,12 +103,11 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private int findCommentCount(Post post) {
-        Long commentCount = jpaQueryFactory.select(comment.count())
+        return jpaQueryFactory.select(comment.count())
                 .from(comment)
                 .where(comment.status.isDeleted.isFalse())
                 .where(comment.post.eq(post))
-                .fetchOne();
-        return commentCount != null ? commentCount.intValue() : 0;
+                .fetchOne().intValue();
     }
 
     private BooleanExpression isMyPost(Member member) {
@@ -268,8 +267,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
 
 
-
-
     private Expression<String> getMemberRole(Board board) {
         return board.getBoardType().equals(ANONYMOUS) ? nullExpression()
                 : post.member.role.stringValue();
@@ -288,7 +285,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
     }
 
     private BooleanExpression postTypeEqual(PostType postType) {
-        return postType != null ? post.postType.eq(postType) : null;
+        return post.postType.eq(postType);
     }
 
 
