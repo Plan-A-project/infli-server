@@ -7,6 +7,7 @@ import static com.plana.infli.domain.editor.PostEditor.delete;
 import static com.plana.infli.domain.editor.PostEditor.edit;
 import static com.plana.infli.domain.editor.PostEditor.increaseViewCount;
 import static com.plana.infli.domain.embedded.post.Recruitment.*;
+import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.infra.exception.custom.BadRequestException.BOARD_TYPE_IS_NOT_RECRUITMENT;
 import static com.plana.infli.infra.exception.custom.BadRequestException.IMAGE_NOT_PROVIDED;
 import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID_BOARD_TYPE;
@@ -26,6 +27,7 @@ import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.domain.embedded.post.Recruitment;
+import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.infra.exception.custom.AuthorizationFailedException;
 import com.plana.infli.infra.exception.custom.BadRequestException;
 import com.plana.infli.infra.exception.custom.NotFoundException;
@@ -50,7 +52,6 @@ import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
 import com.plana.infli.web.dto.response.post.search.SearchedPost;
 import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
-import jakarta.annotation.Nullable;
 import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -109,7 +110,7 @@ public class PostService {
 
         checkIfInSameUniversity(member, board);
 
-        checkIfAgreedOnWritePolicy(member);
+        checkMemberIsAllowedToWrite(member);
 
         BoardType boardType = board.getBoardType();
 
@@ -120,7 +121,11 @@ public class PostService {
         checkWritePermission(member.getRole(), postType, boardType);
     }
 
-    private void checkIfAgreedOnWritePolicy(Member member) {
+    private void checkMemberIsAllowedToWrite(Member member) {
+        if (member.getVerificationStatus() != SUCCESS) {
+            throw new AuthorizationFailedException();
+        }
+
         if (member.getBasicCredentials().isPolicyAccepted() == false) {
             throw new BadRequestException(WRITING_WITHOUT_POLICY_AGREEMENT_NOT_ALLOWED);
         }
@@ -167,7 +172,7 @@ public class PostService {
 
         checkIfInSameUniversity(member, board);
 
-        checkIfAgreedOnWritePolicy(member);
+        checkMemberIsAllowedToWrite(member);
 
         if (isRecruitmentBoard(board) == false) {
             throw new BadRequestException(BOARD_TYPE_IS_NOT_RECRUITMENT);
