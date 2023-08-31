@@ -9,7 +9,9 @@ import com.plana.infli.domain.CommentLike;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.University;
+import com.plana.infli.infra.exception.custom.AuthorizationFailedException;
 import com.plana.infli.infra.exception.custom.BadRequestException;
+import com.plana.infli.infra.exception.custom.ConflictException;
 import com.plana.infli.infra.exception.custom.NotFoundException;
 import com.plana.infli.factory.BoardFactory;
 import com.plana.infli.factory.CommentFactory;
@@ -221,6 +223,51 @@ class CommentLikeServiceTest {
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("게시글이 존재하지 않거나 삭제되었습니다");
 
+    }
+
+
+    @DisplayName("내가 소속된 대학교가 아닌 대학에서 작성된 댓글에 좋아요를 누를수 없다")
+    @Test
+    void pressLikeOnNotMyUniversityComment() {
+
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createCampusLifeBoard(university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
+        Post post = postFactory.createNormalPost(postMember, board);
+        Comment comment = commentFactory.createComment(
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
+
+        University myUniversity = universityFactory.createUniversity("서울대학교");
+        Member member = memberFactory.createVerifiedStudentMember("member", myUniversity);
+
+        //when //then
+        assertThatThrownBy(() -> commentLikeService.createCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
+                .isInstanceOf(AuthorizationFailedException.class)
+                .message().isEqualTo("해당 권한이 없습니다");
+    }
+
+    @DisplayName("이미 좋아요를 누른 댓글에 좋아요를 누를수 없다")
+    @Test
+    void pressLikeOnLikedComment() {
+
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createCampusLifeBoard(university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
+        Post post = postFactory.createNormalPost(postMember, board);
+        Comment comment = commentFactory.createComment(
+                memberFactory.createVerifiedStudentMember("commentMember", university), post);
+
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        CommentLike commentLike = commentLikeFactory.createCommentLike(member, comment);
+
+        //when //then
+        assertThatThrownBy(() -> commentLikeService.createCommentLike(
+                member.getLoginCredentials().getUsername(), comment.getId()))
+                .isInstanceOf(ConflictException.class)
+                .message().isEqualTo("이미 해당 댓글에 좋아요를 눌렀습니다");
     }
 
     /**

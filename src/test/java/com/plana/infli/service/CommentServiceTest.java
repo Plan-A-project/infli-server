@@ -2773,6 +2773,7 @@ class CommentServiceTest {
         assertThat(commentCount).isEqualTo(30);
     }
 
+
     @DisplayName("내가 작성한 댓글 총 갯수 조회시 삭제된 댓글은 포함되지 않는다")
     @Test
     void deletedCommentIsNotIncludedWhenCountingMyCommentsNumber() {

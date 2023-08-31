@@ -40,10 +40,11 @@ import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitment
 import com.plana.infli.web.dto.request.post.edit.normal.EditNormalPostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.view.board.LoadPostsByBoardServiceRequest;
+import com.plana.infli.web.dto.request.post.view.search.SearchPostsByKeywordServiceRequest;
 import com.plana.infli.web.dto.response.post.board.BoardPostsResponse;
 import com.plana.infli.web.dto.response.post.my.MyPostsResponse;
+import com.plana.infli.web.dto.response.post.search.SearchedPostsResponse;
 import com.plana.infli.web.dto.response.post.single.SinglePostResponse;
-import io.micrometer.core.instrument.noop.NoopTimeGauge;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -2241,4 +2242,99 @@ class PostServiceTest {
     }
 
 
+    @DisplayName("키워드로 글 검색 성공 - 글 제목으로 검색")
+    @ParameterizedTest(name = "{index} 게시판 유형 : {0}, 글 유형 : {1}")
+    @MethodSource("allowedCombinationToWritePost")
+    void searchPostsByTitle(BoardType boardType, PostType postType, Role role) {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createByBoardType(university, boardType);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
+        Post post = postFactory.createPost(member, board, postType);
+
+        SearchPostsByKeywordServiceRequest request = SearchPostsByKeywordServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .keyword("제목")
+                .page(1)
+                .build();
+
+        //when
+        SearchedPostsResponse response = postService.searchPostsByKeyword(request);
+
+        //then
+        assertThat(response).extracting("sizeRequest", "actualSize", "currentPage")
+                .containsExactly(20, 1, 1);
+        assertThat(response.getPosts()).extracting(
+                        "content", "boardName", "boardId", "postId",
+                        "title", "likeCount", "pressedLike", "viewCount", "thumbnailUrl")
+                .containsExactly(tuple("내용입니다", board.getBoardName(), board.getId(), post.getId(),
+                        post.getTitle(), 0, false, 0, null));
+
+    }
+
+    @DisplayName("키워드로 글 검색 성공 - 글 내용으로 검색")
+    @ParameterizedTest(name = "{index} 게시판 유형 : {0}, 글 유형 : {1}")
+    @MethodSource("allowedCombinationToWritePost")
+    void searchPostsByContent(BoardType boardType, PostType postType, Role role) {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createByBoardType(university, boardType);
+        Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
+        Post post = postFactory.createPost(member, board, postType);
+
+        SearchPostsByKeywordServiceRequest request = SearchPostsByKeywordServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .keyword("내용")
+                .page(1)
+                .build();
+
+        //when
+        SearchedPostsResponse response = postService.searchPostsByKeyword(request);
+
+        //then
+        assertThat(response.getCurrentPage()).isEqualTo(1);
+        assertThat(response.getPosts()).size().isEqualTo(1);
+        assertThat(response.getPosts()).extracting(
+                        "content", "boardName", "boardId", "postId",
+                        "title", "likeCount", "pressedLike", "viewCount", "thumbnailUrl")
+                .containsExactly(tuple("내용입니다", board.getBoardName(), board.getId(), post.getId(),
+                        post.getTitle(), 0, false, 0, null));
+
+    }
+
+    @DisplayName("키워드로 글 검색 실패 - 조건을 만족하는 글이 없는 경우")
+    @Test
+    void searchPostsByKeyword_Fail_NoMatchingPost() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+
+        SearchPostsByKeywordServiceRequest request = SearchPostsByKeywordServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .keyword("내용")
+                .page(1)
+                .build();
+
+        //when
+        SearchedPostsResponse response = postService.searchPostsByKeyword(request);
+
+        //then
+        assertThat(response.getPosts()).isEmpty();
+    }
+
+    @DisplayName("키워드로 글 검색 실패 - 조회를 요청한 회원이 존재하지 않는 회원인 경우")
+    @Test
+    void searchPostsByKeywordByNotExistingMember() {
+        //given
+        SearchPostsByKeywordServiceRequest request = SearchPostsByKeywordServiceRequest.builder()
+                .username("aaaa")
+                .keyword("내용")
+                .page(1)
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.searchPostsByKeyword(request))
+                .isInstanceOf(NotFoundException.class)
+                .message().isEqualTo("사용자를 찾을수 없습니다");
+    }
 }
