@@ -1,5 +1,6 @@
 package com.plana.infli.web.controller;
 
+import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.service.MailService;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailRequest;
@@ -48,6 +49,12 @@ public class MemberController {
     public void verifyStudentMemberEmail(@PathVariable String code) {
         mailService.verifyStudentMemberEmail(code);
     }
+
+    @GetMapping("/verification")
+    public VerificationStatus loadVerificationStatus(@AuthenticatedPrincipal String username) {
+        return memberService.loadVerificationStatus(username);
+    }
+
 
     @PostMapping("/verification/student/certificate")
     @RolesAllowed({"COMPANY"})

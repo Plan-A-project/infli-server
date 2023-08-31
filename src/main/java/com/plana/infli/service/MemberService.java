@@ -20,6 +20,7 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.editor.MemberEditor;
 import com.plana.infli.domain.embedded.member.BasicCredentials;
+import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.infra.exception.custom.AuthorizationFailedException;
 import com.plana.infli.infra.exception.custom.BadRequestException;
 import com.plana.infli.infra.exception.custom.ConflictException;
@@ -272,5 +273,9 @@ public class MemberService {
         Member member = findMemberBy(username);
 
         MemberEditor.acceptPolicy(member);
+    }
+
+    public VerificationStatus loadVerificationStatus(String username) {
+        return findMemberBy(username).getVerificationStatus();
     }
 }
