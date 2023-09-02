@@ -21,7 +21,7 @@ import com.plana.infli.infra.exception.custom.ConflictException;
 import com.plana.infli.infra.exception.custom.NotFoundException;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.service.aop.upload.Upload;
-import com.plana.infli.service.utils.S3Uploader;
+import com.plana.infli.service.util.S3Uploader;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordServiceRequest;
 import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;

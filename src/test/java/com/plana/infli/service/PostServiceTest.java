@@ -609,6 +609,54 @@ class PostServiceTest {
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
 
+    @DisplayName("일반글 작성 실패 - 학생 인증을 받지 못한 학생 회원은 글을 작성할수 없다")
+    @Test
+    void writePostWithoutStudentVerification() {
+
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member unverifiedMember = memberFactory.createUnverifiedStudentMember("nickname", university);
+        Board board = boardFactory.createCampusLifeBoard(university);
+
+        CreateNormalPostServiceRequest request = CreateNormalPostServiceRequest.builder()
+                .username(unverifiedMember.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .title("제목입니다")
+                .content("내용입니다")
+                .postType(NORMAL)
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.createNormalPost(request))
+                .isInstanceOf(AuthorizationFailedException.class)
+                .message().isEqualTo("해당 권한이 없습니다");
+    }
+
+    @DisplayName("모집글 작성 실패 - 기업 인증을 받지 못한 기업 회원은 글을 작성할수 없다")
+    @Test
+    void writeRecruitmentPostWithoutCompanyVerification() {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Member unverifiedCompanyMember = memberFactory.createUnverifiedCompanyMember(university);
+        Board board = boardFactory.createEmploymentBoard(university);
+
+        CreateRecruitmentPostServiceRequest request = CreateRecruitmentPostServiceRequest.builder()
+                .username(unverifiedCompanyMember.getLoginCredentials().getUsername())
+                .boardId(board.getId())
+                .title("제목입니다")
+                .content("내용입니다")
+                .recruitmentCompanyName("카카오")
+                .recruitmentStartDate(of(2023, 8, 1, 0, 0))
+                .recruitmentEndDate(now())
+                .build();
+
+        //when //then
+        assertThatThrownBy(() -> postService.createRecruitmentPost(request))
+                .isInstanceOf(AuthorizationFailedException.class)
+                .message().isEqualTo("해당 권한이 없습니다");
+    }
+
+
     @DisplayName("모집글 작성 실패 - 존재하지 않는 게시판에 글을 작성할수 없다")
     @Test
     void writeRecruitmentPostInNotExistingBoard() {

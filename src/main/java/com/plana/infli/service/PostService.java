@@ -27,7 +27,6 @@ import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.Post;
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.domain.embedded.post.Recruitment;
-import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.infra.exception.custom.AuthorizationFailedException;
 import com.plana.infli.infra.exception.custom.BadRequestException;
 import com.plana.infli.infra.exception.custom.NotFoundException;
@@ -36,7 +35,7 @@ import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.aop.retry.Retry;
-import com.plana.infli.service.utils.S3Uploader;
+import com.plana.infli.service.util.S3Uploader;
 import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
@@ -81,7 +80,6 @@ public class PostService {
 
 
     @Transactional
-    //TODO 이메일 인증 받은 사람만 글 작성 가능하도록  추후 변경 필요
     public Long createNormalPost(CreateNormalPostServiceRequest request) {
 
         Member member = findMemberWithUniversityBy(request.getUsername());
@@ -112,13 +110,18 @@ public class PostService {
 
         checkMemberIsAllowedToWrite(member);
 
+        checkIsAllowedTypeForNormalPost(postType);
+
         BoardType boardType = board.getBoardType();
 
-        if (postType == RECRUITMENT) {
-            throw new BadRequestException(POST_TYPE_NOT_ALLOWED);
-        }
-
         checkWritePermission(member.getRole(), postType, boardType);
+    }
+
+    private void checkIsAllowedTypeForNormalPost(PostType postType) {
+        if (postType == NORMAL || postType == ANNOUNCEMENT) {
+            return;
+        }
+        throw new BadRequestException(POST_TYPE_NOT_ALLOWED);
     }
 
     private void checkMemberIsAllowedToWrite(Member member) {

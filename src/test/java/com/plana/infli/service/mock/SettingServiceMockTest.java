@@ -19,7 +19,7 @@ import com.plana.infli.domain.embedded.member.StudentCredentials;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.SettingService;
-import com.plana.infli.service.utils.S3Uploader;
+import com.plana.infli.service.util.S3Uploader;
 import com.plana.infli.web.dto.response.profile.image.ChangeProfileImageResponse;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -58,17 +58,13 @@ class SettingServiceMockTest {
     void changeMemberProfile() {
         //given
         University university = universityRepository.save(University.create("푸단대학교"));
-
-        //stub1
         Member member = createStudentMember(university);
-        given(memberRepository.findActiveMemberBy(anyString()))
-                .willReturn(ofNullable(member));
 
-        //stub2
+        given(memberRepository.findActiveMemberBy(anyString())).willReturn(ofNullable(member));
+
         given(s3Uploader.uploadAsOriginalImage(any(MultipartFile.class), anyString()))
                 .willReturn("aaa.com");
 
-        //stub3
         given(s3Uploader.uploadAsThumbnailImage(any(MultipartFile.class), anyString()))
                 .willReturn("bbb.com");
 
