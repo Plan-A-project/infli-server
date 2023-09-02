@@ -108,6 +108,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .where(member.basicCredentials.isDeleted.isFalse())
                 .where(member.role.eq(STUDENT))
                 .where(member.verificationStatus.eq(PENDING))
+                .orderBy(member.id.desc())
                 .fetch();
     }
 

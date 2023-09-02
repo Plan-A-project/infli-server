@@ -9,7 +9,6 @@ import static com.plana.infli.domain.type.VerificationStatus.SUCCESS;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doReturn;
@@ -20,18 +19,14 @@ import com.plana.infli.domain.Post;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.embedded.member.LoginCredentials;
 import com.plana.infli.domain.embedded.member.StudentCredentials;
-import com.plana.infli.domain.type.BoardType;
-import com.plana.infli.domain.type.PostType;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
-import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.PostService;
-import com.plana.infli.service.utils.S3Uploader;
+import com.plana.infli.service.util.S3Uploader;
 import com.plana.infli.web.dto.response.post.image.PostImageUploadResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +39,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
-public class PostServiceMockTest {
+class PostServiceMockTest {
 
     @Mock
     S3Uploader s3Uploader;

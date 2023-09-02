@@ -1,12 +1,10 @@
 package com.plana.infli.web.controller;
 
 import com.plana.infli.domain.type.VerificationStatus;
-import com.plana.infli.service.MailService;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailRequest;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
@@ -24,8 +22,6 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    private final MailService mailService;
-
     @GetMapping("/policy")
     @Operation(summary = "글 작성 이용 규칙 동의 여부 확인")
     public boolean checkMemberAcceptedWritePolicy(@AuthenticatedPrincipal String username) {
@@ -38,23 +34,23 @@ public class MemberController {
         memberService.acceptPolicy(username);
     }
 
-    @RolesAllowed({"STUDENT"})
-    @PostMapping("/verification/student/email")
-    public void sendVerificationEmail(@AuthenticatedPrincipal String username,
-            @RequestBody @Validated SendVerificationMailRequest request) {
-        mailService.sendVerificationMail(request.toServiceRequest(username));
-    }
-
-    @GetMapping("/verification/student/email/{code}")
-    public void verifyStudentMemberEmail(@PathVariable String code) {
-        mailService.verifyStudentMemberEmail(code);
-    }
-
     @GetMapping("/verification")
+    @Operation(summary = "해당 회원의 인증 상태 조회")
     public VerificationStatus loadVerificationStatus(@AuthenticatedPrincipal String username) {
         return memberService.loadVerificationStatus(username);
     }
 
+    @RolesAllowed({"STUDENT"})
+    @PostMapping("/verification/student/email")
+    public void sendVerificationEmail(@AuthenticatedPrincipal String username,
+            @RequestBody @Validated SendVerificationMailRequest request) {
+        memberService.sendVerificationMail(request.toServiceRequest(username));
+    }
+
+    @GetMapping("/verification/student/email/{code}")
+    public void verifyStudentMemberEmail(@PathVariable String code) {
+        memberService.verifyStudentMemberEmail(code);
+    }
 
     @PostMapping("/verification/student/certificate")
     @RolesAllowed({"COMPANY"})

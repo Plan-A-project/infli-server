@@ -81,6 +81,13 @@ public class MemberFactory {
         return memberRepository.save(member);
     }
 
+    public Member createPendingStatusStudent(String nickname,
+            String universityEmail, University university) {
+
+        Member member = of(nickname, university, STUDENT, null, PENDING, true);
+        return memberRepository.save(member);
+    }
+
 
     public Member createVerifiedCompanyMember(University university) {
 
@@ -88,6 +95,16 @@ public class MemberFactory {
 
         Member member = of(randomUUID().toString().substring(0, 10), university, COMPANY,
                 company, SUCCESS, true);
+
+        return memberRepository.save(member);
+    }
+
+    public Member createUnverifiedCompanyMember(University university) {
+
+        Company company = createCompany(COMPANY);
+
+        Member member = of(randomUUID().toString().substring(0, 10), university, COMPANY,
+                company, NOT_STARTED, true);
 
         return memberRepository.save(member);
     }

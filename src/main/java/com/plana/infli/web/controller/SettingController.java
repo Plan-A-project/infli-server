@@ -66,8 +66,8 @@ public class SettingController {
     @PostMapping("/profile/image")
     @Operation(summary = "회원 프로필 사진 변경")
     public ChangeProfileImageResponse changeProfileImage(@AuthenticatedPrincipal String username,
-            @RequestParam("file") MultipartFile profileImage) {
-        return settingService.changeProfileImage(username, profileImage);
+            @RequestParam MultipartFile file) {
+        return settingService.changeProfileImage(username, file);
     }
 
     @GetMapping("/unregister")

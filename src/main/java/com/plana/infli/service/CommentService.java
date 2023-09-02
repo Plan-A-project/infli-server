@@ -64,7 +64,7 @@ public class CommentService {
 
         Member member = findMemberBy(request.getUsername());
 
-//        checkWritePermission(member);
+        checkWritePermission(member);
 
         Post post = findPostWithLockBy(request.getPostId());
 
