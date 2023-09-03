@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.response.member.verification.company;
+package com.plana.infli.web.dto.response.admin.verification.company;
 
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;

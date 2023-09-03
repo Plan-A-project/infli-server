@@ -3,6 +3,7 @@ package com.plana.infli.web.controller;
 import com.plana.infli.domain.type.VerificationStatus;
 import com.plana.infli.service.MemberService;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailRequest;
+import com.plana.infli.web.dto.response.member.verification.VerificationStatusResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.security.RolesAllowed;
@@ -36,7 +37,7 @@ public class MemberController {
 
     @GetMapping("/verification")
     @Operation(summary = "해당 회원의 인증 상태 조회")
-    public VerificationStatus loadVerificationStatus(@AuthenticatedPrincipal String username) {
+    public VerificationStatusResponse loadVerificationStatus(@AuthenticatedPrincipal String username) {
         return memberService.loadVerificationStatus(username);
     }
 

@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.response.member.verification.company;
+package com.plana.infli.web.dto.response.admin.verification.company;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -3,11 +3,10 @@ package com.plana.infli.repository.member;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.type.Role;
-import com.plana.infli.web.dto.response.member.verification.company.CompanyVerificationImage;
-import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
+import com.plana.infli.web.dto.response.admin.verification.company.CompanyVerificationImage;
+import com.plana.infli.web.dto.response.admin.verification.student.StudentVerificationImage;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 public interface MemberRepositoryCustom {
 

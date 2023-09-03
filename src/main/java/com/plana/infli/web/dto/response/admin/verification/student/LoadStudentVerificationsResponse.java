@@ -1,4 +1,4 @@
-package com.plana.infli.web.dto.response.member.verification.student;
+package com.plana.infli.web.dto.response.admin.verification.student;
 
 import java.util.ArrayList;
 import java.util.List;
