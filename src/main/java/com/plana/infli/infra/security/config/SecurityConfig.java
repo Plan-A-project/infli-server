@@ -118,7 +118,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "https://infli.co"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "https://infli.co", "https://plan-a-client-7kn9.vercel.app"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
