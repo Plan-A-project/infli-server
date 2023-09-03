@@ -2,8 +2,8 @@ package com.plana.infli.web.controller;
 
 
 import com.plana.infli.service.AdminService;
-import com.plana.infli.web.dto.response.member.verification.company.LoadCompanyVerificationsResponse;
-import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
+import com.plana.infli.web.dto.response.admin.verification.company.LoadCompanyVerificationsResponse;
+import com.plana.infli.web.dto.response.admin.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.security.RolesAllowed;

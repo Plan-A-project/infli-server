@@ -13,7 +13,6 @@ import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID
 import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID_STUDENT_VERIFICATION_REQUEST;
 import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID_UNIVERSITY_EMAIL;
 import static com.plana.infli.infra.exception.custom.BadRequestException.INVALID_USERNAME;
-import static com.plana.infli.infra.exception.custom.BadRequestException.MEMBER_VERIFICATION_STATUS_IS_NOT_PENDING;
 import static com.plana.infli.infra.exception.custom.BadRequestException.NOT_MATCHES_PASSWORD_CONFIRM;
 import static com.plana.infli.infra.exception.custom.ConflictException.DUPLICATED_NICKNAME;
 import static com.plana.infli.infra.exception.custom.ConflictException.DUPLICATED_UNIVERSITY_EMAIL;
@@ -33,7 +32,6 @@ import com.plana.infli.domain.University;
 import com.plana.infli.domain.editor.MemberEditor;
 import com.plana.infli.domain.embedded.member.BasicCredentials;
 import com.plana.infli.domain.type.VerificationStatus;
-import com.plana.infli.infra.exception.custom.AuthorizationFailedException;
 import com.plana.infli.infra.exception.custom.BadRequestException;
 import com.plana.infli.infra.exception.custom.ConflictException;
 import com.plana.infli.infra.exception.custom.InternalServerErrorException;
@@ -47,10 +45,7 @@ import com.plana.infli.service.util.S3Uploader;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.company.CreateCompanyMemberServiceRequest;
 import com.plana.infli.web.dto.request.member.signup.student.CreateStudentMemberServiceRequest;
-import com.plana.infli.web.dto.response.member.verification.company.CompanyVerificationImage;
-import com.plana.infli.web.dto.response.member.verification.company.LoadCompanyVerificationsResponse;
-import com.plana.infli.web.dto.response.member.verification.student.LoadStudentVerificationsResponse;
-import com.plana.infli.web.dto.response.member.verification.student.StudentVerificationImage;
+import com.plana.infli.web.dto.response.member.verification.VerificationStatusResponse;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
@@ -59,7 +54,6 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -246,8 +240,10 @@ public class MemberService {
         MemberEditor.acceptPolicy(member);
     }
 
-    public VerificationStatus loadVerificationStatus(String username) {
-        return findMemberBy(username).getVerificationStatus();
+    public VerificationStatusResponse loadVerificationStatus(String username) {
+        Member member = findMemberBy(username);
+
+        return VerificationStatusResponse.of(member);
     }
 
 
