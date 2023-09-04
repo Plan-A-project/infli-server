@@ -6,7 +6,6 @@ import com.plana.infli.web.dto.response.admin.verification.company.LoadCompanyVe
 import com.plana.infli.web.dto.response.admin.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,23 +16,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin")
-@RolesAllowed({"ADMIN"})
 public class AdminController {
 
     private final AdminService adminService;
 
     @GetMapping("/certificate/members/student")
     @Operation(summary = "학생 인증을 요청한 회원 목록 조회")
-    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(
+    public LoadStudentVerificationsResponse loadCertificateUploadedStudentMembers(
             @AuthenticatedPrincipal String username) {
-        return adminService.loadStudentVerificationRequestImages(username);
+        return adminService.loadCertificateUploadedStudentMembers(username);
     }
 
     @GetMapping("/certificate/members/company")
     @Operation(summary = "기업 인증을 요청한 회원 목록 조회")
-    public LoadCompanyVerificationsResponse loadCompanyVerificationRequestImages(
+    public LoadCompanyVerificationsResponse loadCertificateUploadedCompanyMembers(
             @AuthenticatedPrincipal String username) {
-        return adminService.loadCompanyVerificationRequestImages(username);
+        return adminService.loadCertificateUploadedCompanyMembers(username);
     }
 
     @PostMapping("/certificate/members/{memberId}")

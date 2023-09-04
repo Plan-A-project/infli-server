@@ -10,8 +10,10 @@ import static java.util.UUID.*;
 
 import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.embedded.member.BasicCredentials;
 import com.plana.infli.domain.embedded.member.CompanyCredentials;
 import com.plana.infli.domain.embedded.member.LoginCredentials;
+import com.plana.infli.domain.embedded.member.ProfileImage;
 import com.plana.infli.domain.embedded.member.StudentCredentials;
 import com.plana.infli.domain.type.Role;
 import com.plana.infli.domain.University;
@@ -159,6 +161,45 @@ public class MemberFactory {
             return companyRepository.save(company);
         }
         return null;
+    }
+
+
+    public Member createVerificationRequestedStudentMember(
+            String nickname, University university) {
+
+        return memberRepository.save(Member.builder()
+                .university(university)
+                .role(STUDENT)
+                .verificationStatus(PENDING)
+                .loginCredentials(LoginCredentials.of(
+                        randomUUID().toString().substring(0, 10), "password1234!"))
+                .profileImage(ProfileImage.ofDefaultProfileImage())
+                .basicCredentials(BasicCredentials.ofDefaultWithNickname(nickname))
+                .companyCredentials(null)
+                .studentCredentials(StudentCredentials.ofWithCertificate(
+                        ofDefault(randomUUID().toString().substring(0, 4)),
+                        randomUUID().toString()))
+                .build());
+    }
+
+    public Member createVerificationRequestedCompanyMember(
+            String nickname, University university) {
+
+        Company company = companyRepository.save(
+                Company.create(randomUUID().toString().substring(0, 5)));
+
+        return memberRepository.save(Member.builder()
+                .university(university)
+                .role(COMPANY)
+                .verificationStatus(PENDING)
+                .loginCredentials(LoginCredentials.of(
+                        randomUUID().toString().substring(0, 10), "password1234!"))
+                .profileImage(ProfileImage.ofDefaultProfileImage())
+                .basicCredentials(BasicCredentials.ofDefaultWithNickname(nickname))
+                .companyCredentials(CompanyCredentials.ofWithCertificate(
+                        CompanyCredentials.ofDefault(company), randomUUID().toString()))
+                .studentCredentials(null)
+                .build());
     }
 
 }

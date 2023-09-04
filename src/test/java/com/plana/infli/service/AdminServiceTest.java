@@ -1,19 +1,9 @@
 package com.plana.infli.service;
 
-import static com.plana.infli.domain.embedded.member.StudentCredentials.*;
-import static com.plana.infli.domain.type.Role.*;
-import static com.plana.infli.domain.type.VerificationStatus.*;
-import static java.util.UUID.*;
 import static org.assertj.core.api.Assertions.*;
 
-import com.plana.infli.domain.Company;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
-import com.plana.infli.domain.embedded.member.BasicCredentials;
-import com.plana.infli.domain.embedded.member.CompanyCredentials;
-import com.plana.infli.domain.embedded.member.LoginCredentials;
-import com.plana.infli.domain.embedded.member.ProfileImage;
-import com.plana.infli.domain.embedded.member.StudentCredentials;
 import com.plana.infli.factory.MemberFactory;
 import com.plana.infli.factory.UniversityFactory;
 import com.plana.infli.repository.company.CompanyRepository;
@@ -64,11 +54,11 @@ class AdminServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member admin = memberFactory.createAdminMember(university);
 
-        Member member1 = createCertificateVerificationRequestedStudentMember("member", university);
-        Member member2 = createCertificateVerificationRequestedStudentMember("qwert", university);
+        Member member1 = memberFactory.createVerificationRequestedStudentMember("member", university);
+        Member member2 = memberFactory.createVerificationRequestedStudentMember("qwert", university);
 
         //when
-        LoadStudentVerificationsResponse response = adminService.loadStudentVerificationRequestImages(
+        LoadStudentVerificationsResponse response = adminService.loadCertificateUploadedStudentMembers(
                 admin.getLoginCredentials().getUsername());
 
         //then
@@ -96,12 +86,12 @@ class AdminServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member admin = memberFactory.createAdminMember(university);
 
-        Member member = createCertificateVerificationRequestedStudentMember("member", university);
+        Member member = memberFactory.createVerificationRequestedStudentMember("member", university);
 
         memberRepository.delete(member);
 
         //when
-        LoadStudentVerificationsResponse response = adminService.loadStudentVerificationRequestImages(
+        LoadStudentVerificationsResponse response = adminService.loadCertificateUploadedStudentMembers(
                 admin.getLoginCredentials().getUsername());
 
         //then
@@ -116,7 +106,7 @@ class AdminServiceTest {
         Member admin = memberFactory.createAdminMember(university);
 
         //when
-        LoadStudentVerificationsResponse response = adminService.loadStudentVerificationRequestImages(
+        LoadStudentVerificationsResponse response = adminService.loadCertificateUploadedStudentMembers(
                 admin.getLoginCredentials().getUsername());
 
         //then
@@ -131,16 +121,16 @@ class AdminServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member admin = memberFactory.createAdminMember(university);
 
-        Member member1 = createCertificateVerificationRequestedCompanyMember("member", university);
-        Member member2 = createCertificateVerificationRequestedCompanyMember("qwert", university);
+        Member member1 = memberFactory.createVerificationRequestedCompanyMember("member", university);
+        Member member2 = memberFactory.createVerificationRequestedCompanyMember("qwert", university);
 
         //when
         LoadCompanyVerificationsResponse response = adminService
-                .loadCompanyVerificationRequestImages(admin.getLoginCredentials().getUsername());
+                .loadCertificateUploadedCompanyMembers(admin.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getStudentVerifications()).size().isEqualTo(2);
-        assertThat(response.getStudentVerifications()).extracting("memberId", "imageUrl",
+        assertThat(response.getCompanyVerifications()).size().isEqualTo(2);
+        assertThat(response.getCompanyVerifications()).extracting("memberId", "imageUrl",
                         "companyName")
                 .contains(
                         tuple(member1.getId(),
@@ -163,10 +153,10 @@ class AdminServiceTest {
 
         //when
         LoadCompanyVerificationsResponse response = adminService
-                .loadCompanyVerificationRequestImages(admin.getLoginCredentials().getUsername());
+                .loadCertificateUploadedCompanyMembers(admin.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getStudentVerifications()).isEmpty();
+        assertThat(response.getCompanyVerifications()).isEmpty();
     }
 
     @DisplayName("관리자가 기업 인증을 신청한 회원 조회 - 신청을 위해 사업자 증명서를 업로드 했지만 탈퇴한 회원은 조회되지 않는다")
@@ -176,51 +166,19 @@ class AdminServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member admin = memberFactory.createAdminMember(university);
 
-        Member member = createCertificateVerificationRequestedCompanyMember("member", university);
+        Member member = memberFactory.createVerificationRequestedCompanyMember("member", university);
 
         memberRepository.delete(member);
 
         //when
         LoadCompanyVerificationsResponse response = adminService
-                .loadCompanyVerificationRequestImages(admin.getLoginCredentials().getUsername());
+                .loadCertificateUploadedCompanyMembers(admin.getLoginCredentials().getUsername());
 
         //then
-        assertThat(response.getStudentVerifications()).isEmpty();
+        assertThat(response.getCompanyVerifications()).isEmpty();
     }
 
-    Member createCertificateVerificationRequestedStudentMember(String nickname, University university) {
 
-        return memberRepository.save(Member.builder()
-                .university(university)
-                .role(STUDENT)
-                .verificationStatus(PENDING)
-                .loginCredentials(LoginCredentials.of(
-                        randomUUID().toString().substring(0, 10), "password1234!"))
-                .profileImage(ProfileImage.ofDefaultProfileImage())
-                .basicCredentials(BasicCredentials.ofDefaultWithNickname(nickname))
-                .companyCredentials(null)
-                .studentCredentials(StudentCredentials.ofWithCertificate(
-                        ofDefault(randomUUID().toString().substring(0, 4)),
-                        randomUUID().toString()))
-                .build());
-    }
 
-    Member createCertificateVerificationRequestedCompanyMember(String nickname, University university) {
 
-        Company company = companyRepository.save(
-                Company.create(randomUUID().toString().substring(0, 5)));
-
-        return memberRepository.save(Member.builder()
-                .university(university)
-                .role(COMPANY)
-                .verificationStatus(PENDING)
-                .loginCredentials(LoginCredentials.of(
-                        randomUUID().toString().substring(0, 10), "password1234!"))
-                .profileImage(ProfileImage.ofDefaultProfileImage())
-                .basicCredentials(BasicCredentials.ofDefaultWithNickname(nickname))
-                .companyCredentials(CompanyCredentials.ofWithCertificate(
-                        CompanyCredentials.ofDefault(company), randomUUID().toString()))
-                .studentCredentials(null)
-                .build());
-    }
 }

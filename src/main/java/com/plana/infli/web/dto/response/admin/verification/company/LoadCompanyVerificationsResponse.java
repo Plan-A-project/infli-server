@@ -8,18 +8,18 @@ import lombok.Getter;
 @Getter
 public class LoadCompanyVerificationsResponse {
 
-    private final List<CompanyVerificationImage> studentVerifications;
+    private final List<CompanyVerificationImage> companyVerifications;
 
     @Builder
-    private LoadCompanyVerificationsResponse(List<CompanyVerificationImage> studentVerifications) {
+    private LoadCompanyVerificationsResponse(List<CompanyVerificationImage> companyVerifications) {
 
-        this.studentVerifications = studentVerifications != null ?
-                studentVerifications : new ArrayList<>();
+        this.companyVerifications = companyVerifications != null ?
+                companyVerifications : new ArrayList<>();
     }
 
-    public static LoadCompanyVerificationsResponse of(List<CompanyVerificationImage> studentVerifications) {
+    public static LoadCompanyVerificationsResponse of(List<CompanyVerificationImage> companyVerifications) {
         return LoadCompanyVerificationsResponse.builder()
-                .studentVerifications(studentVerifications)
+                .companyVerifications(companyVerifications)
                 .build();
     }
 }

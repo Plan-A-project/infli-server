@@ -74,10 +74,9 @@ public class SecurityConfig {
                         .requireExplicitSave(false))
 
                 .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**",
-                                "/v3/api-docs/**", "/actuator")
-                        .permitAll()
+                        .requestMatchers("/swagger-ui.html", "/actuator").permitAll()
                         .requestMatchers("/login", "/signup/**").permitAll()
                         .requestMatchers("/boards/{boardId}/posts").permitAll()
                         .requestMatchers(GET, "/verification/student/email/{code}").permitAll()
