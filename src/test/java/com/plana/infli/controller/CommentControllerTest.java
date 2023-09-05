@@ -48,7 +48,6 @@ import org.springframework.test.web.servlet.ResultActions;
 @MockMvcTest
 class CommentControllerTest {
 
-
     @Autowired
     protected MockMvc mvc;
 

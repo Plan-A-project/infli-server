@@ -22,7 +22,9 @@ import com.plana.infli.infra.exception.custom.NotFoundException;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.service.aop.upload.Upload;
 import com.plana.infli.service.util.S3Uploader;
+import com.plana.infli.web.dto.request.setting.modify.nickname.ModifyNicknameServiceRequest;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordServiceRequest;
+import com.plana.infli.web.dto.request.setting.verify.password.VerifyPasswordServiceRequest;
 import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;
 import com.plana.infli.web.dto.response.profile.image.ChangeProfileImageResponse;
@@ -68,20 +70,20 @@ public class SettingService {
     }
 
     @Transactional
-    public void changeNickname(String username, String newNickname) {
+    public void changeNickname(ModifyNicknameServiceRequest request) {
 
-        Member member = findMemberBy(username);
+        Member member = findMemberBy(request.getUsername());
 
-        checkIsAvailableNewNickname(newNickname);
+        checkIsAvailableNewNickname(request.getNickname());
 
-        editNickname(member, newNickname);
+        editNickname(member, request.getNickname());
     }
 
-    public String verifyCurrentPassword(String username, String currentPassword) {
+    public String verifyCurrentPassword(VerifyPasswordServiceRequest request) {
 
-        Member member = findMemberBy(username);
+        Member member = findMemberBy(request.getUsername());
 
-        return checkPasswordMatches(member, currentPassword);
+        return checkPasswordMatches(member, request.getPassword());
     }
 
     private String checkPasswordMatches(Member member, String password) {

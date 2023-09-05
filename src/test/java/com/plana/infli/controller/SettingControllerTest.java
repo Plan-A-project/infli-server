@@ -26,7 +26,10 @@ import com.plana.infli.domain.Member;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
+import com.plana.infli.web.dto.request.comment.create.CreateCommentRequest;
+import com.plana.infli.web.dto.request.setting.modify.nickname.ModifyNicknameRequest;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordRequest;
+import com.plana.infli.web.dto.request.setting.verify.password.VerifyPasswordRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -215,9 +218,14 @@ class SettingControllerTest {
         //given
         Member member = findContextMember();
 
+        String json = om.writeValueAsString(ModifyNicknameRequest.builder()
+                .nickname("infli12")
+                .build());
+
         //when
         ResultActions resultActions = mvc.perform(post("/setting/nickname")
-                .content("infli12")
+                .contentType(APPLICATION_JSON)
+                .content(json)
                 .with(csrf()));
 
         //then
@@ -230,9 +238,14 @@ class SettingControllerTest {
     @DisplayName("닉네임 변경 실패 - 로그인을 하지 않은 경우")
     @Test
     void changeNicknameWithoutLogin() throws Exception {
+        //given
+        String json = om.writeValueAsString(ModifyNicknameRequest.builder()
+                .nickname("infli12")
+                .build());
         //when
         ResultActions resultActions = mvc.perform(post("/setting/nickname")
-                .content("infli12")
+                .contentType(APPLICATION_JSON)
+                .content(json)
                 .with(csrf()));
 
         //then
@@ -245,14 +258,20 @@ class SettingControllerTest {
     @WithMockMember
     @Test
     void changeNicknameWithEmptyString() throws Exception {
+        //given
+        String json = om.writeValueAsString(ModifyNicknameRequest.builder()
+                .nickname(null)
+                .build());
+
         //when
         ResultActions resultActions = mvc.perform(post("/setting/nickname")
-                .content("")
+                .contentType(APPLICATION_JSON)
+                .content(json)
                 .with(csrf()));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("요청 본문의 형식이 올바르지 않습니다"))
+                .andExpect(jsonPath("$.validation.nickname").value("변경할 새 닉네임을 입력해주세요"))
                 .andDo(print());
     }
 
@@ -260,12 +279,20 @@ class SettingControllerTest {
     @WithMockMember
     @Test
     void changeNicknameWithEmptyString2() throws Exception {
+        //given
+        String json = om.writeValueAsString(ModifyNicknameRequest.builder()
+                .nickname("")
+                .build());
+
         //when
-        ResultActions resultActions = mvc.perform(post("/setting/nickname"));
+        ResultActions resultActions = mvc.perform(post("/setting/nickname")
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(csrf()));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("요청 본문의 형식이 올바르지 않습니다"))
+                .andExpect(jsonPath("$.validation.nickname").value("변경할 새 닉네임을 입력해주세요"))
                 .andDo(print());
     }
 
@@ -273,9 +300,16 @@ class SettingControllerTest {
     @WithMockMember
     @Test
     void verifyCurrentPassword() throws Exception {
+        //given
+        String json = om.writeValueAsString(VerifyPasswordRequest.builder()
+                .password("password")
+                .build());
+
         //when
         ResultActions resultActions = mvc.perform(post("/setting/password/verification")
-                .content("password"));
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(csrf()));
 
         //then
         resultActions.andExpect(status().isOk())
@@ -286,10 +320,17 @@ class SettingControllerTest {
     @WithMockMember
     @Test
     void provideInvalidPassword() throws Exception {
+        //given
+        String json = om.writeValueAsString(VerifyPasswordRequest.builder()
+                .password("1111")
+                .build());
 
         //when
         ResultActions resultActions = mvc.perform(post("/setting/password/verification")
-                .content("1111"));
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(csrf()));
+
 
         //then
         resultActions.andExpect(status().isBadRequest())
@@ -300,9 +341,16 @@ class SettingControllerTest {
     @DisplayName("현재 사용중인 비밀번호 검증 실패 - 로그인을 하지 않은 경우")
     @Test
     void verifyCurrentPasswordWithoutLogin() throws Exception {
+        //given
+        String json = om.writeValueAsString(VerifyPasswordRequest.builder()
+                .password("1111")
+                .build());
+
         //when
         ResultActions resultActions = mvc.perform(post("/setting/password/verification")
-                .content("password"));
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(csrf()));
 
         //then
         resultActions.andExpect(status().isUnauthorized())
@@ -314,14 +362,20 @@ class SettingControllerTest {
     @WithMockMember
     @Test
     void verifyCurrentPasswordWithoutProvidingPassword() throws Exception {
+        //given
+        String json = om.writeValueAsString(VerifyPasswordRequest.builder()
+                .password(null)
+                .build());
 
         //when
         ResultActions resultActions = mvc.perform(post("/setting/password/verification")
-                .content(""));
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(csrf()));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("요청 본문의 형식이 올바르지 않습니다"))
+                .andExpect(jsonPath("$.validation.password").value("비밀번호를 입력해주세요"))
                 .andDo(print());
     }
 
@@ -329,13 +383,20 @@ class SettingControllerTest {
     @WithMockMember
     @Test
     void verifyCurrentPasswordWithoutProvidingPassword2() throws Exception {
+        //given
+        String json = om.writeValueAsString(VerifyPasswordRequest.builder()
+                .password("")
+                .build());
 
         //when
-        ResultActions resultActions = mvc.perform(post("/setting/password/verification"));
+        ResultActions resultActions = mvc.perform(post("/setting/password/verification")
+                .contentType(APPLICATION_JSON)
+                .content(json)
+                .with(csrf()));
 
         //then
         resultActions.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("요청 본문의 형식이 올바르지 않습니다"))
+                .andExpect(jsonPath("$.validation.password").value("비밀번호를 입력해주세요"))
                 .andDo(print());
     }
 
