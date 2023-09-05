@@ -79,9 +79,14 @@ public class SecurityConfig {
                         .requestMatchers(POST, "/verification/company/**").hasAuthority("COMPANY")
                         .requestMatchers(GET, "/verification/student/email/{code}").permitAll()
 
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/swagger-ui.html", "/actuator").permitAll()
-                        .requestMatchers("/login", "/signup/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/actuator",
+                                "/error",
+                                "/login",
+                                "/signup/**").permitAll()
                         .requestMatchers("/boards/{boardId}/posts").permitAll()
                         .anyRequest().authenticated())
 
