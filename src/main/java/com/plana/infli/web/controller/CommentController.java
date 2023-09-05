@@ -80,7 +80,7 @@ public class CommentController {
     @GetMapping("/members/comments")
     @Operation(summary = "내가 작성한 댓글 목록 조회")
     public MyCommentsResponse loadMyComments(@AuthenticatedPrincipal String username,
-            Integer page) {
+            @RequestParam Integer page) {
 
         return commentService.loadMyComments(page, username);
     }
