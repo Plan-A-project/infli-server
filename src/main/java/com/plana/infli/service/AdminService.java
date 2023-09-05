@@ -26,7 +26,7 @@ public class AdminService {
 
     private final MemberRepository memberRepository;
 
-    public LoadStudentVerificationsResponse loadStudentVerificationRequestImages(String username) {
+    public LoadStudentVerificationsResponse loadCertificateUploadedStudentMembers(String username) {
 
         Member admin = findWithUniversityBy(username);
 
@@ -41,7 +41,7 @@ public class AdminService {
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_FOUND));
     }
 
-    public LoadCompanyVerificationsResponse loadCompanyVerificationRequestImages(String username) {
+    public LoadCompanyVerificationsResponse loadCertificateUploadedCompanyMembers(String username) {
 
         Member admin = findWithUniversityBy(username);
 

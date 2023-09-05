@@ -41,7 +41,6 @@ public class MemberController {
         return memberService.loadVerificationStatus(username);
     }
 
-    @RolesAllowed({"STUDENT"})
     @PostMapping("/verification/student/email")
     public void sendVerificationEmail(@AuthenticatedPrincipal String username,
             @RequestBody @Validated SendVerificationMailRequest request) {
@@ -54,14 +53,12 @@ public class MemberController {
     }
 
     @PostMapping("/verification/student/certificate")
-    @RolesAllowed({"COMPANY"})
     public void uploadEnrollmentCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
         memberService.uploadUniversityCertificateImage(username, file);
     }
 
     @PostMapping("/verification/company/certificate")
-    @RolesAllowed({"COMPANY"})
     public void uploadCompanyCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
         memberService.uploadCompanyCertificateImage(username, file);

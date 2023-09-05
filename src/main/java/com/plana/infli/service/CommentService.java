@@ -256,7 +256,6 @@ public class CommentService {
 
         CommentQueryRequest request = myComments(member, 20, page);
 
-
         List<MyComment> comments = commentRepository.findMyComments(request);
 
         return MyCommentsResponse.of(request, comments);
@@ -291,12 +290,5 @@ public class CommentService {
     private Post findPostBy(Long postId) {
         return postRepository.findActivePostBy(postId)
                 .orElseThrow(() -> new NotFoundException(POST_NOT_FOUND));
-    }
-
-    public Long findCommentsCountByMember(String username) {
-
-        Member member = findMemberBy(username);
-
-        return commentRepository.findActiveCommentsCountBy(member);
     }
 }

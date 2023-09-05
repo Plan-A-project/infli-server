@@ -28,8 +28,6 @@ public interface CommentRepositoryCustom {
 
     List<MyComment> findMyComments(CommentQueryRequest request);
 
-    Long findActiveCommentsCountBy(Member member);
-
     Optional<Comment> findActiveCommentWithPostBy(Long commentId);
 
     Optional<Comment> findActiveCommentWithMemberBy(Long commentId);

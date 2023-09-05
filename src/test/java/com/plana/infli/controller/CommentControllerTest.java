@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -891,6 +892,131 @@ class CommentControllerTest {
         //then
         resultActions.andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").doesNotExist())
+                .andDo(print());
+    }
+
+    @DisplayName("특정 글에 작성된 총 댓글 갯수 조회")
+    @WithMockMember
+    @Test
+    void findCommentCountInPost() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("postMember", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        Comment comment1 = commentFactory.createComment(
+                memberFactory.createVerifiedStudentMember("member1", university), post);
+
+        Comment comment2 = commentFactory.createComment(
+                memberFactory.createVerifiedStudentMember("member2", university), post);
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/posts/{postId}/comments/count", post.getId())
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(content().string("2"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 글에 작성된 총 댓글 갯수 조회 - 실패 : 로그인을 하지 않은 경우")
+    @Test
+    void findCommentCountInPostWithoutLogin() throws Exception {
+        //given
+        University university = universityFactory.createUniversity("푸단대학교");
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("postMember", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/posts/{postId}/comments/count", post.getId())
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("인증을 하지 못하였습니다. 로그인 후 이용해 주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 글에 작성된 총 댓글 갯수 조회 - 실패 : 글 Id 번호를 입력하지 않은 경우")
+    @WithMockMember
+    @Test
+    void findCommentCountInPostWithoutPostId() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/posts/{postId}/comments/count", " ")
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Path Variable 값이 입력되지 않았습니다"))
+                .andExpect(jsonPath("$.validation.postId").value("Long"))
+                .andDo(print());
+    }
+
+    @DisplayName("내가 작성한 댓글 목록 조회 - 성공")
+    @WithMockMember
+    @Test
+    void loadMyComments() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member postMember = memberFactory.createVerifiedStudentMember("postMember", university);
+        Post post = postFactory.createNormalPost(postMember, board);
+
+        Member member = findContextMember();
+        Comment comment = commentFactory.createComment(member, post);
+
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/members/comments")
+                        .param("page", "1")
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.sizeRequest").value("20"))
+                .andExpect(jsonPath("$.actualSize").value("1"))
+                .andExpect(jsonPath("$.currentPage").value("1"))
+                .andExpect(jsonPath("$.comments.[0].commentId").value(comment.getId()))
+                .andExpect(jsonPath("$.comments.[0].postId").value(post.getId()))
+                .andExpect(jsonPath("$.comments.[0].content").value(comment.getContent()))
+                .andExpect(jsonPath("$.comments.[0].createdAt").value(comment.getCreatedAt().toString()))
+                .andDo(print());
+    }
+
+    @DisplayName("내가 작성한 댓글 목록 조회 - 실패 : 로그인을 하지 않은 경우")
+    @Test
+    void loadMyCommentsWithoutLogin() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/members/comments")
+                        .param("page", "1")
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("인증을 하지 못하였습니다. 로그인 후 이용해 주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("내가 작성한 댓글 목록 조회 - 실패 : 페이지 정보를 입력하지 않은 경우")
+    @WithMockMember
+    @Test
+    void loadMyCommentsWithoutPageInfo() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(
+                get("/members/comments")
+                        .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Request Parameter가 누락되었습니다"))
+                .andExpect(jsonPath("$.validation.page").value("파라미터 타입 : Integer"))
                 .andDo(print());
     }
 

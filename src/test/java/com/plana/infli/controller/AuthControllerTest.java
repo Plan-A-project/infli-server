@@ -80,7 +80,7 @@ class AuthControllerTest {
         universityRepository.deleteAllInBatch();
     }
 
-    @DisplayName("학생 회원 회원 가입")
+    @DisplayName("학생 회원 회원 가입 성공")
     @Test
     void studentMemberSignup() throws Exception {
 
@@ -117,7 +117,7 @@ class AuthControllerTest {
         assertThat(member.getUniversity().getId()).isEqualTo(university.getId());
     }
 
-    @DisplayName("기업 회원 회원 가입")
+    @DisplayName("기업 회원 회원 가입 성공")
     @Test
     void companyMemberSignup() throws Exception {
 

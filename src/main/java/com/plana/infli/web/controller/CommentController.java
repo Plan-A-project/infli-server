@@ -80,15 +80,8 @@ public class CommentController {
     @GetMapping("/members/comments")
     @Operation(summary = "내가 작성한 댓글 목록 조회")
     public MyCommentsResponse loadMyComments(@AuthenticatedPrincipal String username,
-            int page) {
+            @RequestParam Integer page) {
 
         return commentService.loadMyComments(page, username);
-    }
-
-    @GetMapping("/members/comments/count")
-    @Operation(summary = "내가 총 작성한 댓글 갯수 조회")
-    public Long loadMyCommentsCount(@AuthenticatedPrincipal String username) {
-
-        return commentService.findCommentsCountByMember(username);
     }
 }
