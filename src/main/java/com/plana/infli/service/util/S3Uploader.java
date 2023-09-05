@@ -24,6 +24,8 @@ public class S3Uploader {
 
     private static final String BUCKET = "inflibucket";
 
+    private static final String CLOUDFRONT_DOMAIN_NAME = "https://d1mb3nk8d8uoc7.cloudfront.net/";
+
     private final AmazonS3 amazonS3;
 
     public String uploadAsOriginalImage(MultipartFile multipartFile, String directoryPath) {
@@ -38,7 +40,7 @@ public class S3Uploader {
 
         file.delete();
 
-        return amazonS3.getUrl(BUCKET, fullPathName).toString();
+        return CLOUDFRONT_DOMAIN_NAME + fullPathName;
     }
 
     private void uploadToS3(File file, String fullPathName) {
@@ -62,7 +64,7 @@ public class S3Uploader {
         originalFile.delete();
         thumbnailFile.delete();
 
-        return amazonS3.getUrl(BUCKET, fullPathName).toString();
+        return CLOUDFRONT_DOMAIN_NAME + fullPathName;
     }
 
     @SneakyThrows(IOException.class)

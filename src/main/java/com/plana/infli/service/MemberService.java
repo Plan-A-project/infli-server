@@ -355,5 +355,4 @@ public class MemberService {
             throw new BadRequestException(EMAIL_VERIFICATION_CODE_EXPIRED);
         }
     }
-
 }
