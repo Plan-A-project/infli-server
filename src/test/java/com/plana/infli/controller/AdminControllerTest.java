@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 @MockMvcTest
-public class AdminControllerTest {
+class AdminControllerTest {
 
     @Autowired
     protected MockMvc mvc;

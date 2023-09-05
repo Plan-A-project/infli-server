@@ -54,7 +54,7 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
         Member member = memberRepository.save(Member.builder()
                 .university(university)
                 .role(withMockMember.role())
-                .verificationStatus(SUCCESS)
+                .verificationStatus(withMockMember.status())
                 .loginCredentials(
                         LoginCredentials.of(withMockMember.username(), encoder.encode("password")))
                 .profileImage(ofDefaultProfileImage())
