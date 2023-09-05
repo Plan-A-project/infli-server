@@ -1642,6 +1642,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
+    @DisplayName("글 단건 조회 - 실패 : 로그인을 하지 않은 경우")
     @Test
     void loadSinglePostWithoutLogin() throws Exception {
         //given
@@ -1660,7 +1661,7 @@ public class PostControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("글 단건 조회 성공 - 글 Id 번호를 입력하지 않은 경우")
+    @DisplayName("글 단건 조회 - 실패 : 글 Id 번호를 입력하지 않은 경우")
     @WithMockMember
     @Test
     void loadSinglePostWithoutPostId() throws Exception {
@@ -1677,6 +1678,375 @@ public class PostControllerTest {
         //then
         resultActions.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Path Variable 값이 입력되지 않았습니다"))
+                .andDo(print());
+    }
+
+    @DisplayName("내가 작성한 글 목록 조회 - 성공")
+    @WithMockMember
+    @Test
+    void loadMyPosts() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createAnonymousBoard(university);
+        Member member = findContextMember();
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/members/posts?page=1")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.sizeRequest").value(20))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.actualSize").value(1))
+
+                .andExpect(jsonPath("$.posts.[0].boardName").value(board.getBoardName()))
+                .andExpect(jsonPath("$.posts.[0].postId").value(post.getId()))
+                .andExpect(jsonPath("$.posts.[0].title").value(post.getTitle()))
+                .andExpect(jsonPath("$.posts.[0].commentCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].pressedLike").value(false))
+                .andExpect(jsonPath("$.posts.[0].likeCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].viewCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].thumbnailUrl").value(post.getThumbnailUrl()))
+                .andDo(print());
+    }
+
+
+    @DisplayName("내가 작성한 글 목록 조회 - 실패 : 로그인을 하지 않은 경우")
+    @Test
+    void loadMyPostsWithoutLogin() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(get("/members/posts?page=1")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("인증을 하지 못하였습니다. 로그인 후 이용해 주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("내가 작성한 글 목록 조회 - 실패 : 페이지 정보는 필수다")
+    @WithMockMember
+    @Test
+    void loadMyPostsWithoutPageInfo() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(get("/members/posts")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Request Parameter가 누락되었습니다"))
+                .andExpect(jsonPath("$.validation.page").value("파라미터 타입 : Integer"))
+                .andDo(print());
+    }
+
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 성공")
+    @WithMockMember
+    @Test
+    void loadPostsByBoard() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "NORMAL")
+                .param("page", "1")
+                .param("order", "recent")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.boardId").value(board.getId()))
+                .andExpect(jsonPath("$.boardName").value(board.getBoardName()))
+                .andExpect(jsonPath("$.sizeRequest").value(20))
+                .andExpect(jsonPath("$.actualSize").value(1))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.posts.[0].memberRole").value(member.getRole().name()))
+                .andExpect(jsonPath("$.posts.[0].postId").value(post.getId()))
+                .andExpect(jsonPath("$.posts.[0].title").value(post.getTitle()))
+                .andExpect(jsonPath("$.posts.[0].commentCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].pressedLike").value(false))
+                .andExpect(jsonPath("$.posts.[0].likeCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].viewCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].thumbnailUrl").value(post.getThumbnailUrl()))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 게시판 ID번호는 필수다")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutBoardId() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", " ")
+                .param("type", "NORMAL")
+                .param("page", "1")
+                .param("order", "recent")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Path Variable 값이 입력되지 않았습니다"))
+                .andExpect(jsonPath("$.validation.boardId").value("Long"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 글 종류 입력은 필수다")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutPostType() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("page", "1")
+                .param("order", "recent")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.type").value("글 종류를 선택해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 글 종류 입력은 필수다2")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutPostType2() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "")
+                .param("page", "1")
+                .param("order", "recent")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.type").value("글 종류를 선택해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 정렬 순서 선택은 필수다")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutViewOrder() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "NORMAL")
+                .param("page", "1")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.order").value("최신순, 인기순 여부를 선택해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 정렬 순서 선택은 필수다2")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutViewOrder2() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "NORMAL")
+                .param("order", "")
+                .param("page", "1")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.order").value("최신순, 인기순 여부를 선택해주세요"))
+                .andDo(print());
+    }
+
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 페이지 정보는 필수다")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutPage() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "NORMAL")
+                .param("order", "recent")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.page").value("페이지 정보를 입력해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 페이지 정보는 필수다2")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutPage2() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "NORMAL")
+                .param("order", "recent")
+                .param("page", "")
+                .param("size", "20")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.page").value("페이지 정보를 입력해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 페이지당 글 갯수 선택은 필수다")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutSize() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "NORMAL")
+                .param("order", "recent")
+                .param("page", "1")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.size").value("페이지당 글 갯수를 선택해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("특정 게시판에 작성된 글 목록 조회 - 실패 : 페이지당 글 갯수 선택은 필수다2")
+    @WithMockMember
+    @Test
+    void loadPostsByBoardWithoutSize2() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/boards/{boardId}/posts", board.getId())
+                .param("type", "NORMAL")
+                .param("order", "recent")
+                .param("page", "1")
+                .param("size", "")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.size").value("페이지당 글 갯수를 선택해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("키워드로 글 검색 - 성공")
+    @WithMockMember
+    @Test
+    void searchPostsByKeyword() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+        Board board = boardFactory.createClubBoard(university);
+        Member member = memberFactory.createVerifiedStudentMember("member", university);
+        Post post = postFactory.createNormalPost(member, board);
+
+        //when
+        ResultActions resultActions = mvc.perform(get("/search")
+                .param("keyword", "제목")
+                .param("page", "1")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("$.sizeRequest").value(20))
+                .andExpect(jsonPath("$.actualSize").value(1))
+                .andExpect(jsonPath("$.currentPage").value(1))
+                .andExpect(jsonPath("$.posts.[0].content").value(post.getContent()))
+                .andExpect(jsonPath("$.posts.[0].boardName").value(board.getBoardName()))
+                .andExpect(jsonPath("$.posts.[0].boardId").value(board.getId()))
+                .andExpect(jsonPath("$.posts.[0].postId").value(post.getId()))
+                .andExpect(jsonPath("$.posts.[0].title").value(post.getTitle()))
+                .andExpect(jsonPath("$.posts.[0].commentCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].pressedLike").value(false))
+                .andExpect(jsonPath("$.posts.[0].likeCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].viewCount").value(0))
+                .andExpect(jsonPath("$.posts.[0].thumbnailUrl").value(post.getThumbnailUrl()))
+                .andDo(print());
+    }
+
+    @DisplayName("키워드로 글 검색 - 실패 : 로그인을 하지 않은 경우")
+    @Test
+    void searchPostsByKeywordWithoutLogin() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(get("/search")
+                .param("keyword", "제목")
+                .param("page", "1")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isUnauthorized())
+                .andExpect(content().string("인증을 하지 못하였습니다. 로그인 후 이용해 주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("키워드로 글 검색 - 실패 : 키워드 입력은 필수다")
+    @WithMockMember
+    @Test
+    void searchPostsByKeywordWithoutKeyword() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(get("/search")
+                .param("page", "1")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.keyword").value("검색어를 입력해주세요"))
+                .andDo(print());
+    }
+
+    @DisplayName("키워드로 글 검색 - 실패 : 키워드 입력은 필수다2")
+    @WithMockMember
+    @Test
+    void searchPostsByKeywordWithoutKeyword2() throws Exception {
+        //when
+        ResultActions resultActions = mvc.perform(get("/search")
+                .param("keyword", "")
+                .param("page", "1")
+                .with(csrf()));
+
+        //then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.validation.keyword").value("검색어를 입력해주세요"))
                 .andDo(print());
     }
 

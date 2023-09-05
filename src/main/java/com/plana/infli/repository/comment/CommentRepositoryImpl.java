@@ -149,16 +149,6 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     }
 
     @Override
-    public Long findActiveCommentsCountBy(Member findMember) {
-        return jpaQueryFactory.select(comment.count())
-                .from(comment)
-                .innerJoin(comment.member, member)
-                .where(commentIsNotDeleted())
-                .where(comment.member.eq(findMember))
-                .fetchOne();
-    }
-
-    @Override
     public Optional<Comment> findActiveCommentWithPostBy(Long commentId) {
         return ofNullable(jpaQueryFactory.selectFrom(comment)
                 .where(comment.id.eq(commentId))
