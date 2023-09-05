@@ -21,7 +21,9 @@ import com.plana.infli.factory.UniversityFactory;
 import com.plana.infli.repository.company.CompanyRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.university.UniversityRepository;
+import com.plana.infli.web.dto.request.setting.modify.nickname.ModifyNicknameServiceRequest;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordServiceRequest;
+import com.plana.infli.web.dto.request.setting.verify.password.VerifyPasswordServiceRequest;
 import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;
 import java.io.IOException;
@@ -178,8 +180,13 @@ class SettingServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member member = memberFactory.createPolicyAcceptedMemberWithRole(university, role);
 
+        ModifyNicknameServiceRequest request = ModifyNicknameServiceRequest.builder()
+                .nickname("newName")
+                .username(member.getLoginCredentials().getUsername())
+                .build();
+
         //when
-        settingService.changeNickname(member.getLoginCredentials().getUsername(), "newName");
+        settingService.changeNickname(request);
 
         //then
         Member findMember = memberRepository.findActiveMemberBy(member.getId()).get();
@@ -189,8 +196,14 @@ class SettingServiceTest {
     @DisplayName("닉네임 변경 실패 - 회원이 존재하지 않을 경우")
     @Test
     void changeNotExistingMemberNickname() {
+        //given
+        ModifyNicknameServiceRequest request = ModifyNicknameServiceRequest.builder()
+                .nickname("newName")
+                .username("aaa")
+                .build();
+
         //when //then
-        assertThatThrownBy(() -> settingService.changeNickname("aaa", "newName"))
+        assertThatThrownBy(() -> settingService.changeNickname(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
@@ -202,10 +215,15 @@ class SettingServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
+        ModifyNicknameServiceRequest request = ModifyNicknameServiceRequest.builder()
+                .nickname("newName")
+                .username(member.getLoginCredentials().getUsername())
+                .build();
+
         memberRepository.delete(member);
 
         //when //then
-        assertThatThrownBy(() -> settingService.changeNickname("aaa", "newName"))
+        assertThatThrownBy(() -> settingService.changeNickname(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }
@@ -219,9 +237,14 @@ class SettingServiceTest {
 
         Member member2 = memberFactory.createVerifiedStudentMember("newName", university);
 
+        ModifyNicknameServiceRequest request = ModifyNicknameServiceRequest.builder()
+                .nickname(member2.getBasicCredentials().getNickname())
+                .username(member.getLoginCredentials().getUsername())
+                .build();
+
+
         //when //then
-        assertThatThrownBy(() -> settingService.changeNickname(member.getLoginCredentials()
-                .getUsername(), member2.getBasicCredentials().getNickname()))
+        assertThatThrownBy(() -> settingService.changeNickname(request))
                 .isInstanceOf(ConflictException.class)
                 .message().isEqualTo("이미 존재하는 닉네임입니다.");
     }
@@ -233,9 +256,13 @@ class SettingServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
+        ModifyNicknameServiceRequest request = ModifyNicknameServiceRequest.builder()
+                .nickname("11111111111111111111111111111111111")
+                .username(member.getLoginCredentials().getUsername())
+                .build();
+
         //when //then
-        assertThatThrownBy(() -> settingService.changeNickname(member.getLoginCredentials()
-                .getUsername(), "111111111111111111111"))
+        assertThatThrownBy(() -> settingService.changeNickname(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo(INVALID_NICKNAME);
     }
@@ -247,9 +274,13 @@ class SettingServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
+        VerifyPasswordServiceRequest request = VerifyPasswordServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .password("password")
+                .build();
+
         //when
-        String response = settingService.verifyCurrentPassword(
-                member.getLoginCredentials().getUsername(), "password");
+        String response = settingService.verifyCurrentPassword(request);
 
         //then
         assertThat(response).isEqualTo("비밀번호 일치");
@@ -262,9 +293,13 @@ class SettingServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
+        VerifyPasswordServiceRequest request = VerifyPasswordServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .password("111111")
+                .build();
+
         //when //then
-        assertThatThrownBy(() -> settingService.verifyCurrentPassword(
-                member.getLoginCredentials().getUsername(), "123"))
+        assertThatThrownBy(() -> settingService.verifyCurrentPassword(request))
                 .isInstanceOf(BadRequestException.class)
                 .message().isEqualTo("비밀번호가 일치하지 않습니다.");
     }
@@ -272,11 +307,17 @@ class SettingServiceTest {
     @DisplayName("기존 비밀번호 검증 실패 - 회원이 존재하지 않을 경우")
     @Test
     void verifyNotExistingMemberPassword() {
+        //given
+        VerifyPasswordServiceRequest request = VerifyPasswordServiceRequest.builder()
+                .username("aaa")
+                .password("password")
+                .build();
+
         //when //then
-        assertThatThrownBy(() -> settingService.verifyCurrentPassword(
-                "aaa", "123"))
+        assertThatThrownBy(() -> settingService.verifyCurrentPassword(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
+
     }
 
     @DisplayName("기존 비밀번호 검증 실패 - 탈퇴한 회원인 경우")
@@ -286,11 +327,15 @@ class SettingServiceTest {
         University university = universityFactory.createUniversity("푸단대학교");
         Member member = memberFactory.createVerifiedStudentMember("nickname", university);
 
+        VerifyPasswordServiceRequest request = VerifyPasswordServiceRequest.builder()
+                .username(member.getLoginCredentials().getUsername())
+                .password("password")
+                .build();
+
         memberRepository.delete(member);
 
         //when //then
-        assertThatThrownBy(() -> settingService.verifyCurrentPassword(
-                member.getLoginCredentials().getUsername(), "123"))
+        assertThatThrownBy(() -> settingService.verifyCurrentPassword(request))
                 .isInstanceOf(NotFoundException.class)
                 .message().isEqualTo("사용자를 찾을수 없습니다");
     }

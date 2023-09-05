@@ -1,7 +1,9 @@
 package com.plana.infli.web.controller;
 
 import com.plana.infli.service.SettingService;
+import com.plana.infli.web.dto.request.setting.modify.nickname.ModifyNicknameRequest;
 import com.plana.infli.web.dto.request.setting.modify.password.ModifyPasswordRequest;
+import com.plana.infli.web.dto.request.setting.verify.password.VerifyPasswordRequest;
 import com.plana.infli.web.dto.response.profile.MyProfileResponse;
 import com.plana.infli.web.dto.response.profile.MyProfileToUnregisterResponse;
 import com.plana.infli.web.dto.response.profile.image.ChangeProfileImageResponse;
@@ -39,19 +41,17 @@ public class SettingController {
 
     @PostMapping("/nickname")
     @Operation(summary = "회원 닉네임 변경")
-    public String changeNickname(@AuthenticatedPrincipal String username,
-            @RequestBody String newNickname) {
-
-        settingService.changeNickname(username, newNickname);
-        return "닉네임 변경 완료";
+    public void changeNickname(@AuthenticatedPrincipal String username,
+            @RequestBody @Validated ModifyNicknameRequest request) {
+        settingService.changeNickname(request.toServiceRequest(username));
     }
 
     @PostMapping("/password/verification")
     @Operation(summary = "기존 비밀번호 검증")
     public String verifyCurrentPassword(@AuthenticatedPrincipal String username,
-            @RequestBody String currentPassword) {
+            @RequestBody @Validated VerifyPasswordRequest request) {
 
-        return settingService.verifyCurrentPassword(username, currentPassword);
+        return settingService.verifyCurrentPassword(request.toServiceRequest(username));
     }
 
     @PostMapping("/password")
