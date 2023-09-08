@@ -24,16 +24,12 @@ spring:
   servlet:
     multipart:
       max-file-size: 10MB
-      max-request-size: 100MB
+      max-request-size: 50MB
 
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: none
-
-  data:
-    redis:
-      host: clustercfg.infli-redis-cluster.lc7qwb.memorydb.ap-northeast-2.amazonaws.com:6379
 
 logging:
   level:
