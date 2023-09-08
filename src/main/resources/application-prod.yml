@@ -29,8 +29,12 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
-      
+      ddl-auto: none
+
+  data:
+    redis:
+      host: clustercfg.infli-redis-cluster.lc7qwb.memorydb.ap-northeast-2.amazonaws.com:6379
+
 logging:
   level:
-    sql: debug
+    sql: info
