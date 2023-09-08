@@ -1,8 +1,5 @@
 version: 0.2
 
-env:
-  variables:
-    ECR_REPO_NAME: infli-back
 phases:
   pre_build:
     commands:
@@ -11,7 +8,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-      - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/infli-back
+      - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-2.amazonaws.com/${ECR_REPO_NAME}
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
@@ -20,8 +17,8 @@ phases:
       - chmod +x ./gradlew
       - ./gradlew clean build -x test
       - echo Building the Docker image...
-      - docker build -t infli-back:latest .
-      - docker tag infli-back:latest ${REPOSITORY_URI}:${IMAGE_TAG}
+      - docker build -t ${ECR_REPO_NAME}:latest .
+      - docker tag ${ECR_REPO_NAME}:latest ${REPOSITORY_URI}:${IMAGE_TAG}
       - echo ${REPOSITORY_URI}
   post_build:
     commands:
@@ -29,6 +26,6 @@ phases:
       - echo Pushing the Docker images...
       - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
       - echo Writing image definitions file...
-      - printf '[{"name":"infli-back","imageUri":"%s"}]' ${REPOSITORY_URI}:${IMAGE_TAG} > imagedefinitions.json
+      - printf '[{"name":"${ECR_REPO_NAME}","imageUri":"%s"}]' ${REPOSITORY_URI}:${IMAGE_TAG} > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json
