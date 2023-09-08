@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  variables:
+    ECR_REPO_NAME: ${ECR_REPO_NAME}
+
 phases:
   pre_build:
     commands:
