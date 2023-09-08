@@ -1,0 +1,36 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
+    encoding:
+      charset: utf-8
+      force: true
+
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:mysql://${HOST_NAME}:3306/${DATABASE_NAME}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+      
+logging:
+  level:
+    sql: debug
