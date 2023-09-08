@@ -63,6 +63,10 @@ dependencies {
 
     // email
     implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.9.3'
+
+//    // redis
+//    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+//    implementation 'org.springframework.session:spring-session-data-redis'
 }
 
 dependencyManagement {

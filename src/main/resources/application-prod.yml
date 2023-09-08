@@ -30,7 +30,7 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: none
-      
+
 logging:
   level:
-    sql: debug
+    sql: info
