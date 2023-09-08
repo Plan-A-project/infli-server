@@ -135,8 +135,8 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
     @Override
     public List<MyComment> findMyComments(CommentQueryRequest request) {
         return jpaQueryFactory
-                .select(new QMyComment(comment.id, comment.post.id,
-                        comment.content, comment.createdAt))
+                .select(new QMyComment(comment.id, comment.post.board.id,
+                        comment.post.id, comment.content, comment.createdAt))
                 .from(comment)
                 .innerJoin(comment.member, member)
                 .innerJoin(comment.post, post)

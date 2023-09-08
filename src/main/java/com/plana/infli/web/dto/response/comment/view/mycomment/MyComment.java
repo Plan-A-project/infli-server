@@ -9,6 +9,8 @@ public class MyComment {
 
     private final Long commentId;
 
+    private final Long boardId;
+
     private final Long postId;
 
     private final String content;
@@ -17,8 +19,11 @@ public class MyComment {
 
 
     @QueryProjection
-    public MyComment(Long commentId, Long postId, String content, LocalDateTime createdAt) {
+    public MyComment(Long commentId, Long boardId, Long postId,
+            String content, LocalDateTime createdAt) {
+
         this.commentId = commentId;
+        this.boardId = boardId;
         this.postId = postId;
         this.content = content;
         this.createdAt = createdAt;
