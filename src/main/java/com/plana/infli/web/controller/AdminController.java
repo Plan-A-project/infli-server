@@ -2,6 +2,7 @@ package com.plana.infli.web.controller;
 
 
 import com.plana.infli.service.AdminService;
+import com.plana.infli.web.dto.response.admin.member.LoadSignedUpStudentMembersResponse;
 import com.plana.infli.web.dto.response.admin.verification.company.LoadCompanyVerificationsResponse;
 import com.plana.infli.web.dto.response.admin.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
@@ -39,5 +40,10 @@ public class AdminController {
     public void setVerificationStatusAsSuccess(@AuthenticatedPrincipal String username,
             @PathVariable Long memberId) {
         adminService.setStatusAsVerifiedMember(username, memberId);
+    }
+
+    @GetMapping("/members")
+    public LoadSignedUpStudentMembersResponse loadSignedUpStudentMembers(@AuthenticatedPrincipal String username) {
+       return adminService.loadSignedUpStudentMembers(username);
     }
 }

@@ -3,6 +3,7 @@ package com.plana.infli.repository.member;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.type.Role;
+import com.plana.infli.web.dto.response.admin.member.SignedUpStudentMember;
 import com.plana.infli.web.dto.response.admin.verification.company.CompanyVerificationImage;
 import com.plana.infli.web.dto.response.admin.verification.student.StudentVerificationImage;
 import java.util.List;
@@ -33,4 +34,6 @@ public interface MemberRepositoryCustom {
     Optional<Member> findActiveMemberWithCompanyBy(String username);
 
     Optional<Member> findDeletedMemberBy(Long memberId);
+
+    List<SignedUpStudentMember> loadSignedUpStudentMember(University university);
 }
