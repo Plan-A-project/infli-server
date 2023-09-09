@@ -314,11 +314,7 @@ public class MemberService {
     
     private void validateSendMailRequest(String universityEmail, Member member) {
 
-        ALLOWED_EMAIL_SUFFIX.forEach(suffix -> {
-            if (universityEmail.endsWith(suffix) == false) {
-                throw new BadRequestException(INVALID_UNIVERSITY_EMAIL);
-            }
-        });
+        checkIfAllowedEmailSuffix(universityEmail);
 
         if (member.getVerificationStatus() == SUCCESS) {
             throw new BadRequestException(EMAIL_VERIFICATION_ALREADY_EXISTS);
@@ -327,6 +323,17 @@ public class MemberService {
         if (memberRepository.existsByVerifiedUniversityEmail(universityEmail)) {
             throw new ConflictException(DUPLICATED_UNIVERSITY_EMAIL);
         }
+    }
+
+    //TODO 람다로 변경 필요
+    private void checkIfAllowedEmailSuffix(String universityEmail) {
+
+        for (String suffix : ALLOWED_EMAIL_SUFFIX) {
+            if (universityEmail.endsWith(suffix)) {
+                return;
+            }
+        }
+        throw new BadRequestException(INVALID_UNIVERSITY_EMAIL);
     }
 
 
