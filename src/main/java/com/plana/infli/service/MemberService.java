@@ -23,6 +23,7 @@ import static com.plana.infli.infra.exception.custom.NotFoundException.UNIVERSIT
 import static com.sendgrid.Method.POST;
 import static jakarta.servlet.http.HttpServletResponse.SC_ACCEPTED;
 import static java.time.LocalDateTime.now;
+import static java.util.List.*;
 import static org.springframework.http.MediaType.TEXT_PLAIN_VALUE;
 
 import com.plana.infli.domain.Company;
@@ -54,6 +55,8 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,7 +79,7 @@ public class MemberService {
 
     private static final String MESSAGE_FROM = "no-reply@infli.co";
 
-    private static final String ALLOWED_EMAIL_SUFFIX = "@fudan.edu.cn";
+    private static final List<String> ALLOWED_EMAIL_SUFFIX = of("@fudan.edu.cn", "@m.fudan.edu.cn");
 
     private final MemberRepository memberRepository;
 
@@ -310,9 +313,8 @@ public class MemberService {
     }
     
     private void validateSendMailRequest(String universityEmail, Member member) {
-        if (universityEmail.endsWith(ALLOWED_EMAIL_SUFFIX) == false) {
-            throw new BadRequestException(INVALID_UNIVERSITY_EMAIL);
-        }
+
+        checkIfAllowedEmailSuffix(universityEmail);
 
         if (member.getVerificationStatus() == SUCCESS) {
             throw new BadRequestException(EMAIL_VERIFICATION_ALREADY_EXISTS);
@@ -321,6 +323,17 @@ public class MemberService {
         if (memberRepository.existsByVerifiedUniversityEmail(universityEmail)) {
             throw new ConflictException(DUPLICATED_UNIVERSITY_EMAIL);
         }
+    }
+
+    //TODO 람다로 변경 필요
+    private void checkIfAllowedEmailSuffix(String universityEmail) {
+
+        for (String suffix : ALLOWED_EMAIL_SUFFIX) {
+            if (universityEmail.endsWith(suffix)) {
+                return;
+            }
+        }
+        throw new BadRequestException(INVALID_UNIVERSITY_EMAIL);
     }
 
 

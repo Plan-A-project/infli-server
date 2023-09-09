@@ -8,8 +8,11 @@ import static com.plana.infli.domain.type.VerificationStatus.*;
 import static java.util.Optional.*;
 
 import com.plana.infli.domain.Member;
+import com.plana.infli.domain.QMember;
 import com.plana.infli.domain.University;
 import com.plana.infli.domain.type.Role;
+import com.plana.infli.web.dto.response.admin.member.QSignedUpStudentMember;
+import com.plana.infli.web.dto.response.admin.member.SignedUpStudentMember;
 import com.plana.infli.web.dto.response.admin.verification.company.CompanyVerificationImage;
 import com.plana.infli.web.dto.response.admin.verification.company.QCompanyVerificationImage;
 import com.plana.infli.web.dto.response.admin.verification.student.QStudentVerificationImage;
@@ -145,5 +148,19 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .where(member.basicCredentials.isDeleted.isTrue())
                 .where(member.id.eq(memberId))
                 .fetchOne());
+    }
+
+    @Override
+    public List<SignedUpStudentMember> loadSignedUpStudentMember(University university) {
+        return jpaQueryFactory.select(new QSignedUpStudentMember(member.id, member.university.id,
+                        member.basicCredentials.nickname,
+                        member.studentCredentials.realName, member.studentCredentials.universityEmail,
+                        member.studentCredentials.universityCertificateUrl,
+                        member.verificationStatus, member.profileImage.thumbnailUrl,
+                        member.basicCredentials.isPolicyAccepted, member.createdAt))
+                .from(member)
+                .where(member.basicCredentials.isDeleted.isFalse())
+                .where(member.university.eq(university))
+                .fetch();
     }
 }
