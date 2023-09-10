@@ -1,11 +1,12 @@
 package com.plana.infli.infra.security.token;
 
+import java.io.Serializable;
 import java.util.Collection;
 import lombok.Builder;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
-public class CustomAuthenticationToken extends AbstractAuthenticationToken {
+public class CustomAuthenticationToken extends AbstractAuthenticationToken implements Serializable {
 
     private final Object principal;
 
