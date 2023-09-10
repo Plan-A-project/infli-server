@@ -33,7 +33,8 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST_NAME}
+      cluster:
+        nodes: ${REDIS_NODE}
 
 logging:
   level:
