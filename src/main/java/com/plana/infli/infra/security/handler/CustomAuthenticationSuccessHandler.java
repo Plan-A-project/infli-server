@@ -29,7 +29,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
 
-        String nickName = customUser.getNickName();
+        String nickName = customUser.getNickname();
         Role role = customUser.getRole();
 
         String json = om.writeValueAsString(LoginSuccessResponse.builder()

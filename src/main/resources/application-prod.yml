@@ -31,6 +31,10 @@ spring:
     hibernate:
       ddl-auto: none
 
+  data:
+    redis:
+      host: ${REDIS_HOST_NAME}
+
 logging:
   level:
     sql: info
