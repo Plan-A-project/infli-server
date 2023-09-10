@@ -34,7 +34,7 @@ spring:
   data:
     redis:
       cluster:
-        nodes: infli-redis-cluster-001.lc7qwb.0001.apn2.cache.amazonaws.com:6379
+        nodes: infli-redis-cluster.lc7qwb.ng.0001.apn2.cache.amazonaws.com:6379
 
 logging:
   level:
