@@ -77,7 +77,8 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers(POST, "/verification/student/**").hasAuthority("STUDENT")
                         .requestMatchers(POST, "/verification/company/**").hasAuthority("COMPANY")
-                        .requestMatchers(GET, "/verification/student/email/{code}").permitAll()
+                        .requestMatchers(GET, "/verification/student/email/{code}")
+                        .permitAll()
 
                         .requestMatchers(
                                 "/swagger-ui.html",
@@ -92,7 +93,7 @@ public class SecurityConfig {
 
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
-                        .deleteCookies("JSESSIONID", "remember-me")
+                        .deleteCookies("SESSION", "remember-me")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .logoutSuccessHandler(logoutSuccessHandler))
