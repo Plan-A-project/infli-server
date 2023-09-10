@@ -11,7 +11,9 @@ import org.springframework.security.core.userdetails.User;
 @Getter
 public class CustomUser extends User {
 
-    private final Member member;
+    private final Role role;
+
+    private final String nickname;
 
     public CustomUser(Member member) {
         super(member.getLoginCredentials().getUsername(),
@@ -20,14 +22,7 @@ public class CustomUser extends User {
                 true, true, true,
                 List.of(new SimpleGrantedAuthority(member.getRole().toString())));
 
-        this.member = member;
-    }
-
-    public Role getRole() {
-        return member.getRole();
-    }
-
-    public String getNickName() {
-        return member.getBasicCredentials().getNickname();
+        this.role = member.getRole();
+        this.nickname = member.getBasicCredentials().getNickname();
     }
 }

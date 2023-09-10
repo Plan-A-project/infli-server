@@ -77,7 +77,8 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers(POST, "/verification/student/**").hasAuthority("STUDENT")
                         .requestMatchers(POST, "/verification/company/**").hasAuthority("COMPANY")
-                        .requestMatchers(GET, "/verification/student/email/{code}").permitAll()
+                        .requestMatchers(GET, "/verification/student/email/{code}")
+                        .permitAll()
 
                         .requestMatchers(
                                 "/swagger-ui.html",
@@ -92,7 +93,7 @@ public class SecurityConfig {
 
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "POST"))
-                        .deleteCookies("JSESSIONID", "remember-me")
+                        .deleteCookies("SESSION", "remember-me")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .logoutSuccessHandler(logoutSuccessHandler))
@@ -125,7 +126,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "https://infli.co", "https://plan-a-client-7kn9.vercel.app", "https://www.infli.co"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000", "https://infli.co", "https://www.infli.co"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
