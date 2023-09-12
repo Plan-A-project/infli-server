@@ -1,5 +1,8 @@
 # infli-server
 
+## API Swagger Link
+
+https://api.infli.co/swagger-ui/index.html
 
 ## Architecture Diagrams
 
