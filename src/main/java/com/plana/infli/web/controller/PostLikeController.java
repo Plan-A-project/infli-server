@@ -4,6 +4,7 @@ import static org.springframework.http.HttpStatus.*;
 
 import com.plana.infli.service.PostLikeService;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ public class PostLikeController {
 
     @PostMapping("/posts/{postId}/likes")
     @ResponseStatus(CREATED)
+    @Operation(summary = "글 좋아요 누르기")
     public void createPostLike(@AuthenticatedPrincipal String username,
             @PathVariable Long postId) {
 
@@ -26,10 +28,10 @@ public class PostLikeController {
     }
 
     @DeleteMapping("/posts/{postId}/likes")
+    @Operation(summary = "좋아요 누른 글 좋아요 취소")
     public void cancelPostLike(@AuthenticatedPrincipal String username,
             @PathVariable Long postId) {
 
-        // TODO 동시성 고려 필요
         postLikeService.cancelPostLike(username, postId);
     }
 }

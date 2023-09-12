@@ -30,8 +30,8 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comments")
-    @Operation(summary = "댓글 또는 대댓글 생성")
     @ResponseStatus(CREATED)
+    @Operation(summary = "댓글 또는 대댓글 생성")
     public CreateCommentResponse createComment(@AuthenticatedPrincipal String username,
             @Validated @RequestBody CreateCommentRequest request) {
 
