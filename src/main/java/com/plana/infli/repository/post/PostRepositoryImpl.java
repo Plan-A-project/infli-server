@@ -279,9 +279,9 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     //TODO 인기글 선정 기준
     private BooleanExpression postIsPopularPost() {
-        return post.commentMemberCount.goe(3)
-                .or(post.viewCount.goe(20)
-                        .or(post.likes.size().goe(3)));
+        return post.commentMemberCount.goe(5)
+                .or(post.viewCount.goe(80)
+                        .or(post.likes.size().goe(5)));
     }
 
     private BooleanExpression postTypeEqual(PostType postType) {
