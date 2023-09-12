@@ -24,7 +24,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @GetMapping("/policy")
-    @Operation(summary = "글 작성 이용 규칙 동의 여부 확인")
+    @Operation(summary = "글 작성 이용 규칙을 동의 했는지 여부 확인")
     public boolean checkMemberAcceptedWritePolicy(@AuthenticatedPrincipal String username) {
         return memberService.checkMemberAcceptedPolicy(username);
     }
@@ -42,23 +42,27 @@ public class MemberController {
     }
 
     @PostMapping("/verification/student/email")
+    @Operation(summary = "대학 인증 메일 발송")
     public void sendVerificationEmail(@AuthenticatedPrincipal String username,
             @RequestBody @Validated SendVerificationMailRequest request) {
         memberService.sendVerificationMail(request.toServiceRequest(username));
     }
 
     @GetMapping("/verification/student/email/{code}")
+    @Operation(summary = "발송한 인증 메일 검증")
     public void verifyStudentMemberEmail(@PathVariable String code) {
         memberService.verifyStudentMemberEmail(code);
     }
 
     @PostMapping("/verification/student/certificate")
+    @Operation(summary = "학생 회원이 재학 증명서 사진 업로드")
     public void uploadEnrollmentCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
         memberService.uploadUniversityCertificateImage(username, file);
     }
 
     @PostMapping("/verification/company/certificate")
+    @Operation(summary = "기업 회원이 사업자 등록증 사진 업로드")
     public void uploadCompanyCertificateImage(@AuthenticatedPrincipal String username,
             @RequestParam MultipartFile file) {
         memberService.uploadCompanyCertificateImage(username, file);

@@ -20,7 +20,7 @@ public class CommentLikeController {
     private final CommentLikeService commentLikeService;
 
     @PostMapping("/comments/{commentId}/likes")
-    @Operation(description = "특정 댓글에 좋아요 누르기")
+    @Operation(summary = "특정 댓글에 좋아요 누르기")
     @ResponseStatus(CREATED)
     public void createCommentLike(@AuthenticatedPrincipal String username,
             @PathVariable Long commentId) {
@@ -29,7 +29,7 @@ public class CommentLikeController {
     }
 
     @DeleteMapping("/comments/{commentId}/likes")
-    @ApiResponse(description = "좋아요 누른 댓글 좋아요 취소")
+    @Operation(summary = "좋아요 누른 댓글 좋아요 취소")
     public void cancelCommentLike(@AuthenticatedPrincipal String username,
             @PathVariable Long commentId) {
 
