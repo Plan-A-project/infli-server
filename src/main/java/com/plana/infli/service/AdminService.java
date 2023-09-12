@@ -99,8 +99,8 @@ public class AdminService {
 
         University university = findByUsername(username);
 
-        List<SignedUpStudentMember> members = memberRepository
-                .loadSignedUpStudentMember(university);
+        List<SignedUpStudentMember> members =
+                memberRepository.loadSignedUpStudentMember(university);
 
         return LoadSignedUpStudentMembersResponse.of(members);
     }

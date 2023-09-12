@@ -1,5 +1,8 @@
 # infli-server
 
+## API Swagger Link
+
+### [API 명세 링크](https://test.infli.co/swagger-ui/index.html)
 
 ## Architecture Diagrams
 

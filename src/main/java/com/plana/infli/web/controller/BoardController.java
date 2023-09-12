@@ -49,14 +49,14 @@ public class BoardController {
      */
 
     @GetMapping("/settings/boards/popular")
-    @Operation(description = "인기 게시판을 회원이 보고 싶은 순서대로 변경하기 위해, 인기 게시판 목록 조회")
+    @Operation(summary = "인기 게시판을 회원이 보고 싶은 순서대로 변경하기 위해, 인기 게시판 목록 조회")
     public PopularBoardsSettingsResponse loadEnabledPopularBoardsForSetting(
             @AuthenticatedPrincipal String username) {
         return boardService.loadEnabledPopularBoardsForSettingBy(username);
     }
 
     @PatchMapping("/settings/boards/popular")
-    @Operation(description = "인기 게시판을 회원이 보고 싶은 순서대로 변경")
+    @Operation(summary = "인기 게시판을 회원이 보고 싶은 순서대로 변경")
     public void changePopularBoardSequence(@AuthenticatedPrincipal String username,
             @RequestBody @Validated EditPopularBoardSequenceRequest request) {
         boardService.changePopularBoardSequence(request.toServiceRequest(username));
@@ -64,14 +64,14 @@ public class BoardController {
 
 
     @GetMapping("/settings/boards")
-    @Operation(description = "해당 대학에 존재하는 모든 게시판 조회")
+    @Operation(summary = "해당 대학에 존재하는 모든 게시판 조회")
     public BoardListResponse listAllBoards(@AuthenticatedPrincipal String username) {
 
         return boardService.loadAllBoard(username);
     }
 
     @PostMapping("/settings/boards/popular")
-    @Operation(description = "모든 인기 게시판중 보고싶은 인기 게시판만 조회되도록 선택")
+    @Operation(summary = "모든 인기 게시판중 보고싶은 인기 게시판만 조회되도록 선택")
     public void changeBoardVisibility(@AuthenticatedPrincipal String username,
             @RequestBody @Validated ChangePopularBoardVisibilityRequest request) {
 

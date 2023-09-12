@@ -43,6 +43,7 @@ public class AdminController {
     }
 
     @GetMapping("/members")
+    @Operation(summary = "가입한 학생 회원 목록 조회")
     public LoadSignedUpStudentMembersResponse loadSignedUpStudentMembers(@AuthenticatedPrincipal String username) {
        return adminService.loadSignedUpStudentMembers(username);
     }
