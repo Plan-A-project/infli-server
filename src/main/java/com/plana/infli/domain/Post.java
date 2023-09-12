@@ -99,6 +99,9 @@ public class Post extends BaseEntity {
         this.recruitment = postEditor.getRecruitment();
         this.isDeleted = postEditor.isDeleted();
         this.viewCount = postEditor.getViewCount();
-        this.commentMemberCount = postEditor.getCommentMemberCount();
+    }
+
+    public int increaseCommentMemberCount() {
+        return ++commentMemberCount;
     }
 }

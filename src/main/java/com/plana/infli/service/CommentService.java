@@ -3,7 +3,6 @@ package com.plana.infli.service;
 import static com.plana.infli.domain.Comment.*;
 import static com.plana.infli.domain.Member.isAdmin;
 import static com.plana.infli.domain.editor.CommentEditor.*;
-import static com.plana.infli.domain.editor.PostEditor.increaseCommentMemberCount;
 import static com.plana.infli.domain.type.VerificationStatus.*;
 import static com.plana.infli.infra.exception.custom.BadRequestException.CHILD_COMMENTS_NOT_ALLOWED;
 import static com.plana.infli.infra.exception.custom.BadRequestException.EDIT_COMMENT_IN_DELETED_POST_NOT_ALLOWED;
@@ -151,7 +150,7 @@ public class CommentService {
 
             // 새로운 식별자 번호를 생성한후 부여한다
             // 이 글에 작성된 댓글들에게 부여된 가장 최근 식별자 번호
-            return increaseCommentMemberCount(post);
+            return post.increaseCommentMemberCount();
         }
 
         // 식별자 번호가 존재하는 경우 기존 번호 그대로 다시 부여한다

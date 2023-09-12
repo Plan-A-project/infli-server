@@ -101,6 +101,7 @@ public class DefaultInitializer implements CommandLineRunner {
     }
 
     private void createAdminMember() {
+        if (memberRepository.existsByRole(ADMIN) == false) {
             memberRepository.save(Member.builder()
                     .university(university)
                     .role(ADMIN)
@@ -111,5 +112,6 @@ public class DefaultInitializer implements CommandLineRunner {
                     .studentCredentials(null)
                     .companyCredentials(null)
                     .build());
+        }
     }
 }

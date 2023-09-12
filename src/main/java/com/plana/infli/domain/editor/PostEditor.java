@@ -24,18 +24,16 @@ public class PostEditor {
 
     private final int viewCount;
 
-    private final int commentMemberCount;
 
     @Builder
     public PostEditor(String title, String content, String thumbnailUrl, Recruitment recruitment,
-            boolean isDeleted, int viewCount, int commentMemberCount) {
+            boolean isDeleted, int viewCount) {
         this.title = title;
         this.content = content;
         this.thumbnailUrl = thumbnailUrl;
         this.recruitment = recruitment;
         this.isDeleted = isDeleted;
         this.viewCount = viewCount;
-        this.commentMemberCount = commentMemberCount;
     }
 
 
@@ -72,17 +70,5 @@ public class PostEditor {
         post.edit(post.toEditor()
                 .viewCount(increasedViewCount)
                 .build());
-    }
-
-    public static int increaseCommentMemberCount(Post post) {
-        int currentCommentMemberCount = post.getCommentMemberCount();
-
-        int increasedCommentMemberCount = currentCommentMemberCount + 1;
-
-        post.edit(post.toEditor()
-                .commentMemberCount(increasedCommentMemberCount)
-                .build());
-
-        return increasedCommentMemberCount;
     }
 }
