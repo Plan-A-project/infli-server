@@ -2,7 +2,7 @@
 
 ## API Swagger Link
 
-### [API 명세 링크](https://api.infli.co/swagger-ui/index.html)
+### [API 명세 링크](https://test.infli.co/swagger-ui/index.html)
 
 ## Architecture Diagrams
 
