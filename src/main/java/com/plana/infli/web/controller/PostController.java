@@ -113,7 +113,6 @@ public class PostController {
     @Operation(summary = "글 키워드로 검색")
     public SearchedPostsResponse searchPostsByKeyword(
             @AuthenticatedPrincipal String username, @Validated SearchPostsByKeywordRequest request) {
-
         return postService.searchPostsByKeyword(request.toServiceRequest(username));
     }
 }

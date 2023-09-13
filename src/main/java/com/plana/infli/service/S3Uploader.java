@@ -1,4 +1,4 @@
-package com.plana.infli.service.util;
+package com.plana.infli.service;
 
 import static com.amazonaws.services.s3.model.CannedAccessControlList.*;
 import static org.springframework.util.StringUtils.*;
