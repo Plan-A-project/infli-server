@@ -56,7 +56,6 @@ public class CommentService {
 
     @Transactional
     @Retry
-    //TODO 이메일 인증 받은 회원만 댓글 작성 가능하도록 변경 필요
     public CreateCommentResponse createComment(CreateCommentServiceRequest request) {
 
         validateContentLength(request.getContent());
@@ -111,7 +110,6 @@ public class CommentService {
         return commentId != null ? findCommentWithPostBy(commentId) : null;
     }
 
-    //TODO
     private void validateParentComment(Comment parentComment, Post post) {
 
         if (parentComment == null) {

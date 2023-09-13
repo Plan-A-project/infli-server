@@ -35,7 +35,6 @@ import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.repository.university.UniversityRepository;
 import com.plana.infli.service.aop.retry.Retry;
-import com.plana.infli.service.util.S3Uploader;
 import com.plana.infli.web.dto.request.post.create.recruitment.CreateRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.edit.recruitment.EditRecruitmentPostServiceRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;

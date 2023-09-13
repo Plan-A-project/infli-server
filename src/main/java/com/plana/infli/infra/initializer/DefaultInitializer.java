@@ -101,17 +101,15 @@ public class DefaultInitializer implements CommandLineRunner {
     }
 
     private void createAdminMember() {
-        if (memberRepository.existsByRole(ADMIN) == false) {
-            memberRepository.save(Member.builder()
-                    .university(university)
-                    .role(ADMIN)
-                    .verificationStatus(SUCCESS)
-                    .loginCredentials(of("admin1111", encoder.encode("infli1234!")))
-                    .profileImage(ProfileImage.ofDefaultProfileImage())
-                    .basicCredentials(BasicCredentials.ofDefaultWithNickname("인플리 관리자"))
-                    .studentCredentials(null)
-                    .companyCredentials(null)
-                    .build());
-        }
+        memberRepository.save(Member.builder()
+                .university(university)
+                .role(ADMIN)
+                .verificationStatus(SUCCESS)
+                .loginCredentials(of("admin2222", encoder.encode("infli1234!")))
+                .profileImage(ProfileImage.ofDefaultProfileImage())
+                .basicCredentials(BasicCredentials.ofDefaultWithNickname("인플리 관리자2"))
+                .studentCredentials(null)
+                .companyCredentials(null)
+                .build());
     }
 }
