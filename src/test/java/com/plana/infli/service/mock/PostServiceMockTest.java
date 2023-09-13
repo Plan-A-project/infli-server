@@ -22,7 +22,7 @@ import com.plana.infli.domain.embedded.member.StudentCredentials;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.repository.post.PostRepository;
 import com.plana.infli.service.PostService;
-import com.plana.infli.service.util.S3Uploader;
+import com.plana.infli.service.S3Uploader;
 import com.plana.infli.web.dto.response.post.image.PostImageUploadResponse;
 import java.util.List;
 import java.util.Optional;

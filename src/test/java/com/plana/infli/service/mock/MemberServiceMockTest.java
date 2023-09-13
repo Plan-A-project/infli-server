@@ -27,12 +27,11 @@ import com.plana.infli.infra.exception.custom.InternalServerErrorException;
 import com.plana.infli.repository.emailVerification.EmailVerificationRepository;
 import com.plana.infli.repository.member.MemberRepository;
 import com.plana.infli.service.MemberService;
-import com.plana.infli.service.util.S3Uploader;
+import com.plana.infli.service.S3Uploader;
 import com.plana.infli.web.dto.request.member.email.SendVerificationMailServiceRequest;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +44,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.ion.IonException;
 
 @ExtendWith(MockitoExtension.class)
 class MemberServiceMockTest {

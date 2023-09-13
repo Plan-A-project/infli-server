@@ -277,7 +277,6 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         return viewOrder == popular ? postIsPopularPost() : null;
     }
 
-    //TODO 인기글 선정 기준
     private BooleanExpression postIsPopularPost() {
         return post.commentMemberCount.goe(5)
                 .or(post.viewCount.goe(80)
