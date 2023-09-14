@@ -7,6 +7,8 @@ import com.plana.infli.web.dto.response.admin.verification.company.LoadCompanyVe
 import com.plana.infli.web.dto.response.admin.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,8 +45,10 @@ public class AdminController {
     }
 
     @GetMapping("/members")
-    @Operation(summary = "가입한 학생 회원 목록 조회")
-    public LoadSignedUpStudentMembersResponse loadSignedUpStudentMembers(@AuthenticatedPrincipal String username) {
-       return adminService.loadSignedUpStudentMembers(username);
+    @Operation(summary = "특정 날짜별 가입한 학생 회원 목록 조회")
+    public LoadSignedUpStudentMembersResponse loadSignedUpStudentMembers(
+            @AuthenticatedPrincipal String username, LocalDateTime dateTime) {
+
+        return adminService.loadSignedUpStudentMembers(username, dateTime);
     }
 }

@@ -17,7 +17,9 @@ import com.plana.infli.web.dto.response.admin.verification.company.CompanyVerifi
 import com.plana.infli.web.dto.response.admin.verification.company.QCompanyVerificationImage;
 import com.plana.infli.web.dto.response.admin.verification.student.QStudentVerificationImage;
 import com.plana.infli.web.dto.response.admin.verification.student.StudentVerificationImage;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -151,7 +153,9 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
     }
 
     @Override
-    public List<SignedUpStudentMember> loadSignedUpStudentMember(University university) {
+    public List<SignedUpStudentMember> loadSignedUpStudentMember(
+            University university, LocalDateTime localDateTime) {
+
         return jpaQueryFactory.select(new QSignedUpStudentMember(member.id, member.university.id,
                         member.basicCredentials.nickname,
                         member.studentCredentials.realName, member.studentCredentials.universityEmail,
@@ -161,6 +165,13 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom{
                 .from(member)
                 .where(member.basicCredentials.isDeleted.isFalse())
                 .where(member.university.eq(university))
+                .where(joinedDateTimeEq(localDateTime))
                 .fetch();
     }
+
+    private BooleanExpression joinedDateTimeEq(LocalDateTime localDateTime) {
+        return localDateTime != null ?
+                member.createdAt.between(localDateTime, localDateTime.plusDays(1)) : null;
+    }
+
 }

@@ -19,6 +19,7 @@ import com.plana.infli.web.dto.response.admin.verification.company.CompanyVerifi
 import com.plana.infli.web.dto.response.admin.verification.company.LoadCompanyVerificationsResponse;
 import com.plana.infli.web.dto.response.admin.verification.student.LoadStudentVerificationsResponse;
 import com.plana.infli.web.dto.response.admin.verification.student.StudentVerificationImage;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -95,12 +96,13 @@ public class AdminService {
         }
     }
 
-    public LoadSignedUpStudentMembersResponse loadSignedUpStudentMembers(String username) {
+    public LoadSignedUpStudentMembersResponse loadSignedUpStudentMembers(
+            String username, LocalDateTime joinedDateTime) {
 
         University university = findByUsername(username);
 
         List<SignedUpStudentMember> members =
-                memberRepository.loadSignedUpStudentMember(university);
+                memberRepository.loadSignedUpStudentMember(university, joinedDateTime);
 
         return LoadSignedUpStudentMembersResponse.of(members);
     }
