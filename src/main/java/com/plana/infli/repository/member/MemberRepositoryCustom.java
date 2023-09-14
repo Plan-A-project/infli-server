@@ -6,6 +6,7 @@ import com.plana.infli.domain.type.Role;
 import com.plana.infli.web.dto.response.admin.member.SignedUpStudentMember;
 import com.plana.infli.web.dto.response.admin.verification.company.CompanyVerificationImage;
 import com.plana.infli.web.dto.response.admin.verification.student.StudentVerificationImage;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,5 +36,6 @@ public interface MemberRepositoryCustom {
 
     Optional<Member> findDeletedMemberBy(Long memberId);
 
-    List<SignedUpStudentMember> loadSignedUpStudentMember(University university);
+    List<SignedUpStudentMember> loadSignedUpStudentMember(
+            University university, LocalDateTime localDateTime);
 }
