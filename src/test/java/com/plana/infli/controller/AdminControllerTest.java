@@ -322,6 +322,14 @@ class AdminControllerTest {
                 .andExpect(content().string("해당 권한이 없습니다"))
                 .andDo(print());
     }
+
+    @DisplayName("특정 날짜별 가입 회원 목록 조회")
+    @WithMockMember(role = ADMIN)
+    @Test
+    void loadSignedUpMembersByDate() throws Exception {
+        //given
+        University university = universityRepository.findByName("푸단대학교").get();
+    }
 }
 
 
