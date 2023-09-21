@@ -240,7 +240,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         getMemberRole(request.getBoard()), post.likes.size(),
                         pressedLikeOnThisPost(request.getMember()), post.viewCount,
                         post.recruitment.companyName, post.recruitment.startDate,
-                        post.recruitment.endDate))
+                        post.recruitment.endDate, post.thumbnailUrl.isNotNull()))
                 .from(post)
                 .where(post.id.in(ids))
                 .orderBy(post.id.desc())

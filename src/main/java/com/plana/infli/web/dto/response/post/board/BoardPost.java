@@ -17,18 +17,21 @@ public class BoardPost extends DefaultPost {
 
     private final LocalDateTime recruitmentEndDate;
 
+    private final boolean hasImage;
+
 
     @Builder
     @QueryProjection
     public BoardPost(Long postId, String title, LocalDateTime createdAt,
             String thumbnailURL, String memberRole, int likeCount, boolean pressedLike,int viewCount,
             String companyName, LocalDateTime recruitmentStartDate,
-            LocalDateTime recruitmentEndDate) {
+            LocalDateTime recruitmentEndDate, boolean hasImage) {
         super(postId, title, pressedLike, likeCount, viewCount, createdAt, thumbnailURL);
 
         this.memberRole = memberRole;
         this.companyName = companyName;
         this.recruitmentStartDate = recruitmentStartDate;
         this.recruitmentEndDate = recruitmentEndDate;
+        this.hasImage = hasImage;
     }
 }
