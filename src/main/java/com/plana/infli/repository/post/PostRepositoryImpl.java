@@ -279,8 +279,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
 
     private BooleanExpression postIsPopularPost() {
         return post.commentMemberCount.goe(5)
-                .or(post.viewCount.goe(80)
-                        .or(post.likes.size().goe(5)));
+                .or(post.viewCount.goe(230)
+                        .or(post.likes.size().goe(3)));
     }
 
     private BooleanExpression postTypeEqual(PostType postType) {
