@@ -44,18 +44,19 @@ public class Board extends BaseEntity {
     private boolean isDeleted;
 
     @Builder
-    private Board(BoardType boardType, University university) {
+    private Board(BoardType boardType, University university, String boardName) {
         this.boardType = boardType;
-        this.boardName = boardType.getBoardName();
+        this.boardName = boardName;
         this.university = university;
         this.sequence = boardType.getDefaultSequence();
         this.isDeleted = false;
     }
 
-    public static Board create(BoardType boardType, University university) {
+    public static Board create(BoardType boardType, University university, String boardName) {
         return Board.builder()
                 .boardType(boardType)
                 .university(university)
+                .boardName(boardName)
                 .build();
     }
 
