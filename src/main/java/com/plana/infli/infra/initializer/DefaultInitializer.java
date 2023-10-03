@@ -96,7 +96,7 @@ public class DefaultInitializer implements CommandLineRunner {
 
     private void createBoardWithType(BoardType boardType) {
         if (boardRepository.existsByBoardTypeAndUniversity(boardType, university) == false) {
-            boardRepository.save(create(boardType, university));
+            boardRepository.save(create(boardType, university, boardType.getBoardName()));
         }
     }
 
