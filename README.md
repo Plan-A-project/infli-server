@@ -1,4 +1,6 @@
-# [서비스 링크](https://infli.co)
+# Infli Service
+
+## [infli.co](https://infli.co)
 
 ## API Swagger Link
 
