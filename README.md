@@ -1,4 +1,4 @@
-# infli-server
+# [서비스 링크](https://infli.co)
 
 ## API Swagger Link
 
