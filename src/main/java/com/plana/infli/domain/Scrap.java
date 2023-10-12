@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,4 +31,17 @@ public class Scrap {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @Builder
+    private Scrap(Post post, Member member) {
+        this.post = post;
+        this.member = member;
+    }
+
+    public static Scrap create(Post post, Member member) {
+        return Scrap.builder()
+                .post(post)
+                .member(member)
+                .build();
+    }
 }
