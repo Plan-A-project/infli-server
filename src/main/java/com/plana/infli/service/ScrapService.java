@@ -40,6 +40,10 @@ public class ScrapService {
         scrapRepository.save(scrap);
     }
 
+    public void cancelScrap(String username, Long postId) {
+
+    }
+
     private void checkScrapDuplicate(Post post, Member member) {
         if (scrapRepository.existsByPostAndMember(post, member)) {
             throw new ConflictException(SCRAP_ALREADY_EXISTS);
