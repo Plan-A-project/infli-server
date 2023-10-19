@@ -15,10 +15,12 @@ import com.plana.infli.repository.scrap.ScrapRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@Transactional(readOnly = true)
 public class ScrapService {
 
     private final MemberRepository memberRepository;
@@ -27,6 +29,7 @@ public class ScrapService {
 
     private final PostRepository postRepository;
 
+    @Transactional
     public void createScrap(String username, Long postId) {
 
         Member member = findMemberBy(username);
@@ -40,8 +43,18 @@ public class ScrapService {
         scrapRepository.save(scrap);
     }
 
+    @Transactional
     public void cancelScrap(String username, Long postId) {
+        Member member = findMemberBy(username);
+        Post post = findPostBy(postId);
+        Scrap scrap = findScrapBy(post, member);
 
+        scrapRepository.delete(scrap);
+    }
+
+    private Scrap findScrapBy(Post post, Member member) {
+        return scrapRepository.findByPostAndMember(post, member)
+                .orElseThrow(() -> new NotFoundException(SCRAP_NOT_FOUND));
     }
 
     private void checkScrapDuplicate(Post post, Member member) {

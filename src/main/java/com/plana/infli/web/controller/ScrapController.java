@@ -6,6 +6,7 @@ import com.plana.infli.service.ScrapService;
 import com.plana.infli.web.resolver.AuthenticatedPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,5 +22,10 @@ public class ScrapController {
     @ResponseStatus(CREATED)
     public void createScrap(@AuthenticatedPrincipal String username, @PathVariable Long postId) {
         scrapService.createScrap(username, postId);
+    }
+
+    @DeleteMapping("/posts/{postId}/scraps")
+    public void cancelScrap(@AuthenticatedPrincipal String username, @PathVariable Long postId) {
+        scrapService.cancelScrap(username, postId);
     }
 }
