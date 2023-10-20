@@ -12,6 +12,9 @@ public class ConflictException extends DefaultException {
 
 	public static final String ALREADY_PRESSED_LIKE_ON_THIS_POST = "이미 해당 글에 좋아요를 눌렀습니다";
 
+	public static final String SCRAP_ALREADY_EXISTS = "이미 해당글을 스크랩 했습니다";
+
+
     public static final String DEFAULT_POPULAR_BOARD_EXISTS = "인기 게시판 기본값이 이미 생성되었습니다";
 
 

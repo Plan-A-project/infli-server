@@ -19,13 +19,15 @@ public class BoardPost extends DefaultPost {
 
     private final boolean hasImage;
 
+    private final boolean hasScraped;
+
 
     @Builder
     @QueryProjection
     public BoardPost(Long postId, String title, LocalDateTime createdAt,
             String thumbnailURL, String memberRole, int likeCount, boolean pressedLike,int viewCount,
             String companyName, LocalDateTime recruitmentStartDate,
-            LocalDateTime recruitmentEndDate, boolean hasImage) {
+            LocalDateTime recruitmentEndDate, boolean hasImage, boolean hasScraped) {
         super(postId, title, pressedLike, likeCount, viewCount, createdAt, thumbnailURL);
 
         this.memberRole = memberRole;
@@ -33,5 +35,6 @@ public class BoardPost extends DefaultPost {
         this.recruitmentStartDate = recruitmentStartDate;
         this.recruitmentEndDate = recruitmentEndDate;
         this.hasImage = hasImage;
+        this.hasScraped = hasScraped;
     }
 }

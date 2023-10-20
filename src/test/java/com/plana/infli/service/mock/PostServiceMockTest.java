@@ -118,6 +118,7 @@ class PostServiceMockTest {
     }
 
     Board createBoard(University university) {
-        return Board.create(ANONYMOUS, university);
+        return Board.create(ANONYMOUS, university, ANONYMOUS.getBoardName());
     }
+
 }
