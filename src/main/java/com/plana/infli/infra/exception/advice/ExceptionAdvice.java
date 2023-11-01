@@ -19,7 +19,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 @RestControllerAdvice
 public class ExceptionAdvice {
 
-    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(MethodArgumentNotValidException e) {
         ErrorResponse response = ErrorResponse.builder()
@@ -32,7 +31,6 @@ public class ExceptionAdvice {
                 .body(response);
     }
 
-    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(MethodArgumentTypeMismatchException e) {
         ErrorResponse response = ErrorResponse.builder()
@@ -45,7 +43,6 @@ public class ExceptionAdvice {
                 .body(response);
     }
 
-    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(BindException e) {
         ErrorResponse response = ErrorResponse.builder()
@@ -58,7 +55,6 @@ public class ExceptionAdvice {
                 .body(response);
     }
 
-    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MissingPathVariableException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(MissingPathVariableException e) {
         ErrorResponse response = ErrorResponse.builder()
@@ -71,7 +67,6 @@ public class ExceptionAdvice {
                 .body(response);
     }
 
-    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(HttpMessageNotReadableException e) {
 
@@ -84,7 +79,6 @@ public class ExceptionAdvice {
                 .body(response);
     }
 
-    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(MissingServletRequestPartException e) {
 
@@ -97,7 +91,6 @@ public class ExceptionAdvice {
                 .body(response);
     }
 
-    @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> exceptionHandler(MissingServletRequestParameterException e) {
 

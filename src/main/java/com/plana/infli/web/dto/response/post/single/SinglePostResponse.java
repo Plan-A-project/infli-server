@@ -36,13 +36,17 @@ public class SinglePostResponse extends DefaultPost {
 
     private final boolean isAdmin;
 
+    private final String profileUrl;
+
     @Nullable
     private final RecruitmentInfoResponse recruitment;
 
     @QueryProjection
-    public SinglePostResponse(String boardName, Long boardId, String postType, @Nullable String nickname,
+    public SinglePostResponse(String boardName, Long boardId, String postType,
+            @Nullable String nickname,
             Long postId, String title, String content, LocalDateTime createdAt, boolean isMyPost,
-            boolean isAdmin, int viewCount, int likeCount, boolean pressedLike,String thumbnailURL, String companyName,
+            boolean isAdmin, String profileUrl, int viewCount, int likeCount, boolean pressedLike,
+            String thumbnailURL, String companyName,
             LocalDateTime recruitmentStartedDate, LocalDateTime recruitmentEndDate) {
 
         super(postId, title, pressedLike, likeCount, viewCount, createdAt, thumbnailURL);
@@ -54,6 +58,7 @@ public class SinglePostResponse extends DefaultPost {
         this.content = content;
         this.isMyPost = isMyPost;
         this.isAdmin = isAdmin;
+        this.profileUrl = profileUrl;
         this.recruitment = create(companyName, recruitmentStartedDate, recruitmentEndDate);
     }
 

@@ -7,28 +7,12 @@ import com.plana.infli.domain.type.PostType;
 import lombok.Builder;
 import lombok.Getter;
 
-@Getter
-public class CreateNormalPostServiceRequest {
-
-    private final String username;
-
-    private final Long boardId;
-
-    private final String title;
-
-    private final String content;
-
-    private final PostType postType;
+public record CreateNormalPostServiceRequest(String username, Long boardId, String title,
+                                             String content, PostType postType) {
 
     @Builder
-    public CreateNormalPostServiceRequest(String username, Long boardId,
-            String title, String content, PostType postType) {
+    public CreateNormalPostServiceRequest {
 
-        this.username = username;
-        this.boardId = boardId;
-        this.title = title;
-        this.content = content;
-        this.postType = postType;
     }
 
 
@@ -38,9 +22,9 @@ public class CreateNormalPostServiceRequest {
         return Post.builder()
                 .board(board)
                 .member(member)
-                .postType(request.getPostType())
-                .title(request.getTitle())
-                .content(request.getContent())
+                .postType(request.postType())
+                .title(request.title())
+                .content(request.content())
                 .build();
     }
 }
