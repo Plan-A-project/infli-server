@@ -44,17 +44,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         response.setStatus(SC_OK);
     }
 
-    @Getter
-    private static class LoginSuccessResponse {
-
-        private final String nickname;
-
-        private final Role role;
+    private record LoginSuccessResponse(String nickname, Role role) {
 
         @Builder
-        private LoginSuccessResponse(String nickname, Role role) {
-            this.nickname = nickname;
-            this.role = role;
+        private LoginSuccessResponse {
         }
 
     }

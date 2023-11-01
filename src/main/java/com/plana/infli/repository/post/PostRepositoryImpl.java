@@ -91,6 +91,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 post.postType.stringValue(), writerEq(),
                                 post.id, post.title, post.content, post.createdAt,
                                 isMyPost(request.getMember()), isAdmin(request.getMember()),
+                                post.member.profileImage.thumbnailUrl,
                                 post.viewCount, post.likes.size(),
                                 pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
                                 companyNameEqual(), recruitmentStartDateEqual(),
@@ -242,7 +243,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         getMemberRole(request.getBoard()), post.likes.size(),
                         pressedLikeOnThisPost(request.getMember()), post.viewCount,
                         post.recruitment.companyName, post.recruitment.startDate,
-                        post.recruitment.endDate, post.thumbnailUrl.isNotNull(), hasScrapedThisPost(request.getMember())))
+                        post.recruitment.endDate, post.thumbnailUrl.isNotNull(),
+                        hasScrapedThisPost(request.getMember())))
                 .from(post)
                 .where(post.id.in(ids))
                 .orderBy(post.id.desc())
