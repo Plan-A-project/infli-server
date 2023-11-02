@@ -89,6 +89,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                                 post.postType.stringValue(), writerEq(),
                                 post.id, post.title, post.content, post.createdAt,
                                 isMyPost(request.getMember()), isAdmin(request.getMember()),
+                                post.member.profileImage.thumbnailUrl,
                                 post.viewCount, post.likes.size(),
                                 pressedLikeOnThisPost(request.getMember()), post.thumbnailUrl,
                                 companyNameEqual(), recruitmentStartDateEqual(),
@@ -246,6 +247,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .orderBy(post.id.desc())
                 .fetch();
     }
+
 
     @Override
     public Optional<Post> findActivePostWithOptimisticLock(Long postId) {

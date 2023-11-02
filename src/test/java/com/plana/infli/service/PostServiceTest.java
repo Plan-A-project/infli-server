@@ -142,6 +142,7 @@ class PostServiceTest {
         );
     }
 
+
     @DisplayName("모집 글 작성 성공 - 회원 유형, 게시판 유형에 따른 케이스 분류")
     @ParameterizedTest(name = "{index} 게시판 유형: {0}, 회원 유형 : {1}")
     @MethodSource("allowedRoleToWriteRecruitmentPost")

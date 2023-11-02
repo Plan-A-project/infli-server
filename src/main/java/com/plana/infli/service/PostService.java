@@ -81,11 +81,11 @@ public class PostService {
     @Transactional
     public Long createNormalPost(CreateNormalPostServiceRequest request) {
 
-        Member member = findMemberWithUniversityBy(request.getUsername());
+        Member member = findMemberWithUniversityBy(request.username());
 
-        Board board = findBoardWithUniversityBy(request.getBoardId());
+        Board board = findBoardWithUniversityBy(request.boardId());
 
-        validateCreateNormalPostRequest(member, board, request.getPostType());
+        validateCreateNormalPostRequest(member, board, request.postType());
 
         Post post = CreateNormalPostServiceRequest.toEntity(member, board, request);
 
