@@ -1,6 +1,5 @@
 package com.plana.infli.repository.post;
 
-import static com.plana.infli.domain.QScrap.*;
 import static com.plana.infli.domain.QUniversity.*;
 import static com.plana.infli.domain.type.BoardType.*;
 import static com.plana.infli.domain.type.PostType.*;
@@ -21,7 +20,6 @@ import static java.util.stream.Collectors.groupingBy;
 import com.plana.infli.domain.Board;
 import com.plana.infli.domain.Member;
 import com.plana.infli.domain.Post;
-import com.plana.infli.domain.QScrap;
 import com.plana.infli.domain.type.PostType;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest;
 import com.plana.infli.web.dto.request.post.view.PostQueryRequest.PostViewOrder;
@@ -243,24 +241,13 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                         getMemberRole(request.getBoard()), post.likes.size(),
                         pressedLikeOnThisPost(request.getMember()), post.viewCount,
                         post.recruitment.companyName, post.recruitment.startDate,
-                        post.recruitment.endDate, post.thumbnailUrl.isNotNull(),
-                        hasScrapedThisPost(request.getMember())))
+                        post.recruitment.endDate, post.thumbnailUrl.isNotNull()))
                 .from(post)
                 .where(post.id.in(ids))
                 .orderBy(post.id.desc())
                 .fetch();
     }
 
-    private BooleanExpression hasScrapedThisPost(Member member) {
-        return post.in(myScrapedPosts(member));
-    }
-
-    private List<Post> myScrapedPosts(Member member) {
-        return jpaQueryFactory.select(scrap.post)
-                .from(scrap)
-                .where(scrap.member.eq(member))
-                .fetch();
-    }
 
     @Override
     public Optional<Post> findActivePostWithOptimisticLock(Long postId) {
