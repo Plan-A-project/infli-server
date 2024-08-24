@@ -16,7 +16,7 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:mysql://${HOST_NAME}:3306/${DATABASE_NAME}?useSSL=true&requireSSL=true&verifyServerCertificate=true
+    url: jdbc:mysql://${HOST_NAME}:3306/${DATABASE_NAME}
     username: ${DATABASE_USERNAME}
     password: dlwnstjr37
     driver-class-name: com.mysql.cj.jdbc.Driver
